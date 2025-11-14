@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { Switch } from "@/components/ui/switch";
 import { ArrowRight, Activity } from "lucide-react";
 
 interface AgentCardProps {
@@ -11,6 +12,7 @@ interface AgentCardProps {
   icon: React.ReactNode;
   features: string[];
   isStreaming?: boolean;
+  onToggleStream?: (active: boolean) => void;
 }
 
 export const AgentCard = ({
@@ -21,8 +23,13 @@ export const AgentCard = ({
   icon,
   features,
   isStreaming = false,
+  onToggleStream,
 }: AgentCardProps) => {
   const [isFlipped, setIsFlipped] = useState(false);
+
+  const handleToggle = (checked: boolean) => {
+    onToggleStream?.(checked);
+  };
 
   return (
     <div
@@ -33,20 +40,31 @@ export const AgentCard = ({
       <div className={`flip-card-inner ${isFlipped ? 'flipped' : ''}`}>
         {/* Front Face */}
         <div className="flip-card-front">
-          <div className="glass h-full p-6 flex flex-col justify-between hover:glow-primary transition-all duration-300">
+          <div 
+            className={`glass h-full p-6 flex flex-col justify-between transition-all duration-300 ${
+              isStreaming ? "glow-primary" : "hover:glow-primary"
+            }`}
+          >
             <div>
               <div className="flex items-start justify-between mb-4">
                 <div className="p-3 rounded-xl glass-strong">
                   {icon}
                 </div>
-                <Badge
-                  variant={isStreaming ? "default" : "secondary"}
-                  className={`font-display text-xs tracking-wider ${
-                    isStreaming ? "bg-secondary text-background animate-pulse" : ""
-                  }`}
-                >
-                  {isStreaming ? "STREAMING" : "IDLE"}
-                </Badge>
+                <div className="flex flex-col items-end gap-2">
+                  <Badge
+                    variant={isStreaming ? "default" : "secondary"}
+                    className={`font-display text-xs tracking-wider ${
+                      isStreaming ? "bg-secondary text-background animate-pulse" : ""
+                    }`}
+                  >
+                    {isStreaming ? "ON" : "OFF"}
+                  </Badge>
+                  <Switch
+                    checked={isStreaming}
+                    onCheckedChange={handleToggle}
+                    onClick={(e) => e.stopPropagation()}
+                  />
+                </div>
               </div>
 
               <h3 className="text-xl font-display font-semibold mb-2 tracking-wide">

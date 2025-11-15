@@ -270,16 +270,45 @@ All colors MUST be HSL.
   .react-flow__edge-path {
     opacity: 1 !important;
     pointer-events: none !important;
+    transition: all 0.3s ease;
   }
 
   .react-flow__edge.animated .react-flow__edge-path {
-    stroke-dasharray: 10;
-    animation: dashdraw 0.8s linear infinite;
+    stroke-dasharray: 8 4;
+    animation: dashdraw 0.6s linear infinite;
   }
 
   @keyframes dashdraw {
     to {
-      stroke-dashoffset: -20;
+      stroke-dashoffset: -24;
+    }
+  }
+
+  /* Animated edge glow effect */
+  .animated-edge-glow .react-flow__edge-path {
+    animation: edgePulse 2s ease-in-out infinite, dashdraw 0.6s linear infinite;
+  }
+
+  @keyframes edgePulse {
+    0%, 100% {
+      filter: drop-shadow(0 0 8px rgba(0, 229, 255, 0.6));
+    }
+    50% {
+      filter: drop-shadow(0 0 16px rgba(0, 229, 255, 1)) drop-shadow(0 0 24px rgba(0, 229, 255, 0.6));
+    }
+  }
+
+  /* Green edge glow for revenue stream */
+  .animated-edge-glow-green .react-flow__edge-path {
+    animation: edgePulseGreen 2s ease-in-out infinite, dashdraw 0.6s linear infinite;
+  }
+
+  @keyframes edgePulseGreen {
+    0%, 100% {
+      filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.6));
+    }
+    50% {
+      filter: drop-shadow(0 0 16px rgba(16, 185, 129, 1)) drop-shadow(0 0 24px rgba(16, 185, 129, 0.6));
     }
   }
 

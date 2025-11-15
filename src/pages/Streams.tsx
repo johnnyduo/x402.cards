@@ -98,16 +98,16 @@ const agents = [
   },
   {
     id: 6,
-    name: "+ Add-on Streams",
-    category: "EXTEND",
-    description: "Plug in bespoke alpha modules & partner feeds.",
-    pricePerSec: 0,
-    icon: <Sparkles className="w-6 h-6 text-white" />,
+    name: "AI Crawler Service",
+    category: "REVENUE",
+    description: "Deploy AI crawlers to earn passive income from data collection.",
+    pricePerSec: 0.0003,
+    icon: <Sparkles className="w-6 h-6 text-emerald-400" />,
     features: [
-      "Partner ecosystem integration",
-      "Custom data stream creation",
-      "Advanced analytics modules",
-      "Enterprise-grade SLAs"
+      "Automated web data collection",
+      "Real-time content indexing",
+      "API monetization streams",
+      "Earn 0.0003 USDC/sec per crawler"
     ],
   },
 ];
@@ -124,18 +124,22 @@ const AgentNode = ({ data }: { data: any }) => {
         cursor: isAddon ? 'pointer' : 'default',
         width: '240px',
         background: isAddon 
-          ? 'linear-gradient(135deg, rgba(100, 100, 100, 0.1), rgba(70, 70, 70, 0.15))'
+          ? data.active
+            ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.2))'
+            : 'linear-gradient(135deg, rgba(16, 185, 129, 0.08), rgba(5, 150, 105, 0.12))'
           : 'linear-gradient(135deg, rgba(66, 153, 225, 0.1), rgba(0, 229, 255, 0.15))',
         border: isAddon
-          ? '3px dashed rgba(100, 100, 100, 0.4)'
+          ? `3px solid ${data.active ? 'rgba(16, 185, 129, 0.8)' : 'rgba(16, 185, 129, 0.4)'}`
           : `3px solid ${data.active ? 'rgba(0, 229, 255, 0.8)' : 'rgba(66, 153, 225, 0.4)'}`,
         borderRadius: '16px',
         backdropFilter: 'blur(10px)',
         boxShadow: data.active 
-          ? '0 0 40px rgba(0, 229, 255, 0.4), inset 0 0 30px rgba(0, 229, 255, 0.1)' 
+          ? isAddon
+            ? '0 0 40px rgba(16, 185, 129, 0.4), inset 0 0 30px rgba(16, 185, 129, 0.1)'
+            : '0 0 40px rgba(0, 229, 255, 0.4), inset 0 0 30px rgba(0, 229, 255, 0.1)'
           : '0 8px 32px rgba(0, 0, 0, 0.3)',
         transition: 'all 0.3s ease',
-        opacity: isAddon ? 0.7 : 1,
+        opacity: 1,
         zIndex: 100,
         position: 'relative',
       }}
@@ -145,11 +149,11 @@ const AgentNode = ({ data }: { data: any }) => {
         type="source"
         position={Position.Right}
         style={{
-          background: data.active ? '#00E5FF' : '#4299E1',
+          background: data.active ? (isAddon ? '#10B981' : '#00E5FF') : (isAddon ? '#059669' : '#4299E1'),
           width: '12px',
           height: '12px',
           border: '2px solid rgba(0, 0, 0, 0.3)',
-          opacity: isAddon ? 0 : 1,
+          opacity: 1,
         }}
       />
       {/* Glow effect */}
@@ -179,24 +183,22 @@ const AgentNode = ({ data }: { data: any }) => {
             </div>
             <div className="flex flex-col gap-1">
               <span className={`text-[10px] font-medium uppercase tracking-wider ${
-                isAddon ? 'text-gray-500' : 'text-secondary/70'
+                isAddon ? 'text-emerald-400/70' : 'text-secondary/70'
               }`}>
                 {data.category}
               </span>
               <div className="flex items-center gap-2">
-                {!isAddon ? (
-                  <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
-                    data.active 
+                <span className={`px-2 py-0.5 text-[10px] font-bold rounded-full ${
+                  isAddon
+                    ? data.active
+                      ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                      : 'bg-emerald-900/30 text-emerald-600 border border-emerald-800/30'
+                    : data.active 
                       ? 'bg-secondary/20 text-secondary border border-secondary/30' 
                       : 'bg-gray-700/50 text-gray-400 border border-gray-600/30'
-                  }`}>
-                    {data.active ? 'ON' : 'OFF'}
-                  </span>
-                ) : (
-                  <span className="px-2 py-0.5 text-[10px] font-bold rounded-full bg-gray-700/30 text-gray-500 border border-gray-600/30">
-                    ADDON
-                  </span>
-                )}
+                }`}>
+                  {data.active ? 'ON' : 'OFF'}
+                </span>
               </div>
             </div>
           </div>
@@ -372,9 +374,12 @@ const nodeTypes = {
 const Streams = () => {
   const [streamStates, setStreamStates] = useState<Record<number, boolean>>({});
   const [isAddonModalOpen, setIsAddonModalOpen] = useState(false);
+  const [totalSpent, setTotalSpent] = useState(0);
+  const [totalEarned, setTotalEarned] = useState(0);
 
   const activeCount = agents.filter(agent => agent.id !== 6 && streamStates[agent.id]).length;
-  const totalCostPerSec = agents.filter((agent) => streamStates[agent.id]).reduce((sum, agent) => sum + agent.pricePerSec, 0);
+  const totalCostPerSec = agents.filter((agent) => agent.id !== 6 && streamStates[agent.id]).reduce((sum, agent) => sum + agent.pricePerSec, 0);
+  const addonRevenue = streamStates[6] ? 0.0003 : 0; // AI Crawler generates revenue
   const allStreamsActive = agents.filter(agent => agent.id !== 6).every(agent => streamStates[agent.id]);
 
   const handleToggleAll = useCallback(() => {
@@ -399,6 +404,20 @@ const Streams = () => {
       return { ...prev, [agentId]: newState };
     });
   }, []);
+
+  // Real-time spending/earning tracker
+  useEffect(() => {
+    const interval = setInterval(() => {
+      if (totalCostPerSec > 0) {
+        setTotalSpent(prev => prev + totalCostPerSec);
+      }
+      if (addonRevenue > 0) {
+        setTotalEarned(prev => prev + addonRevenue);
+      }
+    }, 1000); // Update every second
+
+    return () => clearInterval(interval);
+  }, [totalCostPerSec, addonRevenue]);
 
   const initialNodes: Node[] = [
     // Top row agents
@@ -504,7 +523,9 @@ const Streams = () => {
         activeCount,
         totalCost: totalCostPerSec,
         active: allStreamsActive,
-        onToggle: handleToggleAll
+        onToggle: handleToggleAll,
+        totalSpent,
+        totalEarned,
       },
       style: { zIndex: 200 }
     },
@@ -519,16 +540,18 @@ const Streams = () => {
       targetHandle: 'left',
       animated: streamStates[1] || false, 
       type: 'smoothstep',
+      className: streamStates[1] ? 'animated-edge-glow' : '',
       style: { 
-        stroke: streamStates[1] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
-        strokeWidth: streamStates[1] ? 3 : 1.5,
-        filter: streamStates[1] ? 'drop-shadow(0 0 6px rgba(0, 229, 255, 0.6))' : 'none',
+        stroke: streamStates[1] ? 'url(#edge-gradient-1)' : 'rgba(66, 153, 225, 0.4)', 
+        strokeWidth: streamStates[1] ? 4 : 1.5,
+        filter: streamStates[1] ? 'drop-shadow(0 0 10px rgba(0, 229, 255, 0.8)) drop-shadow(0 0 20px rgba(0, 229, 255, 0.5))' : 'none',
+        opacity: streamStates[1] ? 1 : 0.6,
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
         color: streamStates[1] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
-        width: 18,
-        height: 18,
+        width: 20,
+        height: 20,
       } 
     },
     { 
@@ -539,16 +562,18 @@ const Streams = () => {
       targetHandle: 'top',
       animated: streamStates[2] || false, 
       type: 'smoothstep',
+      className: streamStates[2] ? 'animated-edge-glow' : '',
       style: { 
-        stroke: streamStates[2] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
-        strokeWidth: streamStates[2] ? 3 : 1.5,
-        filter: streamStates[2] ? 'drop-shadow(0 0 6px rgba(0, 229, 255, 0.6))' : 'none',
+        stroke: streamStates[2] ? 'url(#edge-gradient-2)' : 'rgba(66, 153, 225, 0.4)', 
+        strokeWidth: streamStates[2] ? 4 : 1.5,
+        filter: streamStates[2] ? 'drop-shadow(0 0 10px rgba(0, 229, 255, 0.8)) drop-shadow(0 0 20px rgba(0, 229, 255, 0.5))' : 'none',
+        opacity: streamStates[2] ? 1 : 0.6,
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
         color: streamStates[2] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
-        width: 18,
-        height: 18,
+        width: 20,
+        height: 20,
       } 
     },
     { 
@@ -559,16 +584,18 @@ const Streams = () => {
       targetHandle: 'right',
       animated: streamStates[3] || false, 
       type: 'smoothstep',
+      className: streamStates[3] ? 'animated-edge-glow' : '',
       style: { 
-        stroke: streamStates[3] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
-        strokeWidth: streamStates[3] ? 3 : 1.5,
-        filter: streamStates[3] ? 'drop-shadow(0 0 6px rgba(0, 229, 255, 0.6))' : 'none',
+        stroke: streamStates[3] ? 'url(#edge-gradient-3)' : 'rgba(66, 153, 225, 0.4)', 
+        strokeWidth: streamStates[3] ? 4 : 1.5,
+        filter: streamStates[3] ? 'drop-shadow(0 0 10px rgba(0, 229, 255, 0.8)) drop-shadow(0 0 20px rgba(0, 229, 255, 0.5))' : 'none',
+        opacity: streamStates[3] ? 1 : 0.6,
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
         color: streamStates[3] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
-        width: 18,
-        height: 18,
+        width: 20,
+        height: 20,
       } 
     },
     { 
@@ -579,16 +606,18 @@ const Streams = () => {
       targetHandle: 'left',
       animated: streamStates[4] || false, 
       type: 'smoothstep',
+      className: streamStates[4] ? 'animated-edge-glow' : '',
       style: { 
-        stroke: streamStates[4] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
-        strokeWidth: streamStates[4] ? 3 : 1.5,
-        filter: streamStates[4] ? 'drop-shadow(0 0 6px rgba(0, 229, 255, 0.6))' : 'none',
+        stroke: streamStates[4] ? 'url(#edge-gradient-4)' : 'rgba(66, 153, 225, 0.4)', 
+        strokeWidth: streamStates[4] ? 4 : 1.5,
+        filter: streamStates[4] ? 'drop-shadow(0 0 10px rgba(0, 229, 255, 0.8)) drop-shadow(0 0 20px rgba(0, 229, 255, 0.5))' : 'none',
+        opacity: streamStates[4] ? 1 : 0.6,
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
         color: streamStates[4] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
-        width: 18,
-        height: 18,
+        width: 20,
+        height: 20,
       } 
     },
     { 
@@ -599,16 +628,40 @@ const Streams = () => {
       targetHandle: 'bottom',
       animated: streamStates[5] || false, 
       type: 'smoothstep',
+      className: streamStates[5] ? 'animated-edge-glow' : '',
       style: { 
-        stroke: streamStates[5] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
-        strokeWidth: streamStates[5] ? 3 : 1.5,
-        filter: streamStates[5] ? 'drop-shadow(0 0 6px rgba(0, 229, 255, 0.6))' : 'none',
+        stroke: streamStates[5] ? 'url(#edge-gradient-5)' : 'rgba(66, 153, 225, 0.4)', 
+        strokeWidth: streamStates[5] ? 4 : 1.5,
+        filter: streamStates[5] ? 'drop-shadow(0 0 10px rgba(0, 229, 255, 0.8)) drop-shadow(0 0 20px rgba(0, 229, 255, 0.5))' : 'none',
+        opacity: streamStates[5] ? 1 : 0.6,
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
         color: streamStates[5] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
-        width: 18,
-        height: 18,
+        width: 20,
+        height: 20,
+      } 
+    },
+    { 
+      id: 'e6', 
+      source: 'agent-6', 
+      target: 'hub', 
+      sourceHandle: null,
+      targetHandle: 'right',
+      animated: streamStates[6] || false, 
+      type: 'smoothstep',
+      className: streamStates[6] ? 'animated-edge-glow-green' : '',
+      style: { 
+        stroke: streamStates[6] ? 'url(#edge-gradient-6)' : 'rgba(16, 185, 129, 0.4)', 
+        strokeWidth: streamStates[6] ? 4 : 1.5,
+        filter: streamStates[6] ? 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.8)) drop-shadow(0 0 20px rgba(16, 185, 129, 0.5))' : 'none',
+        opacity: streamStates[6] ? 1 : 0.6,
+      }, 
+      markerEnd: { 
+        type: MarkerType.ArrowClosed, 
+        color: streamStates[6] ? '#10B981' : 'rgba(16, 185, 129, 0.4)',
+        width: 20,
+        height: 20,
       } 
     },
   ], [streamStates]);
@@ -639,6 +692,8 @@ const Streams = () => {
               totalCost: currentTotalCost,
               active: currentAllActive,
               onToggle: handleToggleAll,
+              totalSpent,
+              totalEarned,
             },
           };
         } else if (node.type === 'agent') {
@@ -658,7 +713,7 @@ const Streams = () => {
 
     // Update edges with createEdges function
     setEdges(createEdges());
-  }, [streamStates, handleToggleAll, handleToggleStream, createEdges]);
+  }, [streamStates, handleToggleAll, handleToggleStream, createEdges, totalSpent, totalEarned]);
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -732,6 +787,34 @@ const Streams = () => {
               }}
               elevateNodesOnSelect={false}
             >
+              <svg style={{ position: 'absolute', width: 0, height: 0 }}>
+                <defs>
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <linearGradient key={i} id={`edge-gradient-${i}`} x1="0%" y1="0%" x2="100%" y2="0%">
+                      <stop offset="0%" stopColor="#00E5FF" stopOpacity="0.3">
+                        <animate attributeName="stop-opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite" />
+                      </stop>
+                      <stop offset="50%" stopColor="#00E5FF" stopOpacity="1">
+                        <animate attributeName="offset" values="0;1;0" dur="3s" repeatCount="indefinite" />
+                      </stop>
+                      <stop offset="100%" stopColor="#4299E1" stopOpacity="0.3">
+                        <animate attributeName="stop-opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite" begin="0.5s" />
+                      </stop>
+                    </linearGradient>
+                  ))}
+                  <linearGradient id="edge-gradient-6" x1="0%" y1="0%" x2="100%" y2="0%">
+                    <stop offset="0%" stopColor="#10B981" stopOpacity="0.3">
+                      <animate attributeName="stop-opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite" />
+                    </stop>
+                    <stop offset="50%" stopColor="#10B981" stopOpacity="1">
+                      <animate attributeName="offset" values="0;1;0" dur="3s" repeatCount="indefinite" />
+                    </stop>
+                    <stop offset="100%" stopColor="#059669" stopOpacity="0.3">
+                      <animate attributeName="stop-opacity" values="0.3;1;0.3" dur="2s" repeatCount="indefinite" begin="0.5s" />
+                    </stop>
+                  </linearGradient>
+                </defs>
+              </svg>
               <Background 
                 color="rgba(0, 229, 255, 0.08)" 
                 gap={24} 
@@ -751,118 +834,93 @@ const Streams = () => {
         </div>
       </section>
 
-      {/* Add-on Streams Configuration Modal */}
+      {/* AI Crawler Configuration Modal */}
       <Dialog open={isAddonModalOpen} onOpenChange={setIsAddonModalOpen}>
-        <DialogContent className="sm:max-w-[600px] bg-gradient-to-br from-gray-900 to-gray-950 border-2 border-primary/30">
+        <DialogContent className="sm:max-w-[600px] bg-gradient-to-br from-gray-900 to-gray-950 border-2 border-emerald-500/30">
           <DialogHeader>
-            <DialogTitle className="text-2xl font-display font-bold gradient-text flex items-center gap-3">
-              <Sparkles className="w-6 h-6 text-secondary" />
-              Add-on Streams Configuration
+            <DialogTitle className="text-2xl font-display font-bold flex items-center gap-3" style={{
+              background: 'linear-gradient(90deg, #10B981, #059669)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}>
+              <Sparkles className="w-6 h-6 text-emerald-400" />
+              AI Crawler Service Configuration
             </DialogTitle>
             <DialogDescription className="text-white/60">
-              Customize and integrate additional data streams from our partner ecosystem
+              Deploy autonomous AI crawlers to collect and monetize web data
             </DialogDescription>
           </DialogHeader>
           
           <div className="space-y-6 py-4">
-            {/* Partner Integration Section */}
+            {/* Crawler Stats Section */}
             <div className="space-y-3">
-              <Label className="text-sm font-semibold text-white uppercase tracking-wider">Partner Integrations</Label>
-              <div className="grid grid-cols-2 gap-3">
-                <button className="p-4 rounded-xl border-2 border-primary/30 hover:border-secondary/60 bg-primary/5 hover:bg-secondary/10 transition-all group">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-blue-500/30 to-purple-500/30 flex items-center justify-center">
-                      <Activity className="w-5 h-5 text-blue-400" />
-                    </div>
-                    <div className="text-left">
-                      <p className="text-sm font-bold text-white">Chainlink</p>
-                      <p className="text-xs text-white/50">Price Feeds</p>
-                    </div>
-                  </div>
-                </button>
-                <button className="p-4 rounded-xl border-2 border-primary/30 hover:border-secondary/60 bg-primary/5 hover:bg-secondary/10 transition-all group">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-green-500/30 to-teal-500/30 flex items-center justify-center">
-                      <TrendingUp className="w-5 h-5 text-green-400" />
-                    </div>
-                    <div className="text-left">
-                      <p className="text-sm font-bold text-white">The Graph</p>
-                      <p className="text-xs text-white/50">On-chain Data</p>
-                    </div>
-                  </div>
-                </button>
-                <button className="p-4 rounded-xl border-2 border-primary/30 hover:border-secondary/60 bg-primary/5 hover:bg-secondary/10 transition-all group">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-orange-500/30 to-red-500/30 flex items-center justify-center">
-                      <GitBranch className="w-5 h-5 text-orange-400" />
-                    </div>
-                    <div className="text-left">
-                      <p className="text-sm font-bold text-white">Pyth Network</p>
-                      <p className="text-xs text-white/50">Real-time Prices</p>
-                    </div>
-                  </div>
-                </button>
-                <button className="p-4 rounded-xl border-2 border-primary/30 hover:border-secondary/60 bg-primary/5 hover:bg-secondary/10 transition-all group">
-                  <div className="flex items-center gap-3">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-pink-500/30 to-purple-500/30 flex items-center justify-center">
-                      <Heart className="w-5 h-5 text-pink-400" />
-                    </div>
-                    <div className="text-left">
-                      <p className="text-sm font-bold text-white">LunarCrush</p>
-                      <p className="text-xs text-white/50">Social Metrics</p>
-                    </div>
-                  </div>
-                </button>
+              <Label className="text-sm font-semibold text-emerald-400 uppercase tracking-wider">Revenue Statistics</Label>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-4 rounded-xl border-2 border-emerald-500/30 bg-emerald-500/5">
+                  <div className="text-xs text-emerald-400/60 mb-1">Active Crawlers</div>
+                  <div className="text-2xl font-bold text-emerald-400">1</div>
+                </div>
+                <div className="p-4 rounded-xl border-2 border-emerald-500/30 bg-emerald-500/5">
+                  <div className="text-xs text-emerald-400/60 mb-1">Revenue/Sec</div>
+                  <div className="text-2xl font-bold text-emerald-400">0.0003</div>
+                </div>
+                <div className="p-4 rounded-xl border-2 border-emerald-500/30 bg-emerald-500/5">
+                  <div className="text-xs text-emerald-400/60 mb-1">Total Earned</div>
+                  <div className="text-2xl font-bold text-emerald-400">{totalEarned.toFixed(4)}</div>
+                </div>
               </div>
             </div>
 
-            {/* Custom Stream Configuration */}
+            {/* Crawler Configuration */}
             <div className="space-y-3">
-              <Label className="text-sm font-semibold text-white uppercase tracking-wider">Custom Stream Configuration</Label>
+              <Label className="text-sm font-semibold text-emerald-400 uppercase tracking-wider">Crawler Targets</Label>
               <div className="space-y-3">
                 <div>
-                  <Label htmlFor="stream-name" className="text-xs text-white/60">Stream Name</Label>
+                  <Label htmlFor="target-url" className="text-xs text-emerald-400/60">Target URL</Label>
                   <Input 
-                    id="stream-name" 
-                    placeholder="e.g., Custom DEX Aggregator"
-                    className="bg-black/40 border-primary/30 text-white placeholder:text-white/30 focus:border-secondary"
+                    id="target-url" 
+                    placeholder="https://example.com"
+                    className="bg-black/40 border-emerald-500/30 text-white placeholder:text-white/30 focus:border-emerald-400"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="api-endpoint" className="text-xs text-white/60">API Endpoint</Label>
+                  <Label htmlFor="crawl-depth" className="text-xs text-emerald-400/60">Crawl Depth</Label>
                   <Input 
-                    id="api-endpoint" 
-                    placeholder="https://api.example.com/v1/data"
-                    className="bg-black/40 border-primary/30 text-white placeholder:text-white/30 focus:border-secondary"
+                    id="crawl-depth" 
+                    type="number"
+                    defaultValue="3"
+                    className="bg-black/40 border-emerald-500/30 text-white focus:border-emerald-400"
                   />
                 </div>
                 <div>
-                  <Label htmlFor="api-key" className="text-xs text-white/60">API Key (Optional)</Label>
-                  <Input 
-                    id="api-key" 
-                    type="password"
-                    placeholder="Enter your API key"
-                    className="bg-black/40 border-primary/30 text-white placeholder:text-white/30 focus:border-secondary"
-                  />
+                  <Label htmlFor="data-types" className="text-xs text-emerald-400/60">Data Types to Collect</Label>
+                  <div className="grid grid-cols-2 gap-2 mt-2">
+                    {['Text Content', 'Images', 'Links', 'Metadata', 'Structured Data', 'Media Files'].map((type) => (
+                      <label key={type} className="flex items-center gap-2 p-2 rounded-lg border border-emerald-500/20 hover:border-emerald-500/40 cursor-pointer transition-all">
+                        <input type="checkbox" className="rounded border-emerald-500/30" defaultChecked={type === 'Text Content'} />
+                        <span className="text-xs text-white/70">{type}</span>
+                      </label>
+                    ))}
+                  </div>
                 </div>
                 <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label htmlFor="refresh-rate" className="text-xs text-white/60">Refresh Rate (sec)</Label>
+                    <Label htmlFor="update-frequency" className="text-xs text-emerald-400/60">Update Frequency</Label>
                     <Input 
-                      id="refresh-rate" 
+                      id="update-frequency" 
                       type="number"
-                      defaultValue="5"
-                      className="bg-black/40 border-primary/30 text-white focus:border-secondary"
+                      defaultValue="60"
+                      placeholder="Minutes"
+                      className="bg-black/40 border-emerald-500/30 text-white focus:border-emerald-400"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="cost" className="text-xs text-white/60">Cost per Second (USDC)</Label>
+                    <Label htmlFor="max-pages" className="text-xs text-emerald-400/60">Max Pages</Label>
                     <Input 
-                      id="cost" 
+                      id="max-pages" 
                       type="number"
-                      step="0.0001"
-                      defaultValue="0.0003"
-                      className="bg-black/40 border-primary/30 text-white focus:border-secondary"
+                      defaultValue="100"
+                      className="bg-black/40 border-emerald-500/30 text-white focus:border-emerald-400"
                     />
                   </div>
                 </div>
@@ -880,12 +938,11 @@ const Streams = () => {
               </Button>
               <Button
                 onClick={() => {
-                  // TODO: Handle stream configuration save
                   setIsAddonModalOpen(false);
                 }}
-                className="flex-1 bg-gradient-to-r from-secondary to-primary text-black font-bold hover:opacity-90 border-0"
+                className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 text-black font-bold hover:opacity-90 border-0"
               >
-                Add Stream
+                Deploy Crawler
               </Button>
             </div>
           </div>

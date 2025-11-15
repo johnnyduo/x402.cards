@@ -2,14 +2,50 @@ import { NavLink } from "@/components/NavLink";
 import { Button } from "@/components/ui/button";
 import { Wallet } from "lucide-react";
 import { useAppKit } from '@reown/appkit/react';
-import { useAccount } from 'wagmi';
+import { useAccount, useBalance, useReadContract } from 'wagmi';
+import { USDC_CONTRACT_ADDRESS, USDC_ABI } from '@/config/contracts';
+import { formatUnits } from 'viem';
 
 export const Navigation = () => {
   const { open } = useAppKit();
   const { address, isConnected } = useAccount();
 
+  // Get IOTA balance
+  const { data: iotaBalance } = useBalance({
+    address: address,
+  });
+
+  // Get USDC balance
+  const { data: usdcBalance, isError, isLoading } = useReadContract({
+    address: USDC_CONTRACT_ADDRESS,
+    abi: USDC_ABI,
+    functionName: 'balanceOf',
+    args: address ? [address] : undefined,
+    query: {
+      enabled: !!address,
+      refetchInterval: 10000, // Refetch every 10 seconds
+    },
+  });
+
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
+
+  const formatBalance = (balance: string | number, decimals: number = 2) => {
+    const num = typeof balance === 'string' ? parseFloat(balance) : balance;
+    return num.toFixed(decimals);
+  };
+
+  const getUsdcDisplay = () => {
+    if (isLoading) return '...';
+    if (isError) return '0.00';
+    if (!usdcBalance) return '0.00';
+    try {
+      return formatBalance(formatUnits(usdcBalance as bigint, 6), 2);
+    } catch (e) {
+      console.error('Error formatting USDC balance:', e);
+      return '0.00';
+    }
   };
 
   return (
@@ -59,14 +95,40 @@ export const Navigation = () => {
           </div>
         </div>
 
-        <Button
-          variant="outline"
-          onClick={() => open()}
-          className="font-display tracking-wide border-white/20 text-white hover:border-secondary hover:bg-secondary/10 hover:text-secondary transition-all"
-        >
-          <Wallet className="w-4 h-4 mr-2" />
-          {isConnected && address ? formatAddress(address) : 'Connect Wallet'}
-        </Button>
+        <div className="flex items-center gap-4">
+          {isConnected && address && (
+            <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-lg border border-white/10 bg-black/20 backdrop-blur-sm">
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
+                <div className="text-xs">
+                  <div className="text-white/50 uppercase tracking-wider">IOTA</div>
+                  <div className="text-white font-bold font-mono">
+                    {iotaBalance ? formatBalance(formatUnits(iotaBalance.value, iotaBalance.decimals), 4) : '0.0000'}
+                  </div>
+                </div>
+              </div>
+              <div className="w-px h-8 bg-white/10" />
+              <div className="flex items-center gap-2">
+                <div className="w-2 h-2 rounded-full bg-emerald-400" />
+                <div className="text-xs">
+                  <div className="text-white/50 uppercase tracking-wider">USDC</div>
+                  <div className="text-white font-bold font-mono">
+                    {getUsdcDisplay()}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <Button
+            variant="outline"
+            onClick={() => open()}
+            className="font-display tracking-wide border-white/20 text-white hover:border-secondary hover:bg-secondary/10 hover:text-secondary transition-all"
+          >
+            <Wallet className="w-4 h-4 mr-2" />
+            {isConnected && address ? formatAddress(address) : 'Connect Wallet'}
+          </Button>
+        </div>
       </div>
     </nav>
   );

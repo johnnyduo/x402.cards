@@ -2,6 +2,7 @@
   "name": "x402-api-server",
   "version": "1.0.0",
   "type": "module",
+  "license": "MIT",
   "scripts": {
     "dev": "node server.js",
     "start": "node server.js"

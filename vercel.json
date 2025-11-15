@@ -5,6 +5,11 @@
   "devCommand": "yarn dev",
   "outputDirectory": "dist",
   "rewrites": [
+    { "source": "/api/agents/signal-forge", "destination": "/api-vercel/signal-forge" },
+    { "source": "/api/agents/volatility-pulse", "destination": "/api-vercel/volatility-pulse" },
+    { "source": "/api/agents/arb-navigator", "destination": "/api-vercel/arb-navigator" },
+    { "source": "/api/agents/sentiment-radar", "destination": "/api-vercel/sentiment-radar" },
+    { "source": "/api/agents/risk-sentinel", "destination": "/api-vercel/risk-sentinel" },
     {
       "source": "/(.*)",
       "destination": "/index.html"

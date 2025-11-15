@@ -159,7 +159,7 @@ function LiveAgentData() {
               {arbData.whaleTracking && (
                 <div className="bg-black/20 rounded p-2">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-muted-foreground">IOTA Mainnet</span>
+                    <span className="text-xs text-muted-foreground">Whale Activity</span>
                     <Badge variant="outline" className={
                       arbData.whaleTracking.whaleActivity === 'HIGH' ? 'border-red-500 text-red-500 text-xs' :
                       arbData.whaleTracking.whaleActivity === 'MEDIUM' ? 'border-yellow-500 text-yellow-500 text-xs' :
@@ -169,7 +169,7 @@ function LiveAgentData() {
                     </Badge>
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {arbData.whaleTracking.totalTransactions} txs • {arbData.whaleTracking.recentBlocks} blocks
+                    IOTA Mainnet: {arbData.whaleTracking.totalTransactions} txs • {arbData.whaleTracking.recentBlocks} blocks
                   </div>
                 </div>
               )}

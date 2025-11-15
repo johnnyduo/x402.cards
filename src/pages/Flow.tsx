@@ -1,37 +1,62 @@
-import { useState } from "react";
+import { useCallback } from "react";
 import { Navigation } from "@/components/Navigation";
 import { AppHeader } from "@/components/AppHeader";
+import ReactFlow, {
+  Node,
+  Edge,
+  Background,
+  Controls,
+  MiniMap,
+  useNodesState,
+  useEdgesState,
+  MarkerType,
+} from 'reactflow';
+import 'reactflow/dist/style.css';
+
+const initialNodes: Node[] = [
+  // Sources
+  { id: 'source-1', type: 'default', position: { x: 50, y: 50 }, data: { label: '🎯 Signal Forge' }, style: { background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.3), rgba(16, 185, 129, 0.4))', border: '2px solid rgba(52, 211, 153, 0.5)', borderRadius: '12px', padding: '10px', color: '#fff', fontSize: '13px', fontWeight: '600' } },
+  { id: 'source-2', type: 'default', position: { x: 50, y: 150 }, data: { label: '📊 Volatility Pulse' }, style: { background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.3), rgba(16, 185, 129, 0.4))', border: '2px solid rgba(52, 211, 153, 0.5)', borderRadius: '12px', padding: '10px', color: '#fff', fontSize: '13px', fontWeight: '600' } },
+  { id: 'source-3', type: 'default', position: { x: 50, y: 250 }, data: { label: '🔀 Arb Navigator' }, style: { background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.3), rgba(16, 185, 129, 0.4))', border: '2px solid rgba(52, 211, 153, 0.5)', borderRadius: '12px', padding: '10px', color: '#fff', fontSize: '13px', fontWeight: '600' } },
+  { id: 'source-4', type: 'default', position: { x: 50, y: 350 }, data: { label: '❤️ Sentiment Radar' }, style: { background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.3), rgba(16, 185, 129, 0.4))', border: '2px solid rgba(52, 211, 153, 0.5)', borderRadius: '12px', padding: '10px', color: '#fff', fontSize: '13px', fontWeight: '600' } },
+  { id: 'source-5', type: 'default', position: { x: 50, y: 450 }, data: { label: '🛡️ Risk Sentinel' }, style: { background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.3), rgba(16, 185, 129, 0.4))', border: '2px solid rgba(52, 211, 153, 0.5)', borderRadius: '12px', padding: '10px', color: '#fff', fontSize: '13px', fontWeight: '600' } },
+  
+  // Routes
+  { id: 'route-1', type: 'default', position: { x: 400, y: 50 }, data: { label: 'ROUTE 1\nSignal Filter\n🔹 Pipeline' }, style: { background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(66, 153, 225, 0.3))', border: '3px solid rgba(0, 229, 255, 0.6)', borderRadius: '16px', padding: '20px', color: '#fff', fontSize: '14px', fontWeight: '700', textAlign: 'center', minWidth: '180px' } },
+  { id: 'route-2', type: 'default', position: { x: 400, y: 180 }, data: { label: 'ROUTE 2\nVolatility Filter\n📦 Pack' }, style: { background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(66, 153, 225, 0.3))', border: '3px solid rgba(0, 229, 255, 0.6)', borderRadius: '16px', padding: '20px', color: '#fff', fontSize: '14px', fontWeight: '700', textAlign: 'center', minWidth: '180px' } },
+  { id: 'route-3', type: 'default', position: { x: 400, y: 310 }, data: { label: 'ROUTE 3\nArb Filter\n🔹 Pipeline' }, style: { background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(66, 153, 225, 0.3))', border: '3px solid rgba(0, 229, 255, 0.6)', borderRadius: '16px', padding: '20px', color: '#fff', fontSize: '14px', fontWeight: '700', textAlign: 'center', minWidth: '180px' } },
+  { id: 'route-4', type: 'default', position: { x: 400, y: 440 }, data: { label: 'ROUTE 4\nSentiment Filter\n📦 Pack' }, style: { background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.2), rgba(66, 153, 225, 0.3))', border: '3px solid rgba(0, 229, 255, 0.6)', borderRadius: '16px', padding: '20px', color: '#fff', fontSize: '14px', fontWeight: '700', textAlign: 'center', minWidth: '180px' } },
+  
+  // Destinations
+  { id: 'dest-1', type: 'output', position: { x: 750, y: 80 }, data: { label: '📊 Live Dashboard' }, style: { background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(59, 130, 246, 0.4))', border: '2px solid rgba(96, 165, 250, 0.5)', borderRadius: '12px', padding: '10px', color: '#fff', fontSize: '13px', fontWeight: '600' } },
+  { id: 'dest-2', type: 'output', position: { x: 750, y: 200 }, data: { label: '🔔 Alert System' }, style: { background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(59, 130, 246, 0.4))', border: '2px solid rgba(96, 165, 250, 0.5)', borderRadius: '12px', padding: '10px', color: '#fff', fontSize: '13px', fontWeight: '600' } },
+  { id: 'dest-3', type: 'output', position: { x: 750, y: 320 }, data: { label: '💾 Data Lake' }, style: { background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(59, 130, 246, 0.4))', border: '2px solid rgba(96, 165, 250, 0.5)', borderRadius: '12px', padding: '10px', color: '#fff', fontSize: '13px', fontWeight: '600' } },
+  { id: 'dest-4', type: 'output', position: { x: 750, y: 440 }, data: { label: '🌐 API Gateway' }, style: { background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.3), rgba(59, 130, 246, 0.4))', border: '2px solid rgba(96, 165, 250, 0.5)', borderRadius: '12px', padding: '10px', color: '#fff', fontSize: '13px', fontWeight: '600' } },
+];
+
+const initialEdges: Edge[] = [
+  // Sources to Routes
+  { id: 'e1-1', source: 'source-1', target: 'route-1', animated: true, style: { stroke: 'rgba(0, 229, 255, 0.6)', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(0, 229, 255, 0.8)' } },
+  { id: 'e2-2', source: 'source-2', target: 'route-2', animated: true, style: { stroke: 'rgba(0, 229, 255, 0.6)', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(0, 229, 255, 0.8)' } },
+  { id: 'e3-3', source: 'source-3', target: 'route-3', animated: true, style: { stroke: 'rgba(0, 229, 255, 0.6)', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(0, 229, 255, 0.8)' } },
+  { id: 'e4-4', source: 'source-4', target: 'route-4', animated: true, style: { stroke: 'rgba(0, 229, 255, 0.6)', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(0, 229, 255, 0.8)' } },
+  { id: 'e5-3', source: 'source-5', target: 'route-3', animated: true, style: { stroke: 'rgba(0, 229, 255, 0.4)', strokeWidth: 2, strokeDasharray: '5,5' }, markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(0, 229, 255, 0.6)' } },
+  
+  // Routes to Destinations
+  { id: 'er1-d1', source: 'route-1', target: 'dest-1', animated: true, style: { stroke: 'rgba(0, 229, 255, 0.6)', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(0, 229, 255, 0.8)' } },
+  { id: 'er1-d2', source: 'route-1', target: 'dest-2', animated: true, style: { stroke: 'rgba(0, 229, 255, 0.5)', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(0, 229, 255, 0.8)' } },
+  { id: 'er2-d2', source: 'route-2', target: 'dest-2', animated: true, style: { stroke: 'rgba(0, 229, 255, 0.6)', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(0, 229, 255, 0.8)' } },
+  { id: 'er2-d3', source: 'route-2', target: 'dest-3', animated: true, style: { stroke: 'rgba(0, 229, 255, 0.5)', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(0, 229, 255, 0.8)' } },
+  { id: 'er3-d3', source: 'route-3', target: 'dest-3', animated: true, style: { stroke: 'rgba(0, 229, 255, 0.6)', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(0, 229, 255, 0.8)' } },
+  { id: 'er3-d4', source: 'route-3', target: 'dest-4', animated: true, style: { stroke: 'rgba(0, 229, 255, 0.5)', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(0, 229, 255, 0.8)' } },
+  { id: 'er4-d4', source: 'route-4', target: 'dest-4', animated: true, style: { stroke: 'rgba(0, 229, 255, 0.6)', strokeWidth: 2 }, markerEnd: { type: MarkerType.ArrowClosed, color: 'rgba(0, 229, 255, 0.8)' } },
+];
 
 const Flow = () => {
-  const [activeStreams, setActiveStreams] = useState<Record<string, boolean>>({
-    signal: false,
-    volatility: false,
-    arb: false,
-    sentiment: false,
-    risk: false,
-  });
+  const [nodes, , onNodesChange] = useNodesState(initialNodes);
+  const [edges, , onEdgesChange] = useEdgesState(initialEdges);
 
-  const sources = [
-    { id: "signal", name: "Signal Forge", desc: "High-frequency signals" },
-    { id: "volatility", name: "Volatility Pulse", desc: "Market turbulence" },
-    { id: "arb", name: "Arb Navigator", desc: "Cross-venue arbitrage" },
-    { id: "sentiment", name: "Sentiment Radar", desc: "Crowd sentiment" },
-    { id: "risk", name: "Risk Sentinel", desc: "Portfolio risk" },
-  ];
-
-  const routes = [
-    { id: 1, name: "ROUTE 1", type: "Pipeline", filter: "Signal Filter" },
-    { id: 2, name: "ROUTE 2", type: "Pack", filter: "Volatility Filter" },
-    { id: 3, name: "ROUTE 3", type: "Pipeline", filter: "Arb Filter" },
-    { id: 4, name: "ROUTE 4", type: "Pack", filter: "Sentiment Filter" },
-  ];
-
-  const destinations = [
-    { id: 1, name: "Live Dashboard" },
-    { id: 2, name: "Alert System" },
-    { id: 3, name: "Data Lake" },
-    { id: 4, name: "API Gateway" },
-  ];
+  const onConnect = useCallback(() => {}, []);
 
   return (
     <div className="min-h-screen">
@@ -39,178 +64,73 @@ const Flow = () => {
       <AppHeader />
 
       <section className="px-4 md:px-6 pb-20">
-        <div className="max-w-[1600px] mx-auto">
+        <div className="max-w-[1800px] mx-auto">
           <div className="mb-8">
             <h1 className="text-4xl font-display font-bold gradient-text mb-2">Stream Flow Architecture</h1>
             <p className="text-white/60 font-display">Data pipeline visualization for x402 streaming intelligence</p>
           </div>
 
           <div 
-            className="rounded-3xl relative min-h-[800px] p-8"
+            className="rounded-3xl relative"
             style={{
+              height: '700px',
               background: 'radial-gradient(circle at 50% 50%, rgba(30, 58, 95, 0.4) 0%, rgba(17, 24, 39, 0.8) 100%)',
               backdropFilter: 'blur(20px)',
               border: '1px solid rgba(66, 153, 225, 0.2)',
               boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)'
             }}
           >
-            {/* SVG for connection lines */}
-            <svg className="absolute top-0 left-0 w-full h-full pointer-events-none" style={{ zIndex: 1 }}>
-              <defs>
-                <marker id="arrowBlue" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto">
-                  <path d="M0,0 L0,10 L10,5 z" fill="rgba(0, 229, 255, 0.8)" />
-                </marker>
-              </defs>
+            <ReactFlow
+              nodes={nodes}
+              edges={edges}
+              onNodesChange={onNodesChange}
+              onEdgesChange={onEdgesChange}
+              onConnect={onConnect}
+              fitView
+              style={{
+                background: 'transparent',
+              }}
+            >
+              <Background 
+                color="rgba(66, 153, 225, 0.1)" 
+                gap={20} 
+                size={1}
+              />
+              <Controls 
+                style={{
+                  background: 'rgba(17, 24, 39, 0.8)',
+                  border: '1px solid rgba(66, 153, 225, 0.2)',
+                  borderRadius: '12px',
+                }}
+              />
+              <MiniMap 
+                style={{
+                  background: 'rgba(17, 24, 39, 0.8)',
+                  border: '1px solid rgba(66, 153, 225, 0.2)',
+                  borderRadius: '12px',
+                }}
+                nodeColor="rgba(0, 229, 255, 0.6)"
+              />
+            </ReactFlow>
+          </div>
 
-              {/* Source 1 to Route 1 */}
-              <path d="M 380 120 L 520 190" stroke="rgba(0, 229, 255, 0.5)" strokeWidth="2" strokeDasharray="8 4" fill="none" markerEnd="url(#arrowBlue)" />
-              
-              {/* Source 2 to Route 2 */}
-              <path d="M 380 240 L 520 310" stroke="rgba(0, 229, 255, 0.5)" strokeWidth="2" strokeDasharray="8 4" fill="none" markerEnd="url(#arrowBlue)" />
-              
-              {/* Source 3 to Route 3 */}
-              <path d="M 380 360 L 520 430" stroke="rgba(0, 229, 255, 0.5)" strokeWidth="2" strokeDasharray="8 4" fill="none" markerEnd="url(#arrowBlue)" />
-              
-              {/* Source 4 to Route 4 */}
-              <path d="M 380 480 L 520 550" stroke="rgba(0, 229, 255, 0.5)" strokeWidth="2" strokeDasharray="8 4" fill="none" markerEnd="url(#arrowBlue)" />
-              
-              {/* Source 5 to Routes (multiple) */}
-              <path d="M 380 600 L 520 430" stroke="rgba(0, 229, 255, 0.3)" strokeWidth="2" strokeDasharray="8 4" fill="none" markerEnd="url(#arrowBlue)" />
-              
-              {/* Route 1 to Destinations */}
-              <path d="M 920 190 L 1060 120" stroke="rgba(0, 229, 255, 0.5)" strokeWidth="2" strokeDasharray="8 4" fill="none" markerEnd="url(#arrowBlue)" />
-              <path d="M 920 190 L 1060 210" stroke="rgba(0, 229, 255, 0.5)" strokeWidth="2" strokeDasharray="8 4" fill="none" markerEnd="url(#arrowBlue)" />
-              
-              {/* Route 2 to Destinations */}
-              <path d="M 920 310 L 1060 210" stroke="rgba(0, 229, 255, 0.5)" strokeWidth="2" strokeDasharray="8 4" fill="none" markerEnd="url(#arrowBlue)" />
-              <path d="M 920 310 L 1060 300" stroke="rgba(0, 229, 255, 0.5)" strokeWidth="2" strokeDasharray="8 4" fill="none" markerEnd="url(#arrowBlue)" />
-              
-              {/* Route 3 to Destinations */}
-              <path d="M 920 430 L 1060 300" stroke="rgba(0, 229, 255, 0.5)" strokeWidth="2" strokeDasharray="8 4" fill="none" markerEnd="url(#arrowBlue)" />
-              <path d="M 920 430 L 1060 390" stroke="rgba(0, 229, 255, 0.5)" strokeWidth="2" strokeDasharray="8 4" fill="none" markerEnd="url(#arrowBlue)" />
-              
-              {/* Route 4 to Destinations */}
-              <path d="M 920 550 L 1060 390" stroke="rgba(0, 229, 255, 0.5)" strokeWidth="2" strokeDasharray="8 4" fill="none" markerEnd="url(#arrowBlue)" />
-            </svg>
-
-            {/* Main Content Grid */}
-            <div className="relative grid grid-cols-3 gap-12" style={{ zIndex: 10 }}>
-              {/* SOURCES Column */}
-              <div>
-                <div className="text-center mb-6">
-                  <h2 className="text-xl font-display font-bold text-white/80 uppercase tracking-wider">Sources</h2>
-                  <p className="text-xs text-white/50 mt-1">Agent Data Streams</p>
-                </div>
-                <div className="space-y-4">
-                  {sources.map((source) => (
-                    <div
-                      key={source.id}
-                      className="p-4 rounded-xl transition-all duration-300 cursor-pointer"
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(52, 211, 153, 0.2), rgba(16, 185, 129, 0.3))',
-                        border: '1px solid rgba(52, 211, 153, 0.3)',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-                      }}
-                      onClick={() => setActiveStreams(prev => ({ ...prev, [source.id]: !prev[source.id] }))}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <h3 className="font-display font-semibold text-white text-sm">{source.name}</h3>
-                          <p className="text-xs text-white/60 mt-0.5">{source.desc}</p>
-                        </div>
-                        <div className={`w-3 h-3 rounded-full ${activeStreams[source.id] ? 'bg-emerald-400' : 'bg-white/30'}`} />
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* ROUTES Column */}
-              <div>
-                <div className="text-center mb-6">
-                  <div className="inline-block px-4 py-2 rounded-full bg-primary/20 border border-primary/40 mb-3">
-                    <span className="text-xs font-display font-bold text-secondary uppercase tracking-wider">Processing Center</span>
-                  </div>
-                  <h2 className="text-xl font-display font-bold text-white/80 uppercase tracking-wider">Routes</h2>
-                  <p className="text-xs text-white/50 mt-1">Input Filters & Processing Pipelines</p>
-                </div>
-                <div className="space-y-4">
-                  {routes.map((route) => (
-                    <div
-                      key={route.id}
-                      className="p-6 rounded-2xl transition-all duration-300"
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(0, 229, 255, 0.15), rgba(66, 153, 225, 0.25))',
-                        border: '2px solid rgba(0, 229, 255, 0.4)',
-                        boxShadow: '0 8px 24px rgba(0, 229, 255, 0.2)'
-                      }}
-                    >
-                      <div className="text-center">
-                        <span className="text-xs font-display text-secondary/80 uppercase tracking-wider">{route.name}</span>
-                        <h3 className="font-display font-bold text-white text-lg mt-2 mb-3">{route.filter}</h3>
-                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-lg bg-secondary/20 border border-secondary/40">
-                          <div className="w-2 h-2 rounded-sm bg-secondary" />
-                          <span className="text-xs font-display font-semibold text-white">{route.type}</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10">
-                  <p className="text-xs text-white/60 text-center">Routes map events to Pipelines and Destinations</p>
-                </div>
-              </div>
-
-              {/* DESTINATIONS Column */}
-              <div>
-                <div className="text-center mb-6">
-                  <h2 className="text-xl font-display font-bold text-white/80 uppercase tracking-wider">Destinations</h2>
-                  <p className="text-xs text-white/50 mt-1">Output Endpoints</p>
-                </div>
-                <div className="space-y-4">
-                  {destinations.map((dest) => (
-                    <div
-                      key={dest.id}
-                      className="p-4 rounded-xl transition-all duration-300"
-                      style={{
-                        background: 'linear-gradient(135deg, rgba(96, 165, 250, 0.2), rgba(59, 130, 246, 0.3))',
-                        border: '1px solid rgba(96, 165, 250, 0.3)',
-                        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
-                      }}
-                    >
-                      <div className="flex items-center justify-between">
-                        <h3 className="font-display font-semibold text-white text-sm">{dest.name}</h3>
-                        <div className="px-3 py-1 rounded-full bg-blue-500/20 border border-blue-400/30">
-                          <span className="text-xs font-display text-blue-300">Active</span>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-6 p-4 rounded-xl bg-white/5 border border-white/10">
-                  <p className="text-xs text-white/60 text-center">Post-processing pipelines normalize events to destinations</p>
-                </div>
-              </div>
+          {/* Quick Stats */}
+          <div className="mt-8 grid grid-cols-4 gap-4">
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
+              <div className="text-2xl font-display font-bold gradient-text">5</div>
+              <div className="text-xs text-white/50 uppercase tracking-wider mt-1">Sources</div>
             </div>
-
-            {/* Quick Stats */}
-            <div className="mt-12 grid grid-cols-4 gap-4">
-              <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-                <div className="text-2xl font-display font-bold gradient-text">{sources.length}</div>
-                <div className="text-xs text-white/50 uppercase tracking-wider mt-1">Sources</div>
-              </div>
-              <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-                <div className="text-2xl font-display font-bold gradient-text">{routes.length}</div>
-                <div className="text-xs text-white/50 uppercase tracking-wider mt-1">Routes</div>
-              </div>
-              <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-                <div className="text-2xl font-display font-bold gradient-text">{destinations.length}</div>
-                <div className="text-xs text-white/50 uppercase tracking-wider mt-1">Destinations</div>
-              </div>
-              <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
-                <div className="text-2xl font-display font-bold text-secondary">0.0010</div>
-                <div className="text-xs text-white/50 uppercase tracking-wider mt-1">USDC/sec</div>
-              </div>
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
+              <div className="text-2xl font-display font-bold gradient-text">4</div>
+              <div className="text-xs text-white/50 uppercase tracking-wider mt-1">Routes</div>
+            </div>
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
+              <div className="text-2xl font-display font-bold gradient-text">4</div>
+              <div className="text-xs text-white/50 uppercase tracking-wider mt-1">Destinations</div>
+            </div>
+            <div className="p-4 rounded-xl bg-white/5 border border-white/10 text-center">
+              <div className="text-2xl font-display font-bold text-secondary">0.0010</div>
+              <div className="text-xs text-white/50 uppercase tracking-wider mt-1">USDC/sec</div>
             </div>
           </div>
         </div>

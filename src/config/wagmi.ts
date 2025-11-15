@@ -4,10 +4,11 @@ import { mainnet, polygon, arbitrum, base, optimism } from '@reown/appkit/networ
 import { defineChain } from 'viem'
 
 // 1. Get projectId from environment
-const projectId = import.meta.env.VITE_REOWN_PROJECT_ID
+const projectId = import.meta.env.VITE_REOWN_PROJECT_ID || ''
 
-if (!projectId) {
-  throw new Error('VITE_REOWN_PROJECT_ID is not set')
+// Warn if using placeholder ID
+if (!projectId || projectId === 'your_project_id_here') {
+  console.warn('⚠️ Using default project ID. Get yours at https://cloud.reown.com for production use.')
 }
 
 // Define IOTA EVM Testnet
@@ -54,10 +55,10 @@ export const wagmiAdapter = new WagmiAdapter({
 export const appKit = createAppKit({
   adapters: [wagmiAdapter],
   networks,
-  projectId,
+  projectId: projectId || 'placeholder',
   defaultNetwork: iotaEVM,
   features: {
-    analytics: true,
+    analytics: false, // Disable analytics if no valid project ID
   },
   metadata: {
     name: 'x402.Cards',

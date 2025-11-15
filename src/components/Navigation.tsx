@@ -1,6 +1,17 @@
 import { NavLink } from "@/components/NavLink";
+import { Button } from "@/components/ui/button";
+import { Wallet } from "lucide-react";
+import { useAppKit } from '@reown/appkit/react';
+import { useAccount } from 'wagmi';
 
 export const Navigation = () => {
+  const { open } = useAppKit();
+  const { address, isConnected } = useAccount();
+
+  const formatAddress = (addr: string) => {
+    return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
+  };
+
   return (
     <nav 
       className="fixed top-0 left-0 right-0 z-50 px-6 py-4"
@@ -48,7 +59,14 @@ export const Navigation = () => {
           </div>
         </div>
 
-        <appkit-button />
+        <Button
+          variant="outline"
+          onClick={() => open()}
+          className="font-display tracking-wide border-white/20 text-white hover:border-secondary hover:bg-secondary/10 hover:text-secondary transition-all"
+        >
+          <Wallet className="w-4 h-4 mr-2" />
+          {isConnected && address ? formatAddress(address) : 'Connect Wallet'}
+        </Button>
       </div>
     </nav>
   );

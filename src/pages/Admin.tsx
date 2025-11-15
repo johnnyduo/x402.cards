@@ -63,6 +63,13 @@ export default function Admin() {
       return;
     }
 
+    // Validate minimum price (contract requires at least 0.001 USDC per second)
+    const MIN_PRICE = 0.001;
+    if (priceNum < MIN_PRICE) {
+      toast.error(`Price must be at least ${MIN_PRICE} USDC per second (contract minimum)`);
+      return;
+    }
+
     try {
       const priceInWei = parseUnits(pricePerSecond, 6);
       const agentId = BigInt(selectedAgent);

@@ -31,7 +31,7 @@ export const AGENTS: Agent[] = [
     name: 'Signal Forge',
     category: 'SIGNALS',
     description: 'Sculpts high-frequency trade entries with adaptive quants.',
-    pricePerSec: 0.0002,
+    pricePerSec: 0.001,
     icon: <Activity className="w-5 h-5" />,
     features: [
       'Multi-timeframe pattern detection',
@@ -53,7 +53,7 @@ export const AGENTS: Agent[] = [
     name: 'Volatility Pulse',
     category: 'VOLATILITY',
     description: 'Detects turbulence spikes across majors & synths.',
-    pricePerSec: 0.0002,
+    pricePerSec: 0.001,
     icon: <TrendingUp className="w-5 h-5" />,
     features: [
       'Real-time VIX tracking',
@@ -75,7 +75,7 @@ export const AGENTS: Agent[] = [
     name: 'Arb Navigator',
     category: 'ARBITRAGE',
     description: 'Plots cross-venue price corridors & neutral legs.',
-    pricePerSec: 0.0002,
+    pricePerSec: 0.001,
     icon: <GitBranch className="w-5 h-5" />,
     features: [
       'Multi-DEX price monitoring',
@@ -97,7 +97,7 @@ export const AGENTS: Agent[] = [
     name: 'Sentiment Radar',
     category: 'SENTIMENT',
     description: 'Scrapes macro narratives & crowd mood vectors.',
-    pricePerSec: 0.0002,
+    pricePerSec: 0.001,
     icon: <Heart className="w-5 h-5" />,
     features: [
       'Multi-platform sentiment aggregation',

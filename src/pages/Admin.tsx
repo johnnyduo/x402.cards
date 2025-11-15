@@ -31,9 +31,13 @@ export default function Admin() {
   const { data: gasPrice } = useGasPrice();
   const [selectedAgent, setSelectedAgent] = useState('');
   const [agentName, setAgentName] = useState('');
-  const [walletAddress, setWalletAddress] = useState('0xa95dbdc9b74e08de421d03728988026fd2adbf5f');
+  const [walletAddress, setWalletAddress] = useState('0x5ebaddf71482d40044391923be1fc42938129988');
   const [pricePerSecond, setPricePerSecond] = useState('');
   const [tokenURI, setTokenURI] = useState('');
+  
+  // Contract deployer/owner address
+  const DEPLOYER_ADDRESS = '0x5ebaddf71482d40044391923be1fc42938129988';
+  const isDeployer = address?.toLowerCase() === DEPLOYER_ADDRESS.toLowerCase();
 
   const { registerAgent, isLoading: isRegistering } = useRegisterAgent();
   const { agents, isLoading: isLoadingAgents, refetch } = useAllAgents();
@@ -72,7 +76,7 @@ export default function Admin() {
 
       setSelectedAgent('');
       setAgentName('');
-      setWalletAddress('0xa95dbdc9b74e08de421d03728988026fd2adbf5f');
+      setWalletAddress('0x5ebaddf71482d40044391923be1fc42938129988');
       setPricePerSecond('');
       setTokenURI('');
 
@@ -111,15 +115,41 @@ export default function Admin() {
           <div className="max-w-5xl mx-auto">
             <div className="mb-8">
               {/* Access Control Warning */}
-              <div className="mb-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
+              <div className={`mb-6 p-4 rounded-lg border ${
+                isDeployer 
+                  ? 'bg-emerald-500/10 border-emerald-500/30' 
+                  : 'bg-amber-500/10 border-amber-500/30'
+              }`}>
                 <div className="flex items-start gap-3">
-                  <Shield className="w-5 h-5 text-amber-400 mt-0.5" />
+                  <Shield className={`w-5 h-5 mt-0.5 ${
+                    isDeployer ? 'text-emerald-400' : 'text-amber-400'
+                  }`} />
                   <div>
-                    <div className="text-amber-400 font-semibold mb-1">Owner-Only Access</div>
+                    <div className={`font-semibold mb-1 ${
+                      isDeployer ? 'text-emerald-400' : 'text-amber-400'
+                    }`}>
+                      {isDeployer ? '✓ Owner Access Verified' : '⚠ Owner-Only Access'}
+                    </div>
                     <div className="text-xs text-white/70">
-                      Agent registration requires contract owner privileges. If you're not the contract owner, registration will fail.
-                      <br />
-                      Contract: <span className="font-mono text-xs">0x37E1...93b9</span>
+                      {isDeployer ? (
+                        <>
+                          You are connected as the contract deployer. You can register agents.
+                          <br />
+                          Your address: <span className="font-mono text-xs text-emerald-400">{address?.slice(0, 10)}...{address?.slice(-8)}</span>
+                        </>
+                      ) : (
+                        <>
+                          Agent registration requires contract owner privileges. If you're not the contract owner, registration will fail.
+                          <br />
+                          Required: <span className="font-mono text-xs text-amber-400">0x5eba...9988</span>
+                          {address && (
+                            <>
+                              <br />
+                              Connected: <span className="font-mono text-xs">{address.slice(0, 10)}...{address.slice(-8)}</span>
+                            </>
+                          )}
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

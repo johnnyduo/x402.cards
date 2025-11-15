@@ -122,7 +122,7 @@ const AgentNode = ({ data }: { data: any }) => {
       onClick={isAddon ? data.onToggle : undefined}
       style={{
         cursor: isAddon ? 'pointer' : 'default',
-        width: '240px',
+        width: '280px',
         background: isAddon 
           ? data.active
             ? 'linear-gradient(135deg, rgba(16, 185, 129, 0.15), rgba(5, 150, 105, 0.2))'
@@ -203,24 +203,37 @@ const AgentNode = ({ data }: { data: any }) => {
             </div>
           </div>
           {!isAddon && (
-            <label className="relative inline-flex items-center cursor-pointer z-10" onClick={(e) => e.stopPropagation()}>
-              <input 
-                type="checkbox" 
-                checked={data.active} 
-                onChange={(e) => {
+            <div className="flex items-center gap-2">
+              <button
+                onClick={(e) => {
                   e.stopPropagation();
-                  data.onToggle();
+                  data.onSettings?.();
                 }}
-                className="sr-only peer"
-              />
-              <div className={`w-11 h-6 rounded-full transition-all pointer-events-auto ${
-                data.active ? 'bg-secondary' : 'bg-gray-700'
-              }`}>
-                <div className={`absolute top-0.5 left-0.5 bg-black rounded-full h-5 w-5 transition-transform ${
-                  data.active ? 'translate-x-5' : ''
-                }`} />
-              </div>
-            </label>
+                className="w-9 h-9 rounded-lg bg-secondary/20 hover:bg-secondary/30 border border-secondary/50 flex items-center justify-center cursor-pointer transition-all"
+                style={{ zIndex: 300, pointerEvents: 'auto' }}
+                title="Configure Agent"
+              >
+                <span className="text-secondary text-base">⚙️</span>
+              </button>
+              <label className="relative inline-flex items-center cursor-pointer z-10" onClick={(e) => e.stopPropagation()}>
+                <input 
+                  type="checkbox" 
+                  checked={data.active} 
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    data.onToggle();
+                  }}
+                  className="sr-only peer"
+                />
+                <div className={`w-11 h-6 rounded-full transition-all pointer-events-auto ${
+                  data.active ? 'bg-secondary' : 'bg-gray-700'
+                }`}>
+                  <div className={`absolute top-0.5 left-0.5 bg-black rounded-full h-5 w-5 transition-transform ${
+                    data.active ? 'translate-x-5' : ''
+                  }`} />
+                </div>
+              </label>
+            </div>
           )}
           {isAddon && (
             <div className="flex items-center gap-2">
@@ -312,8 +325,8 @@ const HubNode = ({ data }: any) => (
   <div
     className="rounded-3xl p-8 transition-all duration-500"
     style={{
-      width: '400px',
-      height: '360px',
+      width: '440px',
+      height: '380px',
       background: data.active
         ? 'linear-gradient(135deg, rgba(0, 229, 255, 0.3) 0%, rgba(66, 153, 225, 0.4) 50%, rgba(30, 58, 95, 0.9) 100%)'
         : 'linear-gradient(135deg, rgba(66, 153, 225, 0.2) 0%, rgba(30, 58, 95, 0.6) 50%, rgba(30, 58, 95, 0.8) 100%)',
@@ -450,6 +463,7 @@ const nodeTypes = {
 const Streams = () => {
   const [streamStates, setStreamStates] = useState<Record<number, boolean>>({});
   const [isAddonModalOpen, setIsAddonModalOpen] = useState(false);
+  const [openModalId, setOpenModalId] = useState<number | null>(null);
   const [totalSpent, setTotalSpent] = useState(0);
   const [totalEarned, setTotalEarned] = useState(0);
   const [agentAccumulated, setAgentAccumulated] = useState<Record<number, number>>({});
@@ -514,7 +528,7 @@ const Streams = () => {
     { 
       id: 'agent-1', 
       type: 'agent', 
-      position: { x: 30, y: 60 },
+      position: { x: 20, y: 60 },
       draggable: true,
       data: { 
         name: agents[0].name, 
@@ -524,13 +538,14 @@ const Streams = () => {
         icon: agents[0].icon,
         active: streamStates[1] || false,
         onToggle: () => handleToggleStream(1),
+        onSettings: () => setOpenModalId(1),
         accumulated: 0,
       }
     },
     { 
       id: 'agent-2', 
       type: 'agent', 
-      position: { x: 540, y: 20 },
+      position: { x: 550, y: 20 },
       draggable: true,
       data: { 
         name: agents[1].name, 
@@ -540,13 +555,14 @@ const Streams = () => {
         icon: agents[1].icon,
         active: streamStates[2] || false,
         onToggle: () => handleToggleStream(2),
+        onSettings: () => setOpenModalId(2),
         accumulated: 0,
       }
     },
     { 
       id: 'agent-3', 
       type: 'agent', 
-      position: { x: 1050, y: 60 },
+      position: { x: 1080, y: 60 },
       draggable: true,
       data: { 
         name: agents[2].name, 
@@ -556,6 +572,7 @@ const Streams = () => {
         icon: agents[2].icon,
         active: streamStates[3] || false,
         onToggle: () => handleToggleStream(3),
+        onSettings: () => setOpenModalId(3),
         accumulated: 0,
       }
     },
@@ -563,7 +580,7 @@ const Streams = () => {
     { 
       id: 'agent-4', 
       type: 'agent', 
-      position: { x: 30, y: 700 },
+      position: { x: 20, y: 720 },
       draggable: true,
       data: { 
         name: agents[3].name, 
@@ -573,13 +590,14 @@ const Streams = () => {
         icon: agents[3].icon,
         active: streamStates[4] || false,
         onToggle: () => handleToggleStream(4),
+        onSettings: () => setOpenModalId(4),
         accumulated: 0,
       }
     },
     { 
       id: 'agent-5', 
       type: 'agent', 
-      position: { x: 540, y: 750 },
+      position: { x: 550, y: 770 },
       draggable: true,
       data: { 
         name: agents[4].name, 
@@ -589,13 +607,14 @@ const Streams = () => {
         icon: agents[4].icon,
         active: streamStates[5] || false,
         onToggle: () => handleToggleStream(5),
+        onSettings: () => setOpenModalId(5),
         accumulated: 0,
       }
     },
     { 
       id: 'agent-6', 
       type: 'agent', 
-      position: { x: 1050, y: 700 },
+      position: { x: 1080, y: 720 },
       draggable: true,
       data: { 
         name: agents[5].name, 
@@ -614,7 +633,7 @@ const Streams = () => {
     { 
       id: 'hub', 
       type: 'hub', 
-      position: { x: 560, y: 365 },
+      position: { x: 540, y: 365 },
       draggable: true,
       data: { 
         activeCount,
@@ -807,7 +826,7 @@ const Streams = () => {
               ...node.data,
               active: streamStates[agentId] || false,
               onToggle: () => handleToggleStream(agentId),
-              onSettings: agentId === 6 ? () => setIsAddonModalOpen(true) : undefined,
+              onSettings: agentId === 6 ? () => setIsAddonModalOpen(true) : () => setOpenModalId(agentId),
               accumulated: agentAccumulated[agentId] || 0,
             },
           };
@@ -938,6 +957,315 @@ const Streams = () => {
           </div>
         </div>
       </section>
+
+      {/* Settings Modals for Agents 1-5 */}
+      <Dialog open={openModalId !== null && openModalId >= 1 && openModalId <= 5} onOpenChange={(open) => !open && setOpenModalId(null)}>
+        <DialogContent className="sm:max-w-[600px] bg-gradient-to-br from-gray-900 to-gray-950 border-2 border-secondary/30">
+          <DialogHeader>
+            <DialogTitle className="text-2xl font-display font-bold flex items-center gap-3" style={{
+              background: 'linear-gradient(90deg, #00E5FF, #2978FF)',
+              WebkitBackgroundClip: 'text',
+              WebkitTextFillColor: 'transparent',
+            }}>
+              <span className="text-3xl">{openModalId !== null ? agents[openModalId - 1]?.icon : ''}</span>
+              {openModalId !== null ? agents[openModalId - 1]?.name : ''} Configuration
+            </DialogTitle>
+            <DialogDescription className="text-white/60">
+              {openModalId !== null ? agents[openModalId - 1]?.description : ''}
+            </DialogDescription>
+          </DialogHeader>
+          
+          <div className="space-y-6 py-4">
+            {/* Cost Stats Section */}
+            <div className="space-y-3">
+              <Label className="text-sm font-semibold text-secondary uppercase tracking-wider">Cost Statistics</Label>
+              <div className="grid grid-cols-3 gap-3">
+                <div className="p-4 rounded-xl border-2 border-secondary/30 bg-secondary/5">
+                  <div className="text-xs text-secondary/60 mb-1">Status</div>
+                  <div className="text-lg font-bold text-secondary">{openModalId !== null && streamStates[openModalId] ? 'Active' : 'Inactive'}</div>
+                </div>
+                <div className="p-4 rounded-xl border-2 border-secondary/30 bg-secondary/5">
+                  <div className="text-xs text-secondary/60 mb-1">Cost/Sec</div>
+                  <div className="text-lg font-bold text-secondary">{openModalId !== null ? agents[openModalId - 1]?.pricePerSec : '0'}</div>
+                </div>
+                <div className="p-4 rounded-xl border-2 border-secondary/30 bg-secondary/5">
+                  <div className="text-xs text-secondary/60 mb-1">Total Spent</div>
+                  <div className="text-lg font-bold text-secondary">{openModalId !== null ? (agentAccumulated[openModalId] || 0).toFixed(6) : '0'}</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Agent-Specific Configuration */}
+            {openModalId === 1 && (
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold text-secondary uppercase tracking-wider">Signal Configuration</Label>
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="signal-pairs" className="text-xs text-secondary/60">Trading Pairs</Label>
+                    <Input 
+                      id="signal-pairs" 
+                      placeholder="BTC/USDT, ETH/USDT, SOL/USDT"
+                      className="bg-black/40 border-secondary/30 text-white placeholder:text-white/30 focus:border-secondary"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="signal-threshold" className="text-xs text-secondary/60">Signal Threshold (%)</Label>
+                      <Input 
+                        id="signal-threshold" 
+                        type="number"
+                        defaultValue="2.5"
+                        step="0.1"
+                        className="bg-black/40 border-secondary/30 text-white focus:border-secondary"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="signal-timeframe" className="text-xs text-secondary/60">Timeframe (min)</Label>
+                      <Input 
+                        id="signal-timeframe" 
+                        type="number"
+                        defaultValue="15"
+                        className="bg-black/40 border-secondary/30 text-white focus:border-secondary"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="signal-indicators" className="text-xs text-secondary/60">Technical Indicators</Label>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {['RSI', 'MACD', 'Moving Avg', 'Bollinger', 'Volume', 'Momentum'].map((indicator) => (
+                        <label key={indicator} className="flex items-center gap-2 p-2 rounded-lg border border-secondary/20 hover:border-secondary/40 cursor-pointer transition-all">
+                          <input type="checkbox" className="rounded border-secondary/30" defaultChecked />
+                          <span className="text-xs text-white/70">{indicator}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {openModalId === 2 && (
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold text-secondary uppercase tracking-wider">Volatility Settings</Label>
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="vol-markets" className="text-xs text-secondary/60">Monitor Markets</Label>
+                    <Input 
+                      id="vol-markets" 
+                      placeholder="Crypto, Forex, Commodities"
+                      className="bg-black/40 border-secondary/30 text-white placeholder:text-white/30 focus:border-secondary"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="vol-window" className="text-xs text-secondary/60">Analysis Window (h)</Label>
+                      <Input 
+                        id="vol-window" 
+                        type="number"
+                        defaultValue="24"
+                        className="bg-black/40 border-secondary/30 text-white focus:border-secondary"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="vol-sensitivity" className="text-xs text-secondary/60">Sensitivity</Label>
+                      <Input 
+                        id="vol-sensitivity" 
+                        type="range"
+                        min="1"
+                        max="10"
+                        defaultValue="7"
+                        className="bg-black/40 border-secondary/30 text-white focus:border-secondary"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="vol-metrics" className="text-xs text-secondary/60">Volatility Metrics</Label>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {['Standard Dev', 'ATR', 'Beta', 'VIX', 'Implied Vol', 'Historical Vol'].map((metric) => (
+                        <label key={metric} className="flex items-center gap-2 p-2 rounded-lg border border-secondary/20 hover:border-secondary/40 cursor-pointer transition-all">
+                          <input type="checkbox" className="rounded border-secondary/30" defaultChecked />
+                          <span className="text-xs text-white/70">{metric}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {openModalId === 3 && (
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold text-secondary uppercase tracking-wider">Arbitrage Configuration</Label>
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="arb-exchanges" className="text-xs text-secondary/60">Connected Exchanges</Label>
+                    <Input 
+                      id="arb-exchanges" 
+                      placeholder="Binance, Coinbase, Kraken"
+                      className="bg-black/40 border-secondary/30 text-white placeholder:text-white/30 focus:border-secondary"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="arb-min-spread" className="text-xs text-secondary/60">Min Spread (%)</Label>
+                      <Input 
+                        id="arb-min-spread" 
+                        type="number"
+                        defaultValue="0.5"
+                        step="0.1"
+                        className="bg-black/40 border-secondary/30 text-white focus:border-secondary"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="arb-max-latency" className="text-xs text-secondary/60">Max Latency (ms)</Label>
+                      <Input 
+                        id="arb-max-latency" 
+                        type="number"
+                        defaultValue="100"
+                        className="bg-black/40 border-secondary/30 text-white focus:border-secondary"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="arb-types" className="text-xs text-secondary/60">Arbitrage Types</Label>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {['Cross-Exchange', 'Triangular', 'Statistical', 'Flash Loans', 'DEX Arb', 'Funding Rate'].map((type) => (
+                        <label key={type} className="flex items-center gap-2 p-2 rounded-lg border border-secondary/20 hover:border-secondary/40 cursor-pointer transition-all">
+                          <input type="checkbox" className="rounded border-secondary/30" defaultChecked={type === 'Cross-Exchange'} />
+                          <span className="text-xs text-white/70">{type}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {openModalId === 4 && (
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold text-secondary uppercase tracking-wider">Sentiment Analysis</Label>
+                <div className="space-y-3">
+                  <div>
+                    <Label htmlFor="sent-sources" className="text-xs text-secondary/60">Data Sources</Label>
+                    <Input 
+                      id="sent-sources" 
+                      placeholder="Twitter, Reddit, News, Telegram"
+                      className="bg-black/40 border-secondary/30 text-white placeholder:text-white/30 focus:border-secondary"
+                    />
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="sent-keywords" className="text-xs text-secondary/60">Keywords</Label>
+                      <Input 
+                        id="sent-keywords" 
+                        placeholder="BTC, ETH, crypto"
+                        className="bg-black/40 border-secondary/30 text-white focus:border-secondary"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="sent-update" className="text-xs text-secondary/60">Update Freq (min)</Label>
+                      <Input 
+                        id="sent-update" 
+                        type="number"
+                        defaultValue="5"
+                        className="bg-black/40 border-secondary/30 text-white focus:border-secondary"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="sent-models" className="text-xs text-secondary/60">Analysis Models</Label>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {['BERT', 'GPT-based', 'VADER', 'FinBERT', 'Custom ML', 'Ensemble'].map((model) => (
+                        <label key={model} className="flex items-center gap-2 p-2 rounded-lg border border-secondary/20 hover:border-secondary/40 cursor-pointer transition-all">
+                          <input type="checkbox" className="rounded border-secondary/30" defaultChecked={model === 'BERT'} />
+                          <span className="text-xs text-white/70">{model}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {openModalId === 5 && (
+              <div className="space-y-3">
+                <Label className="text-sm font-semibold text-secondary uppercase tracking-wider">Risk Management</Label>
+                <div className="space-y-3">
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="risk-max-loss" className="text-xs text-secondary/60">Max Loss (%)</Label>
+                      <Input 
+                        id="risk-max-loss" 
+                        type="number"
+                        defaultValue="2"
+                        step="0.1"
+                        className="bg-black/40 border-secondary/30 text-white focus:border-secondary"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="risk-position" className="text-xs text-secondary/60">Max Position (%)</Label>
+                      <Input 
+                        id="risk-position" 
+                        type="number"
+                        defaultValue="10"
+                        className="bg-black/40 border-secondary/30 text-white focus:border-secondary"
+                      />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <Label htmlFor="risk-leverage" className="text-xs text-secondary/60">Max Leverage</Label>
+                      <Input 
+                        id="risk-leverage" 
+                        type="number"
+                        defaultValue="3"
+                        className="bg-black/40 border-secondary/30 text-white focus:border-secondary"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="risk-drawdown" className="text-xs text-secondary/60">Max Drawdown (%)</Label>
+                      <Input 
+                        id="risk-drawdown" 
+                        type="number"
+                        defaultValue="15"
+                        className="bg-black/40 border-secondary/30 text-white focus:border-secondary"
+                      />
+                    </div>
+                  </div>
+                  <div>
+                    <Label htmlFor="risk-controls" className="text-xs text-secondary/60">Risk Controls</Label>
+                    <div className="grid grid-cols-2 gap-2 mt-2">
+                      {['Stop Loss', 'Take Profit', 'Trailing Stop', 'Position Sizing', 'Portfolio Hedge', 'Circuit Breaker'].map((control) => (
+                        <label key={control} className="flex items-center gap-2 p-2 rounded-lg border border-secondary/20 hover:border-secondary/40 cursor-pointer transition-all">
+                          <input type="checkbox" className="rounded border-secondary/30" defaultChecked />
+                          <span className="text-xs text-white/70">{control}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Action Buttons */}
+            <div className="flex gap-3 pt-4">
+              <Button
+                variant="outline"
+                onClick={() => setOpenModalId(null)}
+                className="flex-1 bg-transparent border-2 border-white/20 text-white hover:bg-white/10 hover:border-white/40"
+              >
+                Cancel
+              </Button>
+              <Button
+                onClick={() => setOpenModalId(null)}
+                className="flex-1 bg-gradient-to-r from-secondary to-primary hover:opacity-90 text-white font-semibold shadow-lg shadow-secondary/50"
+              >
+                Save Configuration
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* AI Crawler Configuration Modal */}
       <Dialog open={isAddonModalOpen} onOpenChange={setIsAddonModalOpen}>

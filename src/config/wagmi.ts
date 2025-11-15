@@ -62,7 +62,7 @@ export const appKit = createAppKit({
   metadata: {
     name: 'x402.Cards',
     description: 'Autonomous Streaming Intelligence Dashboard powered by IOTA EVM & x402',
-    url: 'https://x402.cards',
+    url: typeof window !== 'undefined' ? window.location.origin : 'https://x402.cards',
     icons: ['https://x402.cards/icon.png']
   }
 })

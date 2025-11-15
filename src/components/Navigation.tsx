@@ -4,28 +4,59 @@ import { Wallet } from "lucide-react";
 import { useAppKit } from '@reown/appkit/react';
 import { useAccount, useBalance, useReadContract } from 'wagmi';
 import { USDC_CONTRACT_ADDRESS, USDC_ABI } from '@/config/contracts';
-import { formatUnits } from 'viem';
+import { formatUnits, createPublicClient, http } from 'viem';
+import { useEffect, useState } from 'react';
+import { iotaEVM } from '@/config/wagmi';
 
 export const Navigation = () => {
   const { open } = useAppKit();
-  const { address, isConnected } = useAccount();
+  const { address, isConnected, chain } = useAccount();
+  const [directUsdcBalance, setDirectUsdcBalance] = useState<bigint | null>(null);
 
   // Get IOTA balance
   const { data: iotaBalance } = useBalance({
     address: address,
   });
 
-  // Get USDC balance
-  const { data: usdcBalance, isError, isLoading } = useReadContract({
+  // Get USDC balance - using wagmi
+  const { data: usdcBalanceData } = useReadContract({
     address: USDC_CONTRACT_ADDRESS,
     abi: USDC_ABI,
     functionName: 'balanceOf',
     args: address ? [address] : undefined,
-    query: {
-      enabled: !!address,
-      refetchInterval: 10000, // Refetch every 10 seconds
-    },
+    chainId: 1076,
   });
+
+  // Direct RPC call - runs in parallel for faster display
+  useEffect(() => {
+    if (!address) {
+      setDirectUsdcBalance(null);
+      return;
+    }
+    
+    const fetchDirectBalance = async () => {
+      try {
+        const client = createPublicClient({
+          chain: iotaEVM,
+          transport: http('https://json-rpc.evm.testnet.iota.cafe'),
+        });
+        
+        const balance = await client.readContract({
+          address: USDC_CONTRACT_ADDRESS,
+          abi: USDC_ABI,
+          functionName: 'balanceOf',
+          args: [address],
+        });
+        
+        console.log('USDC balance fetched:', balance);
+        setDirectUsdcBalance(balance as bigint);
+      } catch (err) {
+        console.error('USDC fetch failed:', err);
+      }
+    };
+
+    fetchDirectBalance();
+  }, [address]);
 
   const formatAddress = (addr: string) => {
     return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
@@ -33,15 +64,21 @@ export const Navigation = () => {
 
   const formatBalance = (balance: string | number, decimals: number = 2) => {
     const num = typeof balance === 'string' ? parseFloat(balance) : balance;
+    if (isNaN(num)) return '0.' + '0'.repeat(decimals);
     return num.toFixed(decimals);
   };
 
   const getUsdcDisplay = () => {
-    if (isLoading) return '...';
-    if (isError) return '0.00';
-    if (!usdcBalance) return '0.00';
+    if (!address) return '0.00';
+    
+    // Use wagmi data first, fallback to direct fetch
+    const balance = usdcBalanceData || directUsdcBalance;
+    
+    if (!balance) return '...';
+    
     try {
-      return formatBalance(formatUnits(usdcBalance as bigint, 6), 2);
+      const formatted = formatUnits(balance as bigint, 6);
+      return formatBalance(formatted, 2);
     } catch (e) {
       console.error('Error formatting USDC balance:', e);
       return '0.00';

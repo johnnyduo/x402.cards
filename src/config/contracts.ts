@@ -1,4 +1,4 @@
-export const USDC_CONTRACT_ADDRESS = '0x1ce14fD9dd6678fC3d192f02207d6ff999B04037' as const;
+export const USDC_CONTRACT_ADDRESS = '0x1ce14fD9dd6678fC3d192f02207d6ff999B04037' as `0x${string}`;
 
 export const USDC_ABI = [
   {

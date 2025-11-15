@@ -20,10 +20,28 @@ export function useRegisterAgent() {
         abi: STREAMING_PAYMENTS_ABI,
         functionName: 'registerAgent',
         args: [agentId, wallet, pricePerSecond],
+        gas: 500000n, // Set explicit gas limit
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Register agent error:', error);
-      throw error;
+      
+      // Parse specific error messages
+      let errorMessage = 'Failed to register agent';
+      
+      if (error?.message?.includes('insufficient funds')) {
+        errorMessage = 'Insufficient funds for gas fees. Please add more IOTA to your wallet.';
+      } else if (error?.message?.includes('user rejected')) {
+        errorMessage = 'Transaction was rejected';
+      } else if (error?.message?.includes('already registered')) {
+        errorMessage = 'This agent ID is already registered';
+      } else if (error?.message?.includes('execution reverted')) {
+        errorMessage = 'Transaction reverted. Agent may already be registered or parameters are invalid.';
+      } else if (error?.shortMessage) {
+        errorMessage = error.shortMessage;
+      }
+      
+      toast.error(errorMessage);
+      throw new Error(errorMessage);
     }
   };
 

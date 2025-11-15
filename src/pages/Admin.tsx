@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import { useAccount } from 'wagmi';
+import { useState, useEffect } from 'react';
+import { useAccount, useGasPrice } from 'wagmi';
 import { Navigation } from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -19,14 +19,16 @@ import {
   Heart,
   Shield,
   Sparkles,
+  Zap,
 } from 'lucide-react';
 import { useRegisterAgent, useAllAgents } from '@/hooks/useAgentRegistry';
 import { useAPIStatus, useAgentLiveData } from '@/hooks/useAgentAPI';
 import { AGENTS as predefinedAgents } from '@/data/agents';
-import { formatUnits, parseUnits } from 'viem';
+import { formatUnits, parseUnits, formatGwei } from 'viem';
 
 export default function Admin() {
-  const { isConnected } = useAccount();
+  const { isConnected, address } = useAccount();
+  const { data: gasPrice } = useGasPrice();
   const [selectedAgent, setSelectedAgent] = useState('');
   const [agentName, setAgentName] = useState('');
   const [walletAddress, setWalletAddress] = useState('0xa95dbdc9b74e08de421d03728988026fd2adbf5f');
@@ -39,16 +41,33 @@ export default function Admin() {
   const agentLiveData = useAgentLiveData(selectedAgent ? parseInt(selectedAgent) : 0);
 
   const handleRegister = async () => {
-    if (!agentName || !walletAddress || !pricePerSecond) {
+    if (!selectedAgent || !agentName || !walletAddress || !pricePerSecond) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+
+    // Validate wallet address format
+    if (!walletAddress.match(/^0x[a-fA-F0-9]{40}$/)) {
+      toast.error('Invalid wallet address format');
+      return;
+    }
+
+    // Validate price is positive
+    const priceNum = parseFloat(pricePerSecond);
+    if (isNaN(priceNum) || priceNum <= 0) {
+      toast.error('Price must be a positive number');
       return;
     }
 
     try {
       const priceInWei = parseUnits(pricePerSecond, 6);
+      const agentId = BigInt(selectedAgent);
 
-      await registerAgent(BigInt(0), walletAddress as `0x${string}`, priceInWei);
+      toast.loading('Registering agent... Please confirm the transaction in your wallet');
 
+      await registerAgent(agentId, walletAddress as `0x${string}`, priceInWei);
+
+      toast.dismiss();
       toast.success('Agent registered successfully!');
 
       setSelectedAgent('');
@@ -58,9 +77,10 @@ export default function Admin() {
       setTokenURI('');
 
       await refetch();
-    } catch (error) {
+    } catch (error: any) {
+      toast.dismiss();
       console.error('Registration error:', error);
-      toast.error('Failed to register agent');
+      // Error message already shown by registerAgent hook
     }
   };
 
@@ -98,13 +118,20 @@ export default function Admin() {
                   </p>
                 </div>
                 <div className="flex flex-col gap-2">
-                  {/* On-Chain Data APIs - Top Row */}
+                  {/* Network Status - Top Row */}
                   <div className="flex gap-2">
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/30 border border-white/10">
                       <div className={`w-2 h-2 rounded-full ${
                         apiStatus.connected ? 'bg-emerald-400' : 'bg-red-400'
                       } animate-pulse`} />
                       <span className="text-xs text-white/70">API Server</span>
+                    </div>
+                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/30 border border-amber-500/30">
+                      <Zap className="w-3 h-3 text-amber-400" />
+                      <span className="text-xs text-white/70">Gas:</span>
+                      <span className="text-xs text-amber-400 font-mono font-semibold">
+                        {gasPrice ? `${formatGwei(gasPrice)} Gwei` : '...'}
+                      </span>
                     </div>
                     <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/30 border border-secondary/30">
                       <div className={`w-2 h-2 rounded-full ${
@@ -499,6 +526,27 @@ export default function Admin() {
                       This address will receive payments for agent usage
                     </p>
                   </div>
+
+                  {/* Gas Cost Info */}
+                  {gasPrice && (
+                    <div className="mb-4 p-3 rounded-lg bg-amber-500/5 border border-amber-500/20">
+                      <div className="flex items-start gap-2">
+                        <Zap className="w-4 h-4 text-amber-400 mt-0.5" />
+                        <div className="flex-1">
+                          <div className="text-xs font-semibold text-amber-400 mb-1">
+                            Estimated Gas Cost
+                          </div>
+                          <div className="text-xs text-white/70">
+                            Network: <span className="text-white font-mono">{formatGwei(gasPrice)} Gwei</span>
+                            {' • '}
+                            Estimated: <span className="text-white font-mono">~0.005 IOTA</span>
+                            {' • '}
+                            Make sure you have enough IOTA for gas fees
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
 
                   <Button
                     onClick={handleRegister}

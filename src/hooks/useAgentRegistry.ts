@@ -34,8 +34,10 @@ export function useRegisterAgent() {
         errorMessage = 'Transaction was rejected';
       } else if (error?.message?.includes('already registered')) {
         errorMessage = 'This agent ID is already registered';
+      } else if (error?.message?.includes('0x49a2f91e')) {
+        errorMessage = '⚠️ Access Denied: Only the contract owner can register agents. Please contact the protocol admin.';
       } else if (error?.message?.includes('execution reverted')) {
-        errorMessage = 'Transaction reverted. Agent may already be registered or parameters are invalid.';
+        errorMessage = 'Transaction reverted. You may not have permission to register agents. Only the contract owner can perform this action.';
       } else if (error?.shortMessage) {
         errorMessage = error.shortMessage;
       }

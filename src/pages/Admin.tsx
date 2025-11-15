@@ -110,6 +110,21 @@ export default function Admin() {
         ) : (
           <div className="max-w-5xl mx-auto">
             <div className="mb-8">
+              {/* Access Control Warning */}
+              <div className="mb-6 p-4 rounded-lg bg-amber-500/10 border border-amber-500/30">
+                <div className="flex items-start gap-3">
+                  <Shield className="w-5 h-5 text-amber-400 mt-0.5" />
+                  <div>
+                    <div className="text-amber-400 font-semibold mb-1">Owner-Only Access</div>
+                    <div className="text-xs text-white/70">
+                      Agent registration requires contract owner privileges. If you're not the contract owner, registration will fail.
+                      <br />
+                      Contract: <span className="font-mono text-xs">0x37E1...93b9</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h1 className="text-4xl font-display font-bold tracking-tight mb-3 text-white">Admin</h1>

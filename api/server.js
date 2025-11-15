@@ -38,13 +38,26 @@ async function tdGet(path, params) {
 
 // ==================== FINNHUB CLIENT ====================
 async function fhGet(endpoint, params = {}) {
-  const url = new URL(endpoint, 'https://finnhub.io/api/v1');
-  Object.entries({ ...params, token: FINNHUB_API_KEY }).forEach(([k, v]) =>
-    url.searchParams.append(k, String(v))
-  );
+  // Build full URL manually to avoid path issues with new URL()
+  const baseUrl = 'https://finnhub.io/api/v1';
+  const path = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
+  const queryParams = new URLSearchParams({ ...params, token: FINNHUB_API_KEY });
+  const fullUrl = `${baseUrl}${path}?${queryParams.toString()}`;
 
-  const res = await fetch(url.toString());
+  const res = await fetch(fullUrl, {
+    headers: {
+      'User-Agent': 'x402-api/1.0'
+    }
+  });
+  
   if (!res.ok) throw new Error(`Finnhub error: ${res.status}`);
+  
+  // Check content type before parsing JSON
+  const contentType = res.headers.get('content-type');
+  if (!contentType || !contentType.includes('application/json')) {
+    throw new Error(`Finnhub returned non-JSON response: ${contentType}`);
+  }
+  
   const json = await res.json();
   if (json.error) {
     throw new Error(`Finnhub API error: ${json.error}`);
@@ -154,7 +167,7 @@ app.get('/api/agents/signal-forge', async (req, res) => {
 
     const signal = generateSignal(closes[0], sma20, sma50, rsi14);
 
-    res.json({
+    const response = {
       symbol,
       interval,
       currentPrice: closes[0],
@@ -162,7 +175,10 @@ app.get('/api/agents/signal-forge', async (req, res) => {
       signal,
       candles: candles.slice(0, 100),
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    cache[cacheKey] = { data: response, ts: Date.now() };
+    res.json(response);
   } catch (error) {
     console.error('Signal Forge error:', error);
     res.status(500).json({ error: error.message });
@@ -329,8 +345,7 @@ app.get('/api/agents/sentiment-radar', async (req, res) => {
 
     // Use crypto news endpoint instead of company news
     const newsData = await fhGet('/news', {
-      category: 'crypto',
-      minId: 0
+      category: 'crypto'
     });
 
     const topNews = newsData.slice(0, 5);

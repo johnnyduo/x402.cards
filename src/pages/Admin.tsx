@@ -64,46 +64,16 @@ export default function Admin() {
       <div className="container mx-auto px-4 pt-32 pb-16">
         {!isConnected ? (
           <div className="flex items-center justify-center min-h-[60vh]">
-            <Card className="w-[420px] bg-black/30 border-white/10 backdrop-blur-sm">
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2 text-white">
-                  <AlertCircle className="w-5 h-5 text-yellow-500" />
-                  Authentication Required
-                </CardTitle>
-                <CardDescription className="text-white/70">
-                  Please connect your wallet to access the admin panel
-                </CardDescription>
-              </CardHeader>
-              <CardContent>
-                <w3m-button />
-              </CardContent>
-            </Card>
+            <div className="text-center">
+              <AlertCircle className="w-12 h-12 text-white/20 mx-auto mb-3" />
+              <p className="text-white/70 mb-4">Connect wallet to access admin</p>
+              <w3m-button />
+            </div>
           </div>
         ) : (
-          <div className="max-w-6xl mx-auto">
-            {/* Header */}
-            <div className="mb-8">
-              <div className="flex items-center gap-3 mb-2">
-                <div className="p-2 rounded-lg bg-secondary/20 border border-secondary/30">
-                  <Settings2 className="w-6 h-6 text-secondary" />
-                </div>
-                <h1 className="text-4xl font-bold text-white">Agent Registry Admin</h1>
-              </div>
-              <p className="text-white/70">
-                Manage AI agents on the x402 payment protocol
-              </p>
-              <div className="mt-4 flex gap-3">
-                <Badge variant="outline" className="text-emerald-400 border-emerald-500/30 bg-emerald-500/10">
-                  Connected: {address?.slice(0, 6)}...{address?.slice(-4)}
-                </Badge>
-                <Badge variant="outline" className="text-secondary border-secondary/30 bg-secondary/10">
-                  IOTA EVM Testnet
-                </Badge>
-              </div>
-            </div>
-
+          <div className="max-w-4xl mx-auto">
             <Tabs defaultValue="register" className="space-y-6">
-              <TabsList className="bg-black/30 border border-white/10 backdrop-blur-sm">
+              <TabsList className="bg-black/30 border border-white/10">
                 <TabsTrigger value="register" className="data-[state=active]:bg-secondary/20 data-[state=active]:text-secondary text-white/70">
                   <Plus className="w-4 h-4 mr-2" />
                   Register Agent
@@ -115,253 +85,129 @@ export default function Admin() {
               </TabsList>
 
               {/* Register Agent Tab */}
-              <TabsContent value="register" className="space-y-6">
-                <Card className="bg-black/30 border-white/10 backdrop-blur-sm">
-                  <CardHeader>
-                    <CardTitle className="text-white">Register New Agent</CardTitle>
-                    <CardDescription className="text-white/70">
-                      Deploy a new AI agent to the x402 streaming payment protocol
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="space-y-6">
-                    <Alert className="bg-secondary/10 border-secondary/30">
-                      <AlertCircle className="w-4 h-4 text-secondary" />
-                      <AlertDescription className="text-secondary/90">
-                        Agents will be registered on-chain with EIP-8004 identity and payment capabilities
-                      </AlertDescription>
-                    </Alert>
+              <TabsContent value="register" className="space-y-4">
+                <Card className="bg-black/30 border-white/10">
+                  <CardContent className="pt-6 space-y-4">
 
-                    <div className="grid gap-6">
-                      <div className="space-y-2">
-                        <Label htmlFor="agentName" className="text-white/90">
-                          Agent Name *
-                        </Label>
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <Label className="text-white/70 text-xs">Agent Name *</Label>
                         <Input
-                          id="agentName"
-                          placeholder="e.g., Signal Forge"
+                          placeholder="Signal Forge"
                           value={agentName}
                           onChange={(e) => setAgentName(e.target.value)}
-                          className="bg-black/30 border-white/10 text-white placeholder:text-white/40 focus:border-secondary/50 focus:ring-secondary/20"
+                          className="bg-black/20 border-white/10 text-white h-9"
                         />
                       </div>
 
-                      <div className="space-y-2">
-                        <Label htmlFor="walletAddress" className="text-white/90">
-                          Payment Wallet Address *
-                        </Label>
+                      <div className="space-y-1.5">
+                        <Label className="text-white/70 text-xs">Price/sec (USDC) *</Label>
                         <Input
-                          id="walletAddress"
-                          placeholder="0x..."
-                          value={walletAddress}
-                          onChange={(e) => setWalletAddress(e.target.value)}
-                          className="bg-black/30 border-white/10 text-white font-mono placeholder:text-white/40 focus:border-secondary/50 focus:ring-secondary/20"
+                          type="number"
+                          step="0.0001"
+                          placeholder="0.0002"
+                          value={pricePerSecond}
+                          onChange={(e) => setPricePerSecond(e.target.value)}
+                          className="bg-black/20 border-white/10 text-white h-9"
                         />
-                        <p className="text-xs text-white/50">
-                          Where streaming payments will be sent
-                        </p>
                       </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="pricePerSecond" className="text-white/90">
-                          Price Per Second (USDC) *
-                        </Label>
-                        <div className="relative">
-                          <Input
-                            id="pricePerSecond"
-                            type="number"
-                            step="0.000001"
-                            placeholder="0.0001"
-                            value={pricePerSecond}
-                            onChange={(e) => setPricePerSecond(e.target.value)}
-                            className="bg-black/30 border-white/10 text-white placeholder:text-white/40 focus:border-secondary/50 focus:ring-secondary/20"
-                          />
-                          <span className="absolute right-3 top-1/2 -translate-y-1/2 text-white/50 text-sm">
-                            USDC/sec
-                          </span>
-                        </div>
-                        <div className="flex gap-2 mt-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setPricePerSecond('0.0001')}
-                            className="text-xs bg-black/20 border-white/10 hover:bg-secondary/20 hover:border-secondary/30 hover:text-secondary text-white/70"
-                          >
-                            $0.36/hr
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setPricePerSecond('0.0002')}
-                            className="text-xs bg-black/20 border-white/10 hover:bg-secondary/20 hover:border-secondary/30 hover:text-secondary text-white/70"
-                          >
-                            $0.72/hr
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setPricePerSecond('0.0003')}
-                            className="text-xs bg-black/20 border-white/10 hover:bg-secondary/20 hover:border-secondary/30 hover:text-secondary text-white/70"
-                          >
-                            $1.08/hr
-                          </Button>
-                        </div>
-                      </div>
-
-                      <div className="space-y-2">
-                        <Label htmlFor="tokenURI" className="text-white/90">
-                          Token URI (Optional)
-                        </Label>
-                        <Input
-                          id="tokenURI"
-                          placeholder="ipfs://... or https://..."
-                          value={tokenURI}
-                          onChange={(e) => setTokenURI(e.target.value)}
-                          className="bg-black/30 border-white/10 text-white placeholder:text-white/40 focus:border-secondary/50 focus:ring-secondary/20"
-                        />
-                        <p className="text-xs text-white/50">
-                          IPFS or HTTP link to agent metadata JSON
-                        </p>
-                      </div>
-
-                      <Separator className="bg-white/10" />
-
-                      <div className="bg-black/30 rounded-lg p-4 space-y-2 border border-white/10">
-                        <h4 className="text-sm font-medium text-white/90">Preview</h4>
-                        <div className="space-y-1 text-sm">
-                          <div className="flex justify-between">
-                            <span className="text-white/50">Agent Name:</span>
-                            <span className="text-white">{agentName || '—'}</span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-white/50">Wallet:</span>
-                            <span className="text-white font-mono text-xs">
-                              {walletAddress ? `${walletAddress.slice(0, 6)}...${walletAddress.slice(-4)}` : '—'}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-white/50">Hourly Rate:</span>
-                            <span className="text-secondary">
-                              {pricePerSecond ? `$${(parseFloat(pricePerSecond) * 3600).toFixed(2)}` : '—'}
-                            </span>
-                          </div>
-                          <div className="flex justify-between">
-                            <span className="text-white/50">Daily Rate:</span>
-                            <span className="text-secondary">
-                              {pricePerSecond ? `$${(parseFloat(pricePerSecond) * 86400).toFixed(2)}` : '—'}
-                            </span>
-                          </div>
-                        </div>
-                      </div>
-
-                      <Button
-                        onClick={handleRegister}
-                        disabled={isRegistering || !agentName || !walletAddress || !pricePerSecond}
-                        className="w-full bg-gradient-to-r from-secondary to-blue-500 hover:from-secondary/90 hover:to-blue-600 text-white"
-                      >
-                        {isRegistering ? (
-                          <>
-                            <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                            Registering On-Chain...
-                          </>
-                        ) : (
-                          <>
-                            <CheckCircle2 className="w-4 h-4 mr-2" />
-                            Register Agent
-                          </>
-                        )}
-                      </Button>
                     </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-white/70 text-xs">Wallet Address *</Label>
+                      <Input
+                        placeholder="0x..."
+                        value={walletAddress}
+                        onChange={(e) => setWalletAddress(e.target.value)}
+                        className="bg-black/20 border-white/10 text-white font-mono h-9"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-2 text-xs text-white/50">
+                      {pricePerSecond && (
+                        <span className="text-secondary">
+                          ${(parseFloat(pricePerSecond) * 3600).toFixed(2)}/hr · ${(parseFloat(pricePerSecond) * 86400).toFixed(2)}/day
+                        </span>
+                      )}
+                    </div>
+
+                    <Button
+                      onClick={handleRegister}
+                      disabled={isRegistering || !agentName || !walletAddress || !pricePerSecond}
+                      className="w-full bg-secondary/20 hover:bg-secondary/30 border border-secondary/30 text-secondary h-9"
+                      variant="outline"
+                    >
+                      {isRegistering ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Registering...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Register Agent
+                        </>
+                      )}
+                    </Button>
                   </CardContent>
                 </Card>
               </TabsContent>
 
               {/* Manage Agents Tab */}
-              <TabsContent value="manage" className="space-y-6">
-                <Card className="bg-black/30 border-white/10 backdrop-blur-sm">
-                  <CardHeader>
-                    <CardTitle className="text-white">Registered Agents</CardTitle>
-                    <CardDescription className="text-white/70">
-                      View and manage all agents in the registry
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
+              <TabsContent value="manage" className="space-y-4">
+                <Card className="bg-black/30 border-white/10">
+                  <CardContent className="pt-6">
                     {isLoadingAgents ? (
-                      <div className="flex items-center justify-center py-12">
-                        <Loader2 className="w-8 h-8 animate-spin text-secondary" />
+                      <div className="flex items-center justify-center py-8">
+                        <Loader2 className="w-6 h-6 animate-spin text-secondary" />
                       </div>
                     ) : agents && agents.length > 0 ? (
-                      <div className="space-y-4">
+                      <div className="space-y-3">
                         {agents.map((agent) => (
                           <div
                             key={agent.id}
-                            className="bg-black/30 rounded-lg p-4 border border-white/10 hover:border-secondary/30 hover:bg-black/40 transition-all"
+                            className="bg-black/20 rounded-lg p-3 border border-white/10 hover:border-secondary/30 transition-colors"
                           >
-                            <div className="flex items-start justify-between">
-                              <div className="space-y-2">
-                                <div className="flex items-center gap-3">
-                                  <Badge className="bg-secondary/20 text-secondary border-secondary/30">
-                                    ID: {agent.id}
-                                  </Badge>
-                                  <h3 className="text-lg font-medium text-white">
-                                    Agent #{agent.id}
-                                  </h3>
-                                  {agent.isActive ? (
-                                    <Badge className="bg-emerald-500/20 text-emerald-400 border-emerald-500/30">
-                                      Active
-                                    </Badge>
-                                  ) : (
-                                    <Badge className="bg-white/10 text-white/60 border-white/20">
-                                      Inactive
-                                    </Badge>
-                                  )}
-                                </div>
-                                <div className="space-y-1 text-sm">
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-white/50">Wallet:</span>
-                                    <span className="text-white font-mono">
-                                      {agent.wallet.slice(0, 6)}...{agent.wallet.slice(-4)}
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-white/50">Price:</span>
-                                    <span className="text-secondary">
-                                      {formatUnits(agent.pricePerSecond, 6)} USDC/sec
-                                    </span>
-                                    <span className="text-white/40">
-                                      (${(parseFloat(formatUnits(agent.pricePerSecond, 6)) * 3600).toFixed(2)}/hr)
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-white/50">Total Earned:</span>
-                                    <span className="text-emerald-400">
-                                      {formatUnits(agent.totalEarned, 6)} USDC
-                                    </span>
-                                  </div>
-                                  <div className="flex items-center gap-2">
-                                    <span className="text-white/50">Total Streams:</span>
-                                    <span className="text-white">{agent.totalStreams.toString()}</span>
-                                  </div>
+                            <div className="flex items-center justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <span className="text-xs font-mono text-secondary">#{agent.id}</span>
+                                {agent.isActive ? (
+                                  <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
+                                ) : (
+                                  <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
+                                )}
+                              </div>
+                              <span className="text-xs text-white/40 font-mono">
+                                {agent.wallet.slice(0, 6)}...{agent.wallet.slice(-4)}
+                              </span>
+                            </div>
+                            <div className="grid grid-cols-3 gap-3 text-xs">
+                              <div>
+                                <div className="text-white/50">Price/sec</div>
+                                <div className="text-secondary font-mono">
+                                  {formatUnits(agent.pricePerSecond, 6)}
                                 </div>
                               </div>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                className="bg-black/20 border-white/10 hover:bg-secondary/20 hover:border-secondary/30 hover:text-secondary text-white/70"
-                              >
-                                <Settings2 className="w-4 h-4 mr-2" />
-                                Edit
-                              </Button>
+                              <div>
+                                <div className="text-white/50">Earned</div>
+                                <div className="text-emerald-400 font-mono">
+                                  {formatUnits(agent.totalEarned, 6)}
+                                </div>
+                              </div>
+                              <div>
+                                <div className="text-white/50">Streams</div>
+                                <div className="text-white">
+                                  {agent.totalStreams.toString()}
+                                </div>
+                              </div>
                             </div>
                           </div>
                         ))}
                       </div>
                     ) : (
-                      <div className="text-center py-12">
-                        <AlertCircle className="w-12 h-12 text-white/20 mx-auto mb-3" />
-                        <p className="text-white/70">No agents registered yet</p>
-                        <p className="text-sm text-white/50 mt-1">
-                          Register your first agent to get started
-                        </p>
+                      <div className="text-center py-8">
+                        <AlertCircle className="w-8 h-8 text-white/20 mx-auto mb-2" />
+                        <p className="text-sm text-white/50">No agents yet</p>
                       </div>
                     )}
                   </CardContent>

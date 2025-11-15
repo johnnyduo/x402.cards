@@ -175,7 +175,7 @@ for data in stream:
               <ul className="space-y-2">
                 <li className="text-sm font-body text-muted-foreground flex items-start">
                   <span className="text-secondary mr-2">→</span>
-                  OPAL-secure compute integration
+                  Advanced analytics modules
                 </li>
                 <li className="text-sm font-body text-muted-foreground flex items-start">
                   <span className="text-secondary mr-2">→</span>

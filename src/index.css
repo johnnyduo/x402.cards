@@ -199,11 +199,7 @@ All colors MUST be HSL.
     transform-style: preserve-3d;
   }
 
-  .flip-card:hover .flip-card-inner {
-    transform: rotateY(180deg);
-  }
-
-  .flip-card.flipped .flip-card-inner {
+  .flip-card-inner.flipped {
     transform: rotateY(180deg);
   }
 

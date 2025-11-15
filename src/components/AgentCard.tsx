@@ -33,11 +33,16 @@ export const AgentCard = ({
     onToggleStream?.(checked);
   };
 
+  const handleCardClick = () => {
+    if (!isAddon) {
+      setIsFlipped(!isFlipped);
+    }
+  };
+
   return (
     <div
-      className="flip-card h-[340px]"
-      onMouseEnter={() => !isAddon && setIsFlipped(true)}
-      onMouseLeave={() => !isAddon && setIsFlipped(false)}
+      className="flip-card h-[300px]"
+      onClick={handleCardClick}
       style={{ cursor: isAddon ? 'default' : 'pointer' }}
     >
       <div className={`flip-card-inner ${isFlipped ? 'flipped' : ''}`}>
@@ -73,12 +78,13 @@ export const AgentCard = ({
                     {isStreaming ? "ON" : isAddon ? "OFF" : "OFF"}
                   </Badge>
                   {!isAddon && (
-                    <Switch
-                      checked={isStreaming}
-                      onCheckedChange={handleToggle}
-                      onClick={(e) => e.stopPropagation()}
-                      className="data-[state=checked]:bg-secondary"
-                    />
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <Switch
+                        checked={isStreaming}
+                        onCheckedChange={handleToggle}
+                        className="data-[state=checked]:bg-secondary"
+                      />
+                    </div>
                   )}
                 </div>
               </div>
@@ -103,12 +109,11 @@ export const AgentCard = ({
                   {pricePerSec}
                 </span>
                 {!isAddon && (
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                     <Switch
                       checked={isStreaming}
                       onCheckedChange={handleToggle}
-                      onClick={(e) => e.stopPropagation()}
-                      className="data-[state=checked]:bg-secondary"
+                      className="data-[state=checked]:bg-secondary scale-90"
                     />
                   </div>
                 )}

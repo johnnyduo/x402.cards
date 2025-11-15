@@ -15,25 +15,25 @@ export const CentralHub = ({
   onToggleAll,
 }: CentralHubProps) => {
   return (
-    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-20">
+    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
       <div
-        className="relative rounded-full w-[280px] h-[280px] flex flex-col items-center justify-center transition-all duration-500"
+        className="relative rounded-3xl w-[380px] h-[320px] flex flex-col items-center justify-center transition-all duration-500 pointer-events-auto"
         style={{
           background: allStreamsActive 
-            ? 'radial-gradient(circle, rgba(0, 229, 255, 0.2) 0%, rgba(30, 58, 95, 0.8) 70%)'
-            : 'radial-gradient(circle, rgba(66, 153, 225, 0.15) 0%, rgba(30, 58, 95, 0.6) 70%)',
-          backdropFilter: 'blur(20px)',
+            ? 'linear-gradient(135deg, rgba(0, 229, 255, 0.25) 0%, rgba(66, 153, 225, 0.3) 50%, rgba(30, 58, 95, 0.85) 100%)'
+            : 'linear-gradient(135deg, rgba(66, 153, 225, 0.18) 0%, rgba(30, 58, 95, 0.5) 50%, rgba(30, 58, 95, 0.65) 100%)',
+          backdropFilter: 'blur(24px)',
           border: allStreamsActive 
-            ? '2px solid rgba(0, 229, 255, 0.5)' 
-            : '2px solid rgba(66, 153, 225, 0.3)',
+            ? '3px solid rgba(0, 229, 255, 0.6)' 
+            : '2px solid rgba(66, 153, 225, 0.35)',
           boxShadow: allStreamsActive
-            ? "0 0 60px rgba(0, 229, 255, 0.4), 0 0 100px rgba(66, 153, 225, 0.2)"
-            : "0 0 30px rgba(66, 153, 225, 0.2)",
+            ? "0 0 80px rgba(0, 229, 255, 0.5), 0 0 120px rgba(66, 153, 225, 0.3)"
+            : "0 0 40px rgba(66, 153, 225, 0.25)",
         }}
       >
-        {/* Outer ring animation */}
+        {/* Outer glow animation */}
         <div 
-          className="absolute inset-0 rounded-full"
+          className="absolute inset-0 rounded-3xl"
           style={{
             border: '1px solid rgba(0, 229, 255, 0.3)',
             animation: allStreamsActive ? 'pulse-ring 2s ease-in-out infinite' : 'none',
@@ -67,23 +67,23 @@ export const CentralHub = ({
           )}
         </div>
 
-        {/* Master Button */}
+        {/* Master Button - Rectangular design matching cards */}
         <Button
           onClick={onToggleAll}
           size="lg"
-          className={`rounded-full w-[140px] h-[140px] transition-all duration-500 text-sm font-display font-bold tracking-wider relative overflow-hidden group ${
+          className={`rounded-2xl w-[240px] h-[140px] transition-all duration-500 text-sm font-display font-bold tracking-wider relative overflow-hidden group ${
             allStreamsActive
               ? "bg-secondary hover:bg-secondary/90 text-black shadow-2xl"
               : "bg-white/10 hover:bg-white/20 text-white border-2 border-white/30"
           }`}
           style={{
             boxShadow: allStreamsActive 
-              ? '0 0 40px rgba(0, 229, 255, 0.6)' 
-              : '0 0 20px rgba(66, 153, 225, 0.3)',
+              ? '0 0 50px rgba(0, 229, 255, 0.7), 0 0 80px rgba(0, 229, 255, 0.4)' 
+              : '0 0 25px rgba(66, 153, 225, 0.35)',
           }}
         >
-          <span className="relative z-10 uppercase text-xs leading-tight">
-            {allStreamsActive ? "Close All\nStreams" : "Open All\nStreams"}
+          <span className="relative z-10 uppercase leading-tight text-center whitespace-pre-line px-6">
+            {allStreamsActive ? "CLOSE ALL\nSTREAMS" : "OPEN ALL\nSTREAMS"}
           </span>
           {allStreamsActive && (
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent animate-shimmer" 

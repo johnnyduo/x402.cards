@@ -87,7 +87,7 @@ const agents = [
     features: [
       "Partner ecosystem integration",
       "Custom data stream creation",
-      "OPAL-secure compute (coming soon)",
+      "Advanced analytics modules",
       "Enterprise-grade SLAs"
     ],
   },
@@ -96,11 +96,19 @@ const agents = [
 const Streams = () => {
   const [streamStates, setStreamStates] = useState<Record<number, boolean>>({});
 
-  const activeCount = Object.values(streamStates).filter(Boolean).length;
+  // Count only non-addon active streams
+  const activeCount = agents
+    .filter(agent => agent.id !== 6 && streamStates[agent.id])
+    .length;
+
   const totalCostPerSec = agents
     .filter((agent) => streamStates[agent.id])
     .reduce((sum, agent) => sum + agent.pricePerSec, 0);
-  const allStreamsActive = activeCount === agents.length - 1; // Exclude add-ons
+
+  // Check if all non-addon streams (5 agents) are active
+  const allStreamsActive = agents
+    .filter(agent => agent.id !== 6)
+    .every(agent => streamStates[agent.id]);
 
   const handleToggleAll = () => {
     const newState = !allStreamsActive;
@@ -133,10 +141,10 @@ const Streams = () => {
       <AppHeader />
 
       <section className="px-6 pb-20">
-        <div className="max-w-7xl mx-auto">
-          {/* Laptop Screen Container */}
+        <div className="max-w-[1800px] mx-auto">
+          {/* Laptop Screen Container - Full-screen card spread */}
           <div 
-            className="rounded-3xl p-12 relative overflow-visible min-h-[900px]"
+            className="rounded-3xl p-20 relative overflow-visible min-h-[1000px]"
             style={{
               background: 'radial-gradient(circle at 50% 50%, rgba(30, 58, 95, 0.4) 0%, rgba(17, 24, 39, 0.8) 100%)',
               backdropFilter: 'blur(20px)',
@@ -144,8 +152,8 @@ const Streams = () => {
               boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), inset 0 0 40px rgba(66, 153, 225, 0.1)'
             }}
           >
-            {/* SVG for flow lines */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" style={{ overflow: "visible" }}>
+            {/* SVG for flow lines - No z-index conflicts with expanded layout */}
+            <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ overflow: "visible" }}>
               <defs>
                 <linearGradient id="streamGradientActive" x1="0%" y1="0%" x2="100%" y2="0%">
                   <stop offset="0%" stopColor="rgba(66, 153, 225, 1)" />
@@ -156,21 +164,29 @@ const Streams = () => {
                   <stop offset="0%" stopColor="rgba(66, 153, 225, 0.3)" />
                   <stop offset="100%" stopColor="rgba(66, 153, 225, 0.3)" />
                 </linearGradient>
+                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
+                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                  <feMerge>
+                    <feMergeNode in="coloredBlur"/>
+                    <feMergeNode in="SourceGraphic"/>
+                  </feMerge>
+                </filter>
               </defs>
 
               {agents.slice(0, 5).map((agent, idx) => {
                 const pos = gridPositions[idx];
-                const cardWidth = 340;
-                const cardHeight = 340;
-                const gap = 32;
+                // Smaller cards but wider spread for full-screen distribution
+                const cardWidth = 300;
+                const cardHeight = 300;
+                const gap = 120; // Much larger gap for full-screen spread
                 
-                // Calculate card center positions with padding
-                const fromX = (pos.col * (cardWidth + gap)) + cardWidth / 2 + 48;
-                const fromY = (pos.row * (cardHeight + gap)) + cardHeight / 2 + 48;
+                // Calculate card center positions spread across full container
+                const fromX = (pos.col * (cardWidth + gap)) + cardWidth / 2 + 80;
+                const fromY = (pos.row * (cardHeight + gap)) + cardHeight / 2 + 80;
                 
-                // Center hub position (accounting for container size)
-                const containerWidth = (cardWidth * 3) + (gap * 2) + 96;
-                const containerHeight = (cardHeight * 2) + gap + 96;
+                // Center hub position - perfectly centered with wide spacing
+                const containerWidth = (cardWidth * 3) + (gap * 2) + 160;
+                const containerHeight = (cardHeight * 2) + gap + 160;
                 const toX = containerWidth / 2;
                 const toY = containerHeight / 2;
 
@@ -188,7 +204,7 @@ const Streams = () => {
               })}
             </svg>
 
-            {/* Central Hub */}
+            {/* Central Hub - Perfect centered positioning with expanded spacing */}
             <CentralHub
               activeCount={activeCount}
               totalCostPerSec={totalCostPerSec}
@@ -196,8 +212,8 @@ const Streams = () => {
               onToggleAll={handleToggleAll}
             />
 
-            {/* Agent Cards Grid */}
-            <div className="grid grid-cols-3 gap-8 relative z-0">
+            {/* Agent Cards Grid - Full-screen spread with smaller cards */}
+            <div className="grid grid-cols-3 gap-[120px] relative">
               {agents.map((agent, idx) => (
                 <AgentCard
                   key={agent.id}
@@ -214,23 +230,23 @@ const Streams = () => {
               ))}
             </div>
 
-            {/* Floating Particles */}
-            <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-              {[...Array(20)].map((_, i) => (
+            {/* Floating Particles - Ambient background glow */}
+            <div className="absolute inset-0 pointer-events-none overflow-hidden opacity-60">
+              {[...Array(25)].map((_, i) => (
                 <div
                   key={i}
                   className="absolute rounded-full"
                   style={{
-                    width: `${2 + Math.random() * 3}px`,
-                    height: `${2 + Math.random() * 3}px`,
+                    width: `${2 + Math.random() * 4}px`,
+                    height: `${2 + Math.random() * 4}px`,
                     background: Math.random() > 0.5 
-                      ? 'rgba(66, 153, 225, 0.3)' 
-                      : 'rgba(0, 229, 255, 0.2)',
+                      ? 'rgba(66, 153, 225, 0.4)' 
+                      : 'rgba(0, 229, 255, 0.3)',
                     left: `${Math.random() * 100}%`,
                     top: `${Math.random() * 100}%`,
-                    animation: `drift ${4 + Math.random() * 3}s ease-in-out infinite`,
-                    animationDelay: `${Math.random() * 3}s`,
-                    boxShadow: '0 0 10px rgba(66, 153, 225, 0.3)',
+                    animation: `drift ${5 + Math.random() * 4}s ease-in-out infinite`,
+                    animationDelay: `${Math.random() * 4}s`,
+                    boxShadow: '0 0 15px rgba(66, 153, 225, 0.4)',
                   }}
                 />
               ))}

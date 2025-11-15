@@ -12,7 +12,7 @@ if (!projectId) {
 
 // Define IOTA EVM Testnet
 export const iotaEVM = defineChain({
-  id: 1075,
+  id: 1076,
   name: 'IOTA EVM Testnet',
   nativeCurrency: {
     decimals: 18,
@@ -21,16 +21,22 @@ export const iotaEVM = defineChain({
   },
   rpcUrls: {
     default: {
-      http: ['https://json-rpc.evm.testnet.iota.cafe'],
+      http: ['https://json-rpc.evm.testnet.iota.cafe', 'https://rpc.ankr.com/iota_evm_testnet'],
     },
     public: {
-      http: ['https://json-rpc.evm.testnet.iota.cafe'],
+      http: ['https://json-rpc.evm.testnet.iota.cafe', 'https://rpc.ankr.com/iota_evm_testnet'],
     },
   },
   blockExplorers: {
     default: { 
       name: 'IOTA EVM Testnet Explorer', 
       url: 'https://explorer.evm.testnet.iota.cafe' 
+    },
+  },
+  contracts: {
+    multicall3: {
+      address: '0xcA11bde05977b3631167028862bE2a173976CA11',
+      blockCreated: 1,
     },
   },
   testnet: true,

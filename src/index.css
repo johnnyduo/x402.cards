@@ -1,5 +1,3 @@
-@import '@reown/appkit/styles.css';
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -349,7 +347,6 @@ All colors MUST be HSL.
     border-color: hsl(var(--secondary));
     background: rgba(0, 229, 255, 0.1);
   }
-}
 
   .react-flow__edge .react-flow__edge-path {
     stroke-linecap: round;

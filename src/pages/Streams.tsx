@@ -222,31 +222,85 @@ const AgentNode = ({ data }: { data: any }) => {
               </div>
             </label>
           )}
+          {isAddon && (
+            <div className="flex items-center gap-2">
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  data.onSettings?.();
+                }}
+                className="w-9 h-9 rounded-lg bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/50 flex items-center justify-center cursor-pointer transition-all"
+                style={{ zIndex: 300, pointerEvents: 'auto' }}
+                title="Configure AI Crawler"
+              >
+                <span className="text-emerald-400 text-base">⚙️</span>
+              </button>
+              <label className="relative inline-flex items-center cursor-pointer z-10" onClick={(e) => e.stopPropagation()}>
+                <input 
+                  type="checkbox" 
+                  checked={data.active} 
+                  onChange={(e) => {
+                    e.stopPropagation();
+                    data.onToggle();
+                  }}
+                  className="sr-only peer"
+                />
+                <div className={`w-11 h-6 rounded-full transition-all pointer-events-auto ${
+                  data.active ? 'bg-emerald-500' : 'bg-gray-700'
+                }`}>
+                  <div className={`absolute top-0.5 left-0.5 bg-black rounded-full h-5 w-5 transition-transform ${
+                    data.active ? 'translate-x-5' : ''
+                  }`} />
+                </div>
+              </label>
+            </div>
+          )}
         </div>
         
         {/* Content */}
         <div className="mb-4">
           <h3 className={`text-lg font-bold mb-2 ${
-            isAddon ? 'text-gray-400' : 'text-white'
+            isAddon ? (data.active ? 'text-emerald-400' : 'text-emerald-600') : 'text-white'
           }`}>
             {data.name}
           </h3>
           <p className={`text-sm ${
-            isAddon ? 'text-gray-500' : 'text-white/70'
+            isAddon ? (data.active ? 'text-emerald-400/70' : 'text-emerald-600/60') : 'text-white/70'
           }`}>
             {data.description}
           </p>
         </div>
         
-        {/* Price */}
+        {/* Price & Accumulated */}
         <div className={`pt-4 border-t ${
-          isAddon ? 'border-gray-700/30' : 'border-white/10'
+          isAddon ? 'border-emerald-700/30' : 'border-white/10'
         }`}>
-          <p className={`text-xs font-medium ${
-            isAddon ? 'text-gray-500' : 'text-white/50'
-          }`}>
-            {data.price}
-          </p>
+          <div className="flex items-center justify-between mb-1">
+            <p className={`text-xs font-medium ${
+              isAddon ? 'text-emerald-400/60' : 'text-white/50'
+            }`}>
+              {isAddon ? 'Revenue' : 'Cost'} / SEC
+            </p>
+            <p className={`text-xs font-bold ${
+              isAddon ? 'text-emerald-400' : 'text-secondary'
+            }`}>
+              {isAddon ? '+' : ''}{data.pricePerSec.toFixed(4)} USDC
+            </p>
+          </div>
+          {data.active && (
+            <div className="mt-2 p-2 rounded-lg bg-black/30">
+              <p className={`text-[10px] font-medium uppercase tracking-wider mb-1 ${
+                isAddon ? 'text-emerald-400/50' : 'text-white/40'
+              }`}>
+                {isAddon ? 'Total Earned' : 'Total Spent'}
+              </p>
+              <p className={`text-sm font-bold font-mono ${
+                isAddon ? 'text-emerald-400' : 'text-red-400'
+              }`}>
+                {isAddon ? '+' : ''}{(data.accumulated || 0).toFixed(4)} USDC
+              </p>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -326,27 +380,49 @@ const HubNode = ({ data }: any) => (
       <div className="absolute inset-0 rounded-3xl border-2 border-secondary/30 animate-ping" style={{ animationDuration: '2s' }} />
     )}
     <div className="text-center">
-      <div className="flex items-center justify-center gap-2 mb-3">
-        <Activity className="w-5 h-5 text-secondary" />
-        <span className="text-sm font-display text-white/70 tracking-wider uppercase">Active Agents</span>
+      <div className="flex items-center justify-center gap-2 mb-2">
+        <Activity className="w-4 h-4 text-secondary" />
+        <span className="text-xs font-display text-white/70 tracking-wider uppercase">Active Agents</span>
       </div>
-      <div className="text-5xl font-display font-bold text-white mb-3">
+      <div className="text-4xl font-display font-bold text-white mb-2">
         {data.activeCount} <span className="text-white/40">/ 6</span>
       </div>
-      <div className="text-xs font-display text-white/60 uppercase tracking-wider mb-2">Cost / Sec</div>
-      <div className="text-2xl font-display font-bold gradient-text mb-4">
-        {data.totalCost.toFixed(4)} USDC
+      <div className="text-[10px] font-display text-white/60 uppercase tracking-wider mb-1">
+        {data.revenueActive ? 'Net Rate / Sec' : 'Cost / Sec'}
       </div>
-      {data.active && (
-        <div className="mb-4">
-          <span className="text-xs font-display text-secondary uppercase tracking-wider px-4 py-1.5 rounded-full bg-secondary/20 border border-secondary/40">
-            Balanced
-          </span>
+      <div className={`text-xl font-display font-bold mb-3 ${
+        data.revenueActive && data.netRate < 0 ? 'text-emerald-400' : 'gradient-text'
+      }`}>
+        {data.revenueActive && data.netRate < 0 ? '+' : ''}{Math.abs(data.netRate || data.totalCost).toFixed(4)} USDC
+      </div>
+      
+      {/* Financial Summary */}
+      <div className="mb-3 space-y-1.5">
+        <div className="flex items-center justify-between bg-red-500/10 border border-red-500/30 rounded-lg px-2 py-1">
+          <div className="text-[9px] text-red-400/60 uppercase tracking-wider">Spending</div>
+          <div className="text-xs font-bold text-red-400">-{data.totalSpent?.toFixed(4) || '0.0000'}</div>
         </div>
-      )}
+        <div className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/30 rounded-lg px-2 py-1">
+          <div className="text-[9px] text-emerald-400/60 uppercase tracking-wider">Earning</div>
+          <div className="text-xs font-bold text-emerald-400">+{data.totalEarned?.toFixed(4) || '0.0000'}</div>
+        </div>
+        <div className={`flex items-center justify-between border-2 rounded-lg px-2 py-1.5 ${
+          ((data.totalEarned || 0) - (data.totalSpent || 0)) >= 0
+            ? 'bg-emerald-500/20 border-emerald-500/50'
+            : 'bg-red-500/20 border-red-500/50'
+        }`}>
+          <div className="text-[9px] text-white/70 uppercase tracking-wider font-bold">Net Balance</div>
+          <div className={`text-sm font-bold ${
+            ((data.totalEarned || 0) - (data.totalSpent || 0)) >= 0 ? 'text-emerald-400' : 'text-red-400'
+          }`}>
+            {((data.totalEarned || 0) - (data.totalSpent || 0)) >= 0 ? '+' : ''}{((data.totalEarned || 0) - (data.totalSpent || 0)).toFixed(4)}
+          </div>
+        </div>
+      </div>
+      
       <button
         onClick={data.onToggle}
-        className={`w-full py-4 rounded-2xl text-base font-display font-bold tracking-wider transition-all duration-500 ${
+        className={`w-full py-3 rounded-xl text-sm font-display font-bold tracking-wider transition-all duration-500 ${
           data.active
             ? 'bg-secondary hover:bg-secondary/90 text-black shadow-2xl'
             : 'bg-white/10 hover:bg-white/20 text-white border-2 border-white/30'
@@ -359,7 +435,7 @@ const HubNode = ({ data }: any) => (
           zIndex: 300,
         }}
       >
-        {data.active ? 'CLOSE ALL STREAMS' : 'OPEN ALL STREAMS'}
+        {data.active ? 'CLOSE ALL' : 'OPEN ALL'}
       </button>
     </div>
   </div>
@@ -376,10 +452,12 @@ const Streams = () => {
   const [isAddonModalOpen, setIsAddonModalOpen] = useState(false);
   const [totalSpent, setTotalSpent] = useState(0);
   const [totalEarned, setTotalEarned] = useState(0);
+  const [agentAccumulated, setAgentAccumulated] = useState<Record<number, number>>({});
 
-  const activeCount = agents.filter(agent => agent.id !== 6 && streamStates[agent.id]).length;
+  const activeCount = agents.filter(agent => streamStates[agent.id]).length;
   const totalCostPerSec = agents.filter((agent) => agent.id !== 6 && streamStates[agent.id]).reduce((sum, agent) => sum + agent.pricePerSec, 0);
   const addonRevenue = streamStates[6] ? 0.0003 : 0; // AI Crawler generates revenue
+  const netRatePerSec = totalCostPerSec - addonRevenue; // Net rate after revenue
   const allStreamsActive = agents.filter(agent => agent.id !== 6).every(agent => streamStates[agent.id]);
 
   const handleToggleAll = useCallback(() => {
@@ -414,10 +492,22 @@ const Streams = () => {
       if (addonRevenue > 0) {
         setTotalEarned(prev => prev + addonRevenue);
       }
+      
+      // Update individual agent accumulated amounts
+      setAgentAccumulated(prev => {
+        const newAccumulated = { ...prev };
+        agents.forEach(agent => {
+          if (streamStates[agent.id]) {
+            const rate = agent.pricePerSec;
+            newAccumulated[agent.id] = (newAccumulated[agent.id] || 0) + rate;
+          }
+        });
+        return newAccumulated;
+      });
     }, 1000); // Update every second
 
     return () => clearInterval(interval);
-  }, [totalCostPerSec, addonRevenue]);
+  }, [totalCostPerSec, addonRevenue, streamStates]);
 
   const initialNodes: Node[] = [
     // Top row agents
@@ -425,45 +515,48 @@ const Streams = () => {
       id: 'agent-1', 
       type: 'agent', 
       position: { x: 30, y: 60 },
-      draggable: false,
+      draggable: true,
       data: { 
         name: agents[0].name, 
         category: agents[0].category, 
         description: agents[0].description, 
-        price: `${agents[0].pricePerSec.toFixed(4)} USDC / SEC`,
+        pricePerSec: agents[0].pricePerSec,
         icon: agents[0].icon,
         active: streamStates[1] || false,
-        onToggle: () => handleToggleStream(1)
+        onToggle: () => handleToggleStream(1),
+        accumulated: 0,
       }
     },
     { 
       id: 'agent-2', 
       type: 'agent', 
       position: { x: 540, y: 20 },
-      draggable: false,
+      draggable: true,
       data: { 
         name: agents[1].name, 
         category: agents[1].category, 
         description: agents[1].description, 
-        price: `${agents[1].pricePerSec.toFixed(4)} USDC / SEC`,
+        pricePerSec: agents[1].pricePerSec,
         icon: agents[1].icon,
         active: streamStates[2] || false,
-        onToggle: () => handleToggleStream(2)
+        onToggle: () => handleToggleStream(2),
+        accumulated: 0,
       }
     },
     { 
       id: 'agent-3', 
       type: 'agent', 
       position: { x: 1050, y: 60 },
-      draggable: false,
+      draggable: true,
       data: { 
         name: agents[2].name, 
         category: agents[2].category, 
         description: agents[2].description, 
-        price: `${agents[2].pricePerSec.toFixed(4)} USDC / SEC`,
+        pricePerSec: agents[2].pricePerSec,
         icon: agents[2].icon,
         active: streamStates[3] || false,
-        onToggle: () => handleToggleStream(3)
+        onToggle: () => handleToggleStream(3),
+        accumulated: 0,
       }
     },
     // Bottom row agents
@@ -471,57 +564,63 @@ const Streams = () => {
       id: 'agent-4', 
       type: 'agent', 
       position: { x: 30, y: 700 },
-      draggable: false,
+      draggable: true,
       data: { 
         name: agents[3].name, 
         category: agents[3].category, 
         description: agents[3].description, 
-        price: `${agents[3].pricePerSec.toFixed(4)} USDC / SEC`,
+        pricePerSec: agents[3].pricePerSec,
         icon: agents[3].icon,
         active: streamStates[4] || false,
-        onToggle: () => handleToggleStream(4)
+        onToggle: () => handleToggleStream(4),
+        accumulated: 0,
       }
     },
     { 
       id: 'agent-5', 
       type: 'agent', 
       position: { x: 540, y: 750 },
-      draggable: false,
+      draggable: true,
       data: { 
         name: agents[4].name, 
         category: agents[4].category, 
         description: agents[4].description, 
-        price: `${agents[4].pricePerSec.toFixed(4)} USDC / SEC`,
+        pricePerSec: agents[4].pricePerSec,
         icon: agents[4].icon,
         active: streamStates[5] || false,
-        onToggle: () => handleToggleStream(5)
+        onToggle: () => handleToggleStream(5),
+        accumulated: 0,
       }
     },
     { 
       id: 'agent-6', 
       type: 'agent', 
       position: { x: 1050, y: 700 },
-      draggable: false,
+      draggable: true,
       data: { 
         name: agents[5].name, 
         category: agents[5].category, 
         description: agents[5].description, 
-        price: 'COMING SOON',
+        pricePerSec: agents[5].pricePerSec,
         icon: agents[5].icon,
-        active: false,
-        onToggle: () => setIsAddonModalOpen(true),
-        isAddon: true
+        active: streamStates[6] || false,
+        onToggle: () => handleToggleStream(6),
+        onSettings: () => setIsAddonModalOpen(true),
+        isAddon: true,
+        accumulated: 0,
       }
     },
     // Central hub
     { 
       id: 'hub', 
       type: 'hub', 
-      position: { x: 540, y: 360 },
-      draggable: false,
+      position: { x: 560, y: 365 },
+      draggable: true,
       data: { 
         activeCount,
         totalCost: totalCostPerSec,
+        netRate: netRatePerSec,
+        revenueActive: streamStates[6],
         active: allStreamsActive,
         onToggle: handleToggleAll,
         totalSpent,
@@ -676,8 +775,10 @@ const Streams = () => {
   // Update everything when streamStates change
   useEffect(() => {
     // Calculate current values from streamStates
-    const currentActiveCount = agents.filter(agent => agent.id !== 6 && streamStates[agent.id]).length;
-    const currentTotalCost = agents.filter((agent) => streamStates[agent.id]).reduce((sum, agent) => sum + agent.pricePerSec, 0);
+    const currentActiveCount = agents.filter(agent => streamStates[agent.id]).length;
+    const currentTotalCost = agents.filter((agent) => agent.id !== 6 && streamStates[agent.id]).reduce((sum, agent) => sum + agent.pricePerSec, 0);
+    const currentRevenue = streamStates[6] ? 0.0003 : 0;
+    const currentNetRate = currentTotalCost - currentRevenue;
     const currentAllActive = agents.filter(agent => agent.id !== 6).every(agent => streamStates[agent.id]);
 
     // Update nodes
@@ -690,6 +791,8 @@ const Streams = () => {
               ...node.data,
               activeCount: currentActiveCount,
               totalCost: currentTotalCost,
+              netRate: currentNetRate,
+              revenueActive: streamStates[6],
               active: currentAllActive,
               onToggle: handleToggleAll,
               totalSpent,
@@ -703,7 +806,9 @@ const Streams = () => {
             data: {
               ...node.data,
               active: streamStates[agentId] || false,
-              onToggle: agentId === 6 ? () => setIsAddonModalOpen(true) : () => handleToggleStream(agentId),
+              onToggle: () => handleToggleStream(agentId),
+              onSettings: agentId === 6 ? () => setIsAddonModalOpen(true) : undefined,
+              accumulated: agentAccumulated[agentId] || 0,
             },
           };
         }
@@ -713,7 +818,7 @@ const Streams = () => {
 
     // Update edges with createEdges function
     setEdges(createEdges());
-  }, [streamStates, handleToggleAll, handleToggleStream, createEdges, totalSpent, totalEarned]);
+  }, [streamStates, handleToggleAll, handleToggleStream, createEdges, totalSpent, totalEarned, agentAccumulated]);
 
   return (
     <div className="min-h-screen relative overflow-hidden">
@@ -938,6 +1043,7 @@ const Streams = () => {
               </Button>
               <Button
                 onClick={() => {
+                  handleToggleStream(6); // Activate AI Crawler stream
                   setIsAddonModalOpen(false);
                 }}
                 className="flex-1 bg-gradient-to-r from-emerald-500 to-emerald-600 text-black font-bold hover:opacity-90 border-0"

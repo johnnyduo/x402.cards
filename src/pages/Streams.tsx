@@ -20,6 +20,8 @@ import ReactFlow, {
   MarkerType,
   Background,
   Controls,
+  Handle,
+  Position,
 } from 'reactflow';
 import 'reactflow/dist/style.css';
 
@@ -136,6 +138,18 @@ const AgentNode = ({ data }: { data: any }) => {
         opacity: isAddon ? 0.7 : 1,
       }}
     >
+      {/* Connection handle for edges */}
+      <Handle
+        type="source"
+        position={Position.Right}
+        style={{
+          background: data.active ? '#00E5FF' : '#4299E1',
+          width: '12px',
+          height: '12px',
+          border: '2px solid rgba(0, 0, 0, 0.3)',
+          opacity: isAddon ? 0 : 1,
+        }}
+      />
       {/* Glow effect */}
       {data.active && !isAddon && (
         <div 
@@ -252,6 +266,55 @@ const HubNode = ({ data }: any) => (
       backdropFilter: 'blur(24px)',
     }}
   >
+    {/* Connection handles for incoming edges */}
+    <Handle
+      type="target"
+      position={Position.Top}
+      id="top"
+      style={{
+        background: data.active ? '#00E5FF' : '#4299E1',
+        width: '16px',
+        height: '16px',
+        border: '3px solid rgba(0, 0, 0, 0.3)',
+        top: '-8px',
+      }}
+    />
+    <Handle
+      type="target"
+      position={Position.Left}
+      id="left"
+      style={{
+        background: data.active ? '#00E5FF' : '#4299E1',
+        width: '16px',
+        height: '16px',
+        border: '3px solid rgba(0, 0, 0, 0.3)',
+        left: '-8px',
+      }}
+    />
+    <Handle
+      type="target"
+      position={Position.Right}
+      id="right"
+      style={{
+        background: data.active ? '#00E5FF' : '#4299E1',
+        width: '16px',
+        height: '16px',
+        border: '3px solid rgba(0, 0, 0, 0.3)',
+        right: '-8px',
+      }}
+    />
+    <Handle
+      type="target"
+      position={Position.Bottom}
+      id="bottom"
+      style={{
+        background: data.active ? '#00E5FF' : '#4299E1',
+        width: '16px',
+        height: '16px',
+        border: '3px solid rgba(0, 0, 0, 0.3)',
+        bottom: '-8px',
+      }}
+    />
     {data.active && (
       <div className="absolute inset-0 rounded-3xl border-2 border-secondary/30 animate-ping" style={{ animationDuration: '2s' }} />
     )}
@@ -291,6 +354,7 @@ const HubNode = ({ data }: any) => (
   </div>
 );
 
+// Define nodeTypes outside component to prevent re-creation on every render
 const nodeTypes = {
   agent: AgentNode,
   hub: HubNode,
@@ -304,7 +368,7 @@ const Streams = () => {
   const totalCostPerSec = agents.filter((agent) => streamStates[agent.id]).reduce((sum, agent) => sum + agent.pricePerSec, 0);
   const allStreamsActive = agents.filter(agent => agent.id !== 6).every(agent => streamStates[agent.id]);
 
-  const handleToggleAll = () => {
+  const handleToggleAll = useCallback(() => {
     setStreamStates((prev) => {
       const currentAllActive = agents.filter(agent => agent.id !== 6).every(agent => prev[agent.id]);
       const newState = !currentAllActive;
@@ -314,13 +378,18 @@ const Streams = () => {
           newStates[agent.id] = newState;
         }
       });
+      console.log('Toggle All - Current:', currentAllActive, 'New State:', newState, 'New States:', newStates);
       return newStates;
     });
-  };
+  }, []);
 
-  const handleToggleStream = (agentId: number) => {
-    setStreamStates((prev) => ({ ...prev, [agentId]: !prev[agentId] }));
-  };
+  const handleToggleStream = useCallback((agentId: number) => {
+    setStreamStates((prev) => {
+      const newState = !prev[agentId];
+      console.log(`Toggle Agent ${agentId} - Old:`, prev[agentId], 'New:', newState);
+      return { ...prev, [agentId]: newState };
+    });
+  }, []);
 
   const initialNodes: Node[] = [
     // Top row agents
@@ -431,7 +500,7 @@ const Streams = () => {
     },
   ];
 
-  const initialEdges: Edge[] = [
+  const createEdges = useCallback((): Edge[] => [
     { 
       id: 'e1', 
       source: 'agent-1', 
@@ -439,15 +508,15 @@ const Streams = () => {
       animated: streamStates[1] || false, 
       type: 'smoothstep',
       style: { 
-        stroke: streamStates[1] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)', 
-        strokeWidth: streamStates[1] ? 6 : 3,
-        filter: streamStates[1] ? 'drop-shadow(0 0 12px rgba(0, 229, 255, 1)) drop-shadow(0 0 24px rgba(0, 229, 255, 0.8))' : 'none',
+        stroke: streamStates[1] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
+        strokeWidth: streamStates[1] ? 4 : 2,
+        filter: streamStates[1] ? 'drop-shadow(0 0 8px rgba(0, 229, 255, 0.8))' : 'none',
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
-        color: streamStates[1] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)',
-        width: 25,
-        height: 25,
+        color: streamStates[1] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
+        width: 20,
+        height: 20,
       } 
     },
     { 
@@ -457,15 +526,15 @@ const Streams = () => {
       animated: streamStates[2] || false, 
       type: 'smoothstep',
       style: { 
-        stroke: streamStates[2] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)', 
-        strokeWidth: streamStates[2] ? 6 : 3,
-        filter: streamStates[2] ? 'drop-shadow(0 0 12px rgba(0, 229, 255, 1)) drop-shadow(0 0 24px rgba(0, 229, 255, 0.8))' : 'none',
+        stroke: streamStates[2] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
+        strokeWidth: streamStates[2] ? 4 : 2,
+        filter: streamStates[2] ? 'drop-shadow(0 0 8px rgba(0, 229, 255, 0.8))' : 'none',
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
-        color: streamStates[2] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)',
-        width: 25,
-        height: 25,
+        color: streamStates[2] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
+        width: 20,
+        height: 20,
       } 
     },
     { 
@@ -475,15 +544,15 @@ const Streams = () => {
       animated: streamStates[3] || false, 
       type: 'smoothstep',
       style: { 
-        stroke: streamStates[3] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)', 
-        strokeWidth: streamStates[3] ? 6 : 3,
-        filter: streamStates[3] ? 'drop-shadow(0 0 12px rgba(0, 229, 255, 1)) drop-shadow(0 0 24px rgba(0, 229, 255, 0.8))' : 'none',
+        stroke: streamStates[3] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
+        strokeWidth: streamStates[3] ? 4 : 2,
+        filter: streamStates[3] ? 'drop-shadow(0 0 8px rgba(0, 229, 255, 0.8))' : 'none',
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
-        color: streamStates[3] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)',
-        width: 25,
-        height: 25,
+        color: streamStates[3] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
+        width: 20,
+        height: 20,
       } 
     },
     { 
@@ -493,15 +562,15 @@ const Streams = () => {
       animated: streamStates[4] || false, 
       type: 'smoothstep',
       style: { 
-        stroke: streamStates[4] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)', 
-        strokeWidth: streamStates[4] ? 6 : 3,
-        filter: streamStates[4] ? 'drop-shadow(0 0 12px rgba(0, 229, 255, 1)) drop-shadow(0 0 24px rgba(0, 229, 255, 0.8))' : 'none',
+        stroke: streamStates[4] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
+        strokeWidth: streamStates[4] ? 4 : 2,
+        filter: streamStates[4] ? 'drop-shadow(0 0 8px rgba(0, 229, 255, 0.8))' : 'none',
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
-        color: streamStates[4] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)',
-        width: 25,
-        height: 25,
+        color: streamStates[4] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
+        width: 20,
+        height: 20,
       } 
     },
     { 
@@ -511,18 +580,20 @@ const Streams = () => {
       animated: streamStates[5] || false, 
       type: 'smoothstep',
       style: { 
-        stroke: streamStates[5] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)', 
-        strokeWidth: streamStates[5] ? 6 : 3,
-        filter: streamStates[5] ? 'drop-shadow(0 0 12px rgba(0, 229, 255, 1)) drop-shadow(0 0 24px rgba(0, 229, 255, 0.8))' : 'none',
+        stroke: streamStates[5] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
+        strokeWidth: streamStates[5] ? 4 : 2,
+        filter: streamStates[5] ? 'drop-shadow(0 0 8px rgba(0, 229, 255, 0.8))' : 'none',
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
-        color: streamStates[5] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)',
-        width: 25,
-        height: 25,
+        color: streamStates[5] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
+        width: 20,
+        height: 20,
       } 
     },
-  ];
+  ], [streamStates]);
+
+  const initialEdges = createEdges();
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
@@ -547,115 +618,27 @@ const Streams = () => {
               activeCount: currentActiveCount,
               totalCost: currentTotalCost,
               active: currentAllActive,
+              onToggle: handleToggleAll,
             },
           };
-        } else {
+        } else if (node.type === 'agent') {
           const agentId = parseInt(node.id.split('-')[1]);
           return {
             ...node,
             data: {
               ...node.data,
               active: streamStates[agentId] || false,
+              onToggle: agentId === 6 ? () => setIsAddonModalOpen(true) : () => handleToggleStream(agentId),
             },
           };
         }
+        return node;
       })
     );
 
-    // Update edges
-    setEdges([
-      { 
-        id: 'e1', 
-        source: 'agent-1', 
-        target: 'hub', 
-        animated: streamStates[1] || false, 
-        type: 'smoothstep',
-        style: { 
-          stroke: streamStates[1] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)', 
-          strokeWidth: streamStates[1] ? 6 : 3,
-          filter: streamStates[1] ? 'drop-shadow(0 0 12px rgba(0, 229, 255, 1)) drop-shadow(0 0 24px rgba(0, 229, 255, 0.8))' : 'none',
-        }, 
-        markerEnd: { 
-          type: MarkerType.ArrowClosed, 
-          color: streamStates[1] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)',
-          width: 25,
-          height: 25,
-        } 
-      },
-      { 
-        id: 'e2', 
-        source: 'agent-2', 
-        target: 'hub', 
-        animated: streamStates[2] || false, 
-        type: 'smoothstep',
-        style: { 
-          stroke: streamStates[2] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)', 
-          strokeWidth: streamStates[2] ? 6 : 3,
-          filter: streamStates[2] ? 'drop-shadow(0 0 12px rgba(0, 229, 255, 1)) drop-shadow(0 0 24px rgba(0, 229, 255, 0.8))' : 'none',
-        }, 
-        markerEnd: { 
-          type: MarkerType.ArrowClosed, 
-          color: streamStates[2] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)',
-          width: 25,
-          height: 25,
-        } 
-      },
-      { 
-        id: 'e3', 
-        source: 'agent-3', 
-        target: 'hub', 
-        animated: streamStates[3] || false, 
-        type: 'smoothstep',
-        style: { 
-          stroke: streamStates[3] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)', 
-          strokeWidth: streamStates[3] ? 6 : 3,
-          filter: streamStates[3] ? 'drop-shadow(0 0 12px rgba(0, 229, 255, 1)) drop-shadow(0 0 24px rgba(0, 229, 255, 0.8))' : 'none',
-        }, 
-        markerEnd: { 
-          type: MarkerType.ArrowClosed, 
-          color: streamStates[3] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)',
-          width: 25,
-          height: 25,
-        } 
-      },
-      { 
-        id: 'e4', 
-        source: 'agent-4', 
-        target: 'hub', 
-        animated: streamStates[4] || false, 
-        type: 'smoothstep',
-        style: { 
-          stroke: streamStates[4] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)', 
-          strokeWidth: streamStates[4] ? 6 : 3,
-          filter: streamStates[4] ? 'drop-shadow(0 0 12px rgba(0, 229, 255, 1)) drop-shadow(0 0 24px rgba(0, 229, 255, 0.8))' : 'none',
-        }, 
-        markerEnd: { 
-          type: MarkerType.ArrowClosed, 
-          color: streamStates[4] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)',
-          width: 25,
-          height: 25,
-        } 
-      },
-      { 
-        id: 'e5', 
-        source: 'agent-5', 
-        target: 'hub', 
-        animated: streamStates[5] || false, 
-        type: 'smoothstep',
-        style: { 
-          stroke: streamStates[5] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)', 
-          strokeWidth: streamStates[5] ? 6 : 3,
-          filter: streamStates[5] ? 'drop-shadow(0 0 12px rgba(0, 229, 255, 1)) drop-shadow(0 0 24px rgba(0, 229, 255, 0.8))' : 'none',
-        }, 
-        markerEnd: { 
-          type: MarkerType.ArrowClosed, 
-          color: streamStates[5] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)',
-          width: 25,
-          height: 25,
-        } 
-      },
-    ]);
-  }, [streamStates]);
+    // Update edges with createEdges function
+    setEdges(createEdges());
+  }, [streamStates, handleToggleAll, handleToggleStream, createEdges]);
 
   return (
     <div className="min-h-screen relative overflow-hidden">

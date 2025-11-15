@@ -261,32 +261,39 @@ All colors MUST be HSL.
     background-clip: text;
   }
 
-  /* ReactFlow Edge Styles */
+  /* ReactFlow Edge Styles - Force visibility */
+  .react-flow__edge {
+    pointer-events: all !important;
+    z-index: 50 !important;
+  }
+
   .react-flow__edge-path {
-    stroke-width: 3 !important;
+    stroke-width: 4px !important;
+    opacity: 1 !important;
   }
 
   .react-flow__edge.animated .react-flow__edge-path {
-    stroke-dasharray: 5;
-    animation: dashdraw 0.5s linear infinite;
+    stroke-dasharray: 10;
+    animation: dashdraw 0.8s linear infinite;
   }
 
   @keyframes dashdraw {
     to {
-      stroke-dashoffset: -10;
+      stroke-dashoffset: -20;
     }
   }
 
-  .react-flow__edge .react-flow__edge-path {
-    opacity: 1 !important;
-  }
-
-  /* Ensure edges are visible */
+  /* Ensure proper layering */
   .react-flow__edges {
-    z-index: 100 !important;
+    z-index: 50 !important;
   }
 
   .react-flow__nodes {
-    z-index: 200 !important;
+    z-index: 100 !important;
+  }
+
+  .react-flow__edge .react-flow__edge-path {
+    stroke-linecap: round;
+    stroke-linejoin: round;
   }
 }

@@ -41,7 +41,7 @@ export const AgentCard = ({
 
   return (
     <div
-      className="flip-card h-[260px]"
+      className="flip-card h-[280px] md:h-[260px]"
       onClick={handleCardClick}
       style={{ cursor: isAddon ? 'default' : 'pointer' }}
     >
@@ -78,7 +78,7 @@ export const AgentCard = ({
                     {isStreaming ? "ON" : isAddon ? "OFF" : "OFF"}
                   </Badge>
                   {!isAddon && (
-                    <div onClick={(e) => e.stopPropagation()}>
+                    <div onClick={(e) => e.stopPropagation()} className="relative z-50">
                       <Switch
                         checked={isStreaming}
                         onCheckedChange={handleToggle}
@@ -109,7 +109,7 @@ export const AgentCard = ({
                   {pricePerSec}
                 </span>
                 {!isAddon && (
-                  <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                  <div className="flex items-center gap-2 relative z-50" onClick={(e) => e.stopPropagation()}>
                     <Switch
                       checked={isStreaming}
                       onCheckedChange={handleToggle}

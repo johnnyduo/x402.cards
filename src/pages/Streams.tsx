@@ -4,6 +4,7 @@ import { AppHeader } from "@/components/AppHeader";
 import { AgentCard } from "@/components/AgentCard";
 import { CentralHub } from "@/components/CentralHub";
 import { StreamFlow } from "@/components/StreamFlow";
+import { Button } from "@/components/ui/button";
 import { Activity, TrendingUp, GitBranch, Heart, Shield, Sparkles } from "lucide-react";
 
 const agents = [
@@ -140,12 +141,11 @@ const Streams = () => {
       <Navigation />
       <AppHeader />
 
-      <section className="px-6 pb-20">
+      <section className="px-4 md:px-6 pb-20">
         <div className="max-w-[1850px] mx-auto">
           {/* Laptop Screen Container - Balanced card layout */}
           <div 
-            className="rounded-3xl relative overflow-visible min-h-[800px]"
-            style={{ padding: '80px' }}
+            className="rounded-3xl relative overflow-visible min-h-[800px] p-4 md:p-12 lg:p-20"
             style={{
               background: 'radial-gradient(circle at 50% 50%, rgba(30, 58, 95, 0.4) 0%, rgba(17, 24, 39, 0.8) 100%)',
               backdropFilter: 'blur(20px)',
@@ -174,7 +174,7 @@ const Streams = () => {
                 </filter>
               </defs>
 
-              {agents.slice(0, 5).map((agent, idx) => {
+              {typeof window !== 'undefined' && window.innerWidth >= 1024 && agents.slice(0, 5).map((agent, idx) => {
                 const pos = gridPositions[idx];
                 // Balanced card dimensions
                 const cardWidth = 260;
@@ -209,15 +209,37 @@ const Streams = () => {
             </svg>
 
             {/* Central Hub - Perfect centered positioning with expanded spacing */}
-            <CentralHub
-              activeCount={activeCount}
-              totalCostPerSec={totalCostPerSec}
-              allStreamsActive={allStreamsActive}
-              onToggleAll={handleToggleAll}
-            />
+            <div className="hidden lg:block">
+              <CentralHub
+                activeCount={activeCount}
+                totalCostPerSec={totalCostPerSec}
+                allStreamsActive={allStreamsActive}
+                onToggleAll={handleToggleAll}
+              />
+            </div>
+            
+            {/* Mobile/Tablet Master Control */}
+            <div className="lg:hidden sticky top-20 z-50 mb-6">
+              <div className="glass-strong p-4 rounded-2xl flex items-center justify-between">
+                <div>
+                  <div className="text-sm font-display text-white/60">Active: {activeCount} / 6</div>
+                  <div className="text-lg font-display font-bold gradient-text">{totalCostPerSec.toFixed(4)} USDC/s</div>
+                </div>
+                <Button
+                  onClick={onToggleAll}
+                  className={`rounded-xl px-6 py-3 font-display font-bold text-xs ${
+                    allStreamsActive
+                      ? "bg-secondary hover:bg-secondary/90 text-black"
+                      : "bg-white/10 hover:bg-white/20 text-white border-2 border-white/30"
+                  }`}
+                >
+                  {allStreamsActive ? "CLOSE ALL" : "OPEN ALL"}
+                </Button>
+              </div>
+            </div>
 
-            {/* Agent Cards Grid - Balanced layout */}
-            <div className="grid grid-cols-3 gap-x-[170px] gap-y-[160px] relative">
+            {/* Agent Cards Grid - Responsive balanced layout */}
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-12 lg:gap-x-[170px] lg:gap-y-[160px] relative">
               {agents.map((agent, idx) => (
                 <AgentCard
                   key={agent.id}

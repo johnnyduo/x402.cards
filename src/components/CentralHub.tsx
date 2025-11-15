@@ -15,9 +15,9 @@ export const CentralHub = ({
   onToggleAll,
 }: CentralHubProps) => {
   return (
-    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-40">
       <div
-        className="relative rounded-3xl w-[360px] h-[300px] flex flex-col items-center justify-center transition-all duration-500 pointer-events-auto"
+        className="relative rounded-3xl w-[360px] h-[300px] flex flex-col items-center justify-center transition-all duration-500"
         style={{
           background: allStreamsActive 
             ? 'linear-gradient(135deg, rgba(0, 229, 255, 0.25) 0%, rgba(66, 153, 225, 0.3) 50%, rgba(30, 58, 95, 0.85) 100%)'
@@ -71,7 +71,7 @@ export const CentralHub = ({
         <Button
           onClick={onToggleAll}
           size="lg"
-          className={`rounded-2xl w-[240px] h-[140px] transition-all duration-500 text-sm font-display font-bold tracking-wider relative overflow-hidden group ${
+          className={`rounded-2xl w-[240px] h-[140px] transition-all duration-500 text-sm font-display font-bold tracking-wider relative overflow-hidden group z-50 ${
             allStreamsActive
               ? "bg-secondary hover:bg-secondary/90 text-black shadow-2xl"
               : "bg-white/10 hover:bg-white/20 text-white border-2 border-white/30"

@@ -293,25 +293,31 @@ app.get('/api/agents/arb-navigator', async (req, res) => {
 
     opportunities.sort((a, b) => b.spreadPct - a.spreadPct);
 
-    // Fetch IOTA whale movements from on-chain data
+    // Fetch IOTA EVM mainnet whale movements from on-chain data
     let whaleData = null;
     try {
-      // Get recent large transactions on IOTA network
-      const recentTxs = await fetch('https://explorer-api.iota.org/stardust/mainnet/transactions/recent?limit=20', {
-        headers: { 'X-API-Key': BLOCKBERRY_API_KEY }
-      }).then(r => r.json());
+      // Get latest blocks from IOTA EVM mainnet explorer
+      const blocksUrl = 'https://explorer.evm.iota.org/api/v2/blocks';
+      const blocksResponse = await fetch(blocksUrl).then(r => r.json());
 
-      const largeTxs = (recentTxs.transactions || [])
-        .filter(tx => tx.value && tx.value > 1000000) // Filter large txs
-        .slice(0, 5);
+      const recentBlocks = blocksResponse.items || [];
+      const totalTransactions = recentBlocks.reduce((sum, block) => sum + (block.tx_count || 0), 0);
+      
+      // Calculate whale activity based on transaction volume
+      const avgTxPerBlock = totalTransactions / (recentBlocks.length || 1);
+      const whaleThreshold = avgTxPerBlock * 2; // Blocks with 2x average tx count
+      
+      const whaleBlocks = recentBlocks.filter(block => block.tx_count > whaleThreshold);
 
       whaleData = {
-        largeTransactions: largeTxs.length,
-        totalVolume: largeTxs.reduce((sum, tx) => sum + (tx.value || 0), 0),
-        whaleActivity: largeTxs.length > 3 ? 'HIGH' : largeTxs.length > 1 ? 'MEDIUM' : 'LOW'
+        recentBlocks: recentBlocks.length,
+        totalTransactions,
+        whaleBlocks: whaleBlocks.length,
+        avgTxPerBlock: Math.round(avgTxPerBlock),
+        whaleActivity: whaleBlocks.length > 3 ? 'HIGH' : whaleBlocks.length > 1 ? 'MEDIUM' : 'LOW'
       };
     } catch (e) {
-      console.log('Whale tracking unavailable:', e.message);
+      console.log('IOTA EVM whale tracking unavailable:', e.message);
     }
 
     const response = {

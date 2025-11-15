@@ -177,16 +177,36 @@ All colors MUST be HSL.
   }
 
   /* Shimmer effect */
-  @keyframes shimmer {
-    0% {
-      background-position: -200% 0;
-    }
-    100% {
-      background-position: 200% 0;
-    }
+@keyframes shimmer {
+  0% {
+    background-position: -1000px 0;
   }
+  100% {
+    background-position: 1000px 0;
+  }
+}
 
-  /* 3D Flip Card */
+@keyframes flowVertical {
+  0%, 100% {
+    top: 0;
+    opacity: 0;
+  }
+  50% {
+    top: 50%;
+    opacity: 1;
+  }
+}
+
+@keyframes flowHorizontal {
+  0%, 100% {
+    left: 0;
+    opacity: 0;
+  }
+  50% {
+    left: 50%;
+    opacity: 1;
+  }
+}  /* 3D Flip Card */
   .flip-card {
     perspective: 1500px;
   }

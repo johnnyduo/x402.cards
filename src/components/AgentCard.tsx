@@ -82,7 +82,7 @@ export const AgentCard = ({
                       <Switch
                         checked={isStreaming}
                         onCheckedChange={handleToggle}
-                        className="data-[state=checked]:bg-secondary"
+                        className="data-[state=checked]:bg-secondary data-[state=unchecked]:bg-white"
                       />
                     </div>
                   )}

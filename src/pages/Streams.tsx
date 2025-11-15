@@ -153,60 +153,101 @@ const Streams = () => {
               boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), inset 0 0 40px rgba(66, 153, 225, 0.1)'
             }}
           >
-            {/* SVG for flow lines - No z-index conflicts with expanded layout */}
-            <svg className="absolute inset-0 w-full h-full pointer-events-none" style={{ overflow: "visible" }}>
-              <defs>
-                <linearGradient id="streamGradientActive" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="rgba(66, 153, 225, 1)" />
-                  <stop offset="50%" stopColor="rgba(0, 229, 255, 1)" />
-                  <stop offset="100%" stopColor="rgba(66, 153, 225, 1)" />
-                </linearGradient>
-                <linearGradient id="streamGradientInactive" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="rgba(66, 153, 225, 0.3)" />
-                  <stop offset="100%" stopColor="rgba(66, 153, 225, 0.3)" />
-                </linearGradient>
-                <filter id="glow" x="-50%" y="-50%" width="200%" height="200%">
-                  <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
-                  <feMerge>
-                    <feMergeNode in="coloredBlur"/>
-                    <feMergeNode in="SourceGraphic"/>
-                  </feMerge>
-                </filter>
-              </defs>
-
-              {typeof window !== 'undefined' && window.innerWidth >= 1024 && agents.slice(0, 5).map((agent, idx) => {
+            {/* Connecting lines from cards to central hub */}
+            <div className="absolute inset-0 pointer-events-none hidden lg:block overflow-hidden">
+              {agents.slice(0, 5).map((agent, idx) => {
+                const isActive = streamStates[agent.id] || false;
                 const pos = gridPositions[idx];
-                // Balanced card dimensions
+                
+                // Card dimensions and spacing
                 const cardWidth = 260;
                 const cardHeight = 260;
-                const gapX = 170; // Horizontal gap
-                const gapY = 160; // Vertical gap
-                const paddingX = 80; // Left padding
-                const paddingY = 80; // Top padding
+                const gapX = 170;
+                const gapY = 160;
+                const paddingX = 80;
+                const paddingY = 80;
                 
-                // Calculate card center positions for balanced layout
-                const fromX = paddingX + (pos.col * (cardWidth + gapX)) + cardWidth / 2;
-                const fromY = paddingY + (pos.row * (cardHeight + gapY)) + cardHeight / 2;
+                // Calculate card center
+                const cardCenterX = paddingX + (pos.col * (cardWidth + gapX)) + cardWidth / 2;
+                const cardCenterY = paddingY + (pos.row * (cardHeight + gapY)) + cardHeight / 2;
                 
-                // Center hub position - calculate from actual container center
+                // Hub center (same calculation as before)
                 const totalWidth = (cardWidth * 3) + (gapX * 2) + (paddingX * 2);
                 const totalHeight = (cardHeight * 2) + gapY + (paddingY * 2);
-                const toX = totalWidth / 2;
-                const toY = totalHeight / 2;
-
+                const hubCenterX = totalWidth / 2;
+                const hubCenterY = totalHeight / 2;
+                
+                // Calculate line dimensions
+                const lineWidth = Math.abs(hubCenterX - cardCenterX);
+                const lineHeight = Math.abs(hubCenterY - cardCenterY);
+                
+                // Determine line position and direction
+                const isLeft = cardCenterX < hubCenterX;
+                const isTop = cardCenterY < hubCenterY;
+                
                 return (
-                  <StreamFlow
-                    key={agent.id}
-                    fromX={fromX}
-                    fromY={fromY}
-                    toX={toX}
-                    toY={toY}
-                    isActive={streamStates[agent.id] || false}
-                    index={idx}
-                  />
+                  <div key={agent.id}>
+                    {/* Vertical line */}
+                    <div
+                      className={`absolute transition-all duration-500 ${
+                        isActive ? 'opacity-100' : 'opacity-30'
+                      }`}
+                      style={{
+                        left: `${cardCenterX}px`,
+                        top: isTop ? `${cardCenterY}px` : `${hubCenterY}px`,
+                        width: '2px',
+                        height: `${lineHeight}px`,
+                        background: isActive 
+                          ? 'linear-gradient(180deg, rgba(0, 229, 255, 0.8), rgba(66, 153, 225, 0.6))'
+                          : 'rgba(66, 153, 225, 0.4)',
+                        boxShadow: isActive ? '0 0 8px rgba(0, 229, 255, 0.5)' : 'none',
+                      }}
+                    >
+                      {isActive && (
+                        <div 
+                          className="absolute w-2 h-2 rounded-full bg-secondary"
+                          style={{
+                            left: '50%',
+                            transform: 'translateX(-50%)',
+                            animation: 'flowVertical 2s ease-in-out infinite',
+                            boxShadow: '0 0 8px rgba(0, 229, 255, 0.8)',
+                          }}
+                        />
+                      )}
+                    </div>
+                    
+                    {/* Horizontal line */}
+                    <div
+                      className={`absolute transition-all duration-500 ${
+                        isActive ? 'opacity-100' : 'opacity-30'
+                      }`}
+                      style={{
+                        left: isLeft ? `${cardCenterX}px` : `${hubCenterX}px`,
+                        top: isTop ? `${hubCenterY}px` : `${cardCenterY}px`,
+                        width: `${lineWidth}px`,
+                        height: '2px',
+                        background: isActive 
+                          ? 'linear-gradient(90deg, rgba(66, 153, 225, 0.6), rgba(0, 229, 255, 0.8))'
+                          : 'rgba(66, 153, 225, 0.4)',
+                        boxShadow: isActive ? '0 0 8px rgba(0, 229, 255, 0.5)' : 'none',
+                      }}
+                    >
+                      {isActive && (
+                        <div 
+                          className="absolute w-2 h-2 rounded-full bg-secondary"
+                          style={{
+                            top: '50%',
+                            transform: 'translateY(-50%)',
+                            animation: 'flowHorizontal 2s ease-in-out infinite',
+                            boxShadow: '0 0 8px rgba(0, 229, 255, 0.8)',
+                          }}
+                        />
+                      )}
+                    </div>
+                  </div>
                 );
               })}
-            </svg>
+            </div>
 
             {/* Central Hub - Perfect centered positioning with expanded spacing */}
             <div className="hidden lg:block">
@@ -226,7 +267,7 @@ const Streams = () => {
                   <div className="text-lg font-display font-bold gradient-text">{totalCostPerSec.toFixed(4)} USDC/s</div>
                 </div>
                 <Button
-                  onClick={onToggleAll}
+                  onClick={handleToggleAll}
                   className={`rounded-xl px-6 py-3 font-display font-bold text-xs ${
                     allStreamsActive
                       ? "bg-secondary hover:bg-secondary/90 text-black"

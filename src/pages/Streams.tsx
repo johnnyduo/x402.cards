@@ -136,6 +136,8 @@ const AgentNode = ({ data }: { data: any }) => {
           : '0 8px 32px rgba(0, 0, 0, 0.3)',
         transition: 'all 0.3s ease',
         opacity: isAddon ? 0.7 : 1,
+        zIndex: 100,
+        position: 'relative',
       }}
     >
       {/* Connection handle for edges */}
@@ -252,7 +254,7 @@ const AgentNode = ({ data }: { data: any }) => {
 // Custom node component for central hub
 const HubNode = ({ data }: any) => (
   <div
-    className="rounded-3xl p-8 transition-all duration-500 pointer-events-auto"
+    className="rounded-3xl p-8 transition-all duration-500"
     style={{
       width: '400px',
       height: '360px',
@@ -264,6 +266,9 @@ const HubNode = ({ data }: any) => (
         ? '0 0 100px rgba(0, 229, 255, 0.6), 0 0 150px rgba(66, 153, 225, 0.4)'
         : '0 0 60px rgba(66, 153, 225, 0.3)',
       backdropFilter: 'blur(24px)',
+      zIndex: 200,
+      position: 'relative',
+      pointerEvents: 'auto',
     }}
   >
     {/* Connection handles for incoming edges */}
@@ -346,6 +351,10 @@ const HubNode = ({ data }: any) => (
         }`}
         style={{
           boxShadow: data.active ? '0 0 60px rgba(0, 229, 255, 0.5)' : 'none',
+          pointerEvents: 'auto',
+          cursor: 'pointer',
+          position: 'relative',
+          zIndex: 300,
         }}
       >
         {data.active ? 'CLOSE ALL STREAMS' : 'OPEN ALL STREAMS'}
@@ -396,7 +405,7 @@ const Streams = () => {
     { 
       id: 'agent-1', 
       type: 'agent', 
-      position: { x: 50, y: 80 },
+      position: { x: 30, y: 60 },
       draggable: false,
       data: { 
         name: agents[0].name, 
@@ -411,7 +420,7 @@ const Streams = () => {
     { 
       id: 'agent-2', 
       type: 'agent', 
-      position: { x: 540, y: 30 },
+      position: { x: 540, y: 20 },
       draggable: false,
       data: { 
         name: agents[1].name, 
@@ -426,7 +435,7 @@ const Streams = () => {
     { 
       id: 'agent-3', 
       type: 'agent', 
-      position: { x: 1030, y: 80 },
+      position: { x: 1050, y: 60 },
       draggable: false,
       data: { 
         name: agents[2].name, 
@@ -442,7 +451,7 @@ const Streams = () => {
     { 
       id: 'agent-4', 
       type: 'agent', 
-      position: { x: 50, y: 680 },
+      position: { x: 30, y: 700 },
       draggable: false,
       data: { 
         name: agents[3].name, 
@@ -457,7 +466,7 @@ const Streams = () => {
     { 
       id: 'agent-5', 
       type: 'agent', 
-      position: { x: 540, y: 730 },
+      position: { x: 540, y: 750 },
       draggable: false,
       data: { 
         name: agents[4].name, 
@@ -472,7 +481,7 @@ const Streams = () => {
     { 
       id: 'agent-6', 
       type: 'agent', 
-      position: { x: 1030, y: 680 },
+      position: { x: 1050, y: 700 },
       draggable: false,
       data: { 
         name: agents[5].name, 
@@ -496,7 +505,8 @@ const Streams = () => {
         totalCost: totalCostPerSec,
         active: allStreamsActive,
         onToggle: handleToggleAll
-      }
+      },
+      style: { zIndex: 200 }
     },
   ];
 
@@ -505,90 +515,100 @@ const Streams = () => {
       id: 'e1', 
       source: 'agent-1', 
       target: 'hub', 
+      sourceHandle: null,
+      targetHandle: 'left',
       animated: streamStates[1] || false, 
       type: 'smoothstep',
       style: { 
         stroke: streamStates[1] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
-        strokeWidth: streamStates[1] ? 4 : 2,
-        filter: streamStates[1] ? 'drop-shadow(0 0 8px rgba(0, 229, 255, 0.8))' : 'none',
+        strokeWidth: streamStates[1] ? 3 : 1.5,
+        filter: streamStates[1] ? 'drop-shadow(0 0 6px rgba(0, 229, 255, 0.6))' : 'none',
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
         color: streamStates[1] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
-        width: 20,
-        height: 20,
+        width: 18,
+        height: 18,
       } 
     },
     { 
       id: 'e2', 
       source: 'agent-2', 
       target: 'hub', 
+      sourceHandle: null,
+      targetHandle: 'top',
       animated: streamStates[2] || false, 
       type: 'smoothstep',
       style: { 
         stroke: streamStates[2] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
-        strokeWidth: streamStates[2] ? 4 : 2,
-        filter: streamStates[2] ? 'drop-shadow(0 0 8px rgba(0, 229, 255, 0.8))' : 'none',
+        strokeWidth: streamStates[2] ? 3 : 1.5,
+        filter: streamStates[2] ? 'drop-shadow(0 0 6px rgba(0, 229, 255, 0.6))' : 'none',
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
         color: streamStates[2] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
-        width: 20,
-        height: 20,
+        width: 18,
+        height: 18,
       } 
     },
     { 
       id: 'e3', 
       source: 'agent-3', 
       target: 'hub', 
+      sourceHandle: null,
+      targetHandle: 'right',
       animated: streamStates[3] || false, 
       type: 'smoothstep',
       style: { 
         stroke: streamStates[3] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
-        strokeWidth: streamStates[3] ? 4 : 2,
-        filter: streamStates[3] ? 'drop-shadow(0 0 8px rgba(0, 229, 255, 0.8))' : 'none',
+        strokeWidth: streamStates[3] ? 3 : 1.5,
+        filter: streamStates[3] ? 'drop-shadow(0 0 6px rgba(0, 229, 255, 0.6))' : 'none',
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
         color: streamStates[3] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
-        width: 20,
-        height: 20,
+        width: 18,
+        height: 18,
       } 
     },
     { 
       id: 'e4', 
       source: 'agent-4', 
       target: 'hub', 
+      sourceHandle: null,
+      targetHandle: 'left',
       animated: streamStates[4] || false, 
       type: 'smoothstep',
       style: { 
         stroke: streamStates[4] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
-        strokeWidth: streamStates[4] ? 4 : 2,
-        filter: streamStates[4] ? 'drop-shadow(0 0 8px rgba(0, 229, 255, 0.8))' : 'none',
+        strokeWidth: streamStates[4] ? 3 : 1.5,
+        filter: streamStates[4] ? 'drop-shadow(0 0 6px rgba(0, 229, 255, 0.6))' : 'none',
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
         color: streamStates[4] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
-        width: 20,
-        height: 20,
+        width: 18,
+        height: 18,
       } 
     },
     { 
       id: 'e5', 
       source: 'agent-5', 
       target: 'hub', 
+      sourceHandle: null,
+      targetHandle: 'bottom',
       animated: streamStates[5] || false, 
       type: 'smoothstep',
       style: { 
         stroke: streamStates[5] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
-        strokeWidth: streamStates[5] ? 4 : 2,
-        filter: streamStates[5] ? 'drop-shadow(0 0 8px rgba(0, 229, 255, 0.8))' : 'none',
+        strokeWidth: streamStates[5] ? 3 : 1.5,
+        filter: streamStates[5] ? 'drop-shadow(0 0 6px rgba(0, 229, 255, 0.6))' : 'none',
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
         color: streamStates[5] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
-        width: 20,
-        height: 20,
+        width: 18,
+        height: 18,
       } 
     },
   ], [streamStates]);
@@ -710,6 +730,7 @@ const Streams = () => {
               style={{
                 background: 'transparent',
               }}
+              elevateNodesOnSelect={false}
             >
               <Background 
                 color="rgba(0, 229, 255, 0.08)" 

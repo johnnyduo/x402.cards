@@ -263,12 +263,13 @@ All colors MUST be HSL.
 
   /* ReactFlow Edge Styles - Force visibility */
   .react-flow__edge {
-    pointer-events: all !important;
-    z-index: 50 !important;
+    pointer-events: none !important;
+    z-index: 1 !important;
   }
 
   .react-flow__edge-path {
     opacity: 1 !important;
+    pointer-events: none !important;
   }
 
   .react-flow__edge.animated .react-flow__edge-path {
@@ -282,13 +283,18 @@ All colors MUST be HSL.
     }
   }
 
-  /* Ensure proper layering */
+  /* Ensure proper layering - edges behind, nodes in front */
   .react-flow__edges {
-    z-index: 50 !important;
+    z-index: 1 !important;
   }
 
   .react-flow__nodes {
-    z-index: 100 !important;
+    z-index: 10 !important;
+  }
+
+  /* Ensure node content is clickable */
+  .react-flow__node {
+    z-index: 10 !important;
   }
 
   .react-flow__edge .react-flow__edge-path {

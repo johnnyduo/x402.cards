@@ -1,8 +1,15 @@
 {
-  "name": "vite_react_shadcn_ts",
+  "name": "x402-cards",
   "private": true,
-  "version": "0.0.0",
+  "version": "1.0.0",
   "type": "module",
+  "description": "Autonomous Streaming Intelligence Dashboard powered by IOTA EVM & x402",
+  "author": "x402.Cards",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/johnnyduo/x402-streamflow.git"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",
@@ -73,7 +80,6 @@
     "eslint-plugin-react-hooks": "^5.2.0",
     "eslint-plugin-react-refresh": "^0.4.20",
     "globals": "^15.15.0",
-    "lovable-tagger": "^1.1.11",
     "postcss": "^8.5.6",
     "tailwindcss": "^3.4.17",
     "typescript": "^5.8.3",

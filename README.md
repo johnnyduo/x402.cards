@@ -6,6 +6,46 @@
 
 x402.Cards is a real-time DeFi intelligence platform where users activate **flip-card agents** that stream live data and pay **per second** using x402 streaming payments on IOTA EVM.
 
+---
+
+## 📦 Deployment on Vercel
+
+### Quick Deploy
+
+1. **Push to GitHub**
+   ```bash
+   git add .
+   git commit -m "Ready for deployment"
+   git push origin main
+   ```
+
+2. **Deploy to Vercel**
+   - Go to [vercel.com](https://vercel.com)
+   - Import your GitHub repository
+   - Add environment variable:
+     - `VITE_REOWN_PROJECT_ID` = `2aaa6469698af00874e7e688d69eab25`
+   - Click **Deploy**
+
+3. **Environment Variables** (Required)
+   ```
+   VITE_REOWN_PROJECT_ID=2aaa6469698af00874e7e688d69eab25
+   ```
+
+### Local Development
+
+```bash
+# Install dependencies
+yarn install
+
+# Copy environment file
+cp .env.example .env
+
+# Start dev server
+yarn dev
+```
+
+---
+
 Agents provide:
 
 * Trading signals

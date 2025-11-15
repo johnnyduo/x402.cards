@@ -156,7 +156,24 @@ function LiveAgentData() {
                 <span className="text-muted-foreground">Opportunities</span>
                 <span className="text-secondary font-bold">{arbData.summary?.totalOpportunities || 0}</span>
               </div>
-              {arbData.opportunities?.slice(0, 2).map((opp: any, idx: number) => (
+              {arbData.whaleTracking && (
+                <div className="bg-black/20 rounded p-2">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="text-xs text-muted-foreground">IOTA Mainnet</span>
+                    <Badge variant="outline" className={
+                      arbData.whaleTracking.whaleActivity === 'HIGH' ? 'border-red-500 text-red-500 text-xs' :
+                      arbData.whaleTracking.whaleActivity === 'MEDIUM' ? 'border-yellow-500 text-yellow-500 text-xs' :
+                      'border-green-500 text-green-500 text-xs'
+                    }>
+                      {arbData.whaleTracking.whaleActivity}
+                    </Badge>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {arbData.whaleTracking.totalTransactions} txs • {arbData.whaleTracking.recentBlocks} blocks
+                  </div>
+                </div>
+              )}
+              {arbData.opportunities?.slice(0, 1).map((opp: any, idx: number) => (
                 <div key={idx} className="bg-black/20 rounded p-2 text-xs">
                   <div className="font-semibold mb-1">{opp.pair.join(' ↔ ')}</div>
                   <div className="text-muted-foreground">

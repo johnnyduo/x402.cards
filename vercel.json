@@ -21,7 +21,4 @@
       ]
     }
   ],
-  "env": {
-    "VITE_REOWN_PROJECT_ID": "@vite_reown_project_id"
-  }
 }

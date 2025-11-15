@@ -4,7 +4,14 @@ import { NavLink } from "@/components/NavLink";
 
 export const Navigation = () => {
   return (
-    <nav className="glass-strong fixed top-0 left-0 right-0 z-50 px-6 py-4">
+    <nav 
+      className="fixed top-0 left-0 right-0 z-50 px-6 py-4"
+      style={{
+        background: 'rgba(17, 24, 39, 0.8)',
+        backdropFilter: 'blur(20px)',
+        borderBottom: '1px solid rgba(66, 153, 225, 0.1)'
+      }}
+    >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-8">
           <h1 className="text-xl font-display font-bold gradient-text tracking-wider">
@@ -14,22 +21,22 @@ export const Navigation = () => {
           <div className="hidden md:flex items-center gap-6">
             <NavLink
               to="/"
-              className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors"
-              activeClassName="text-foreground font-semibold"
+              className="text-sm font-body text-white/50 hover:text-white transition-colors"
+              activeClassName="text-white font-semibold"
             >
               Streams
             </NavLink>
             <NavLink
               to="/active"
-              className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors"
-              activeClassName="text-foreground font-semibold"
+              className="text-sm font-body text-white/50 hover:text-white transition-colors"
+              activeClassName="text-white font-semibold"
             >
               Active
             </NavLink>
             <NavLink
               to="/developers"
-              className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors"
-              activeClassName="text-foreground font-semibold"
+              className="text-sm font-body text-white/50 hover:text-white transition-colors"
+              activeClassName="text-white font-semibold"
             >
               Developers
             </NavLink>
@@ -38,7 +45,7 @@ export const Navigation = () => {
 
         <Button
           variant="outline"
-          className="font-display tracking-wide border-primary/30 hover:border-primary hover:bg-primary/10"
+          className="font-display tracking-wide border-white/20 text-white hover:border-secondary hover:bg-secondary/10"
         >
           <Wallet className="w-4 h-4 mr-2" />
           Connect Wallet

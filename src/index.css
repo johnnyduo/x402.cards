@@ -9,47 +9,50 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* IOTA x402 Color System - Dark Mode Only */
-    --background: 222 84% 5%;
-    --foreground: 214 32% 91%;
+    --background: 222 47% 11%;
+    --foreground: 210 40% 98%;
 
-    --card: 218 67% 15%;
-    --card-foreground: 214 32% 91%;
+    --card: 222 47% 11%;
+    --card-foreground: 210 40% 98%;
 
-    --popover: 218 67% 15%;
-    --popover-foreground: 214 32% 91%;
+    --popover: 222 47% 11%;
+    --popover-foreground: 210 40% 98%;
 
     /* Primary: IOTA Blue */
-    --primary: 218 100% 58%;
-    --primary-foreground: 214 32% 91%;
+    --primary: 210 100% 56%;
+    --primary-foreground: 0 0% 100%;
 
     /* Secondary: Teal Accent */
-    --secondary: 175 78% 47%;
-    --secondary-foreground: 214 32% 91%;
+    --secondary: 180 100% 50%;
+    --secondary-foreground: 0 0% 0%;
 
-    --muted: 218 67% 15%;
-    --muted-foreground: 215 16% 47%;
+    --muted: 217 33% 17%;
+    --muted-foreground: 215 20% 65%;
 
-    --accent: 175 78% 47%;
-    --accent-foreground: 214 32% 91%;
+    --accent: 180 100% 50%;
+    --accent-foreground: 0 0% 0%;
 
     /* Error/Stop */
-    --destructive: 350 100% 64%;
-    --destructive-foreground: 214 32% 91%;
+    --destructive: 0 84% 60%;
+    --destructive-foreground: 0 0% 100%;
 
-    --border: 218 67% 20%;
-    --input: 218 67% 15%;
-    --ring: 218 100% 58%;
+    --border: 217 33% 17%;
+    --input: 217 33% 17%;
+    --ring: 210 100% 56%;
 
-    --radius: 1rem;
+    --radius: 1.25rem;
 
-    /* Custom gradient colors */
-    --stream-start: 218 100% 58%;
-    --stream-end: 175 78% 47%;
-    --deep-blue: 218 67% 15%;
+    /* Custom gradient colors for cards */
+    --card-gradient-from: 210 100% 40%;
+    --card-gradient-to: 180 80% 50%;
+    --stream-start: 210 100% 56%;
+    --stream-end: 180 100% 50%;
+    --deep-blue: 220 40% 15%;
+    --dark-navy: 222 47% 8%;
     
     /* Glass effect */
-    --glass-bg: 214 32% 91%;
-    --glass-border: 218 67% 30%;
+    --glass-bg: 217 33% 17%;
+    --glass-border: 210 50% 40%;
   }
 }
 
@@ -60,7 +63,8 @@ All colors MUST be HSL.
 
   body {
     @apply bg-background text-foreground font-body;
-    background: linear-gradient(135deg, hsl(var(--background)) 0%, hsl(var(--deep-blue)) 100%);
+    background: radial-gradient(ellipse at top, rgba(30, 58, 95, 0.5) 0%, rgba(17, 24, 39, 1) 50%, rgba(10, 15, 25, 1) 100%);
+    background-attachment: fixed;
     min-height: 100vh;
   }
 }
@@ -78,17 +82,36 @@ All colors MUST be HSL.
 
   /* Glassmorphism */
   .glass {
-    background: rgba(255, 255, 255, 0.08);
+    background: rgba(30, 58, 95, 0.4);
     backdrop-filter: blur(12px);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 1.5rem;
+    border: 1px solid rgba(66, 153, 225, 0.2);
+    border-radius: 1.25rem;
   }
 
   .glass-strong {
-    background: rgba(255, 255, 255, 0.12);
+    background: rgba(30, 58, 95, 0.6);
     backdrop-filter: blur(16px);
-    border: 1px solid rgba(255, 255, 255, 0.15);
-    border-radius: 1.5rem;
+    border: 1px solid rgba(66, 153, 225, 0.3);
+    border-radius: 1.25rem;
+  }
+
+  /* Card gradient background */
+  .card-gradient {
+    background: linear-gradient(135deg, 
+      hsl(var(--card-gradient-from)) 0%, 
+      hsl(var(--card-gradient-to)) 100%);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .card-gradient::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, 
+      rgba(66, 153, 225, 0.15) 0%, 
+      rgba(0, 229, 255, 0.15) 100%);
+    opacity: 0.8;
   }
 
   /* Stream gradient animation */
@@ -110,17 +133,74 @@ All colors MUST be HSL.
     100% { background-position: -200% 0; }
   }
 
+  /* Dashed line animation */
+  .stream-line-dashed {
+    stroke-dasharray: 5 5;
+    animation: dash 20s linear infinite;
+  }
+
+  @keyframes dash {
+    to {
+      stroke-dashoffset: -1000;
+    }
+  }
+
+  /* Pulsing glow effect */
+  @keyframes pulse-glow {
+    0%, 100% { 
+      box-shadow: 0 0 20px hsl(var(--primary) / 0.3);
+    }
+    50% { 
+      box-shadow: 0 0 40px hsl(var(--primary) / 0.6), 
+                  0 0 60px hsl(var(--secondary) / 0.3);
+    }
+  }
+
+  .animate-pulse-glow {
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  /* Pulse ring animation */
+  @keyframes pulse-ring {
+    0% {
+      transform: scale(1);
+      opacity: 1;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 0.5;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  /* Shimmer effect */
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
   /* 3D Flip Card */
   .flip-card {
-    perspective: 1000px;
+    perspective: 1500px;
   }
 
   .flip-card-inner {
     position: relative;
     width: 100%;
     height: 100%;
-    transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: transform 0.6s cubic-bezier(0.4, 0, 0.2, 1);
     transform-style: preserve-3d;
+  }
+
+  .flip-card:hover .flip-card-inner {
+    transform: rotateY(180deg);
   }
 
   .flip-card.flipped .flip-card-inner {
@@ -133,6 +213,7 @@ All colors MUST be HSL.
     width: 100%;
     height: 100%;
     backface-visibility: hidden;
+    -webkit-backface-visibility: hidden;
   }
 
   .flip-card-back {

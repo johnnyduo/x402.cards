@@ -11,9 +11,9 @@ const agents = [
     id: 1,
     name: "Signal Forge",
     category: "SIGNALS",
-    description: "Real-time trading signals with ML-powered pattern recognition across multiple timeframes.",
+    description: "Sculpts high-frequency trade entries with adaptive quants.",
     pricePerSec: 0.0002,
-    icon: <Activity className="w-6 h-6 text-primary" />,
+    icon: <Activity className="w-6 h-6 text-white" />,
     features: [
       "Multi-timeframe pattern detection",
       "ML-powered signal generation",
@@ -25,9 +25,9 @@ const agents = [
     id: 2,
     name: "Volatility Pulse",
     category: "VOLATILITY",
-    description: "Track market volatility indices and predict turbulence zones before they happen.",
-    pricePerSec: 0.0001,
-    icon: <TrendingUp className="w-6 h-6 text-primary" />,
+    description: "Detects turbulence spikes across majors & synths.",
+    pricePerSec: 0.0002,
+    icon: <TrendingUp className="w-6 h-6 text-white" />,
     features: [
       "Real-time VIX tracking",
       "Volatility forecasting models",
@@ -38,10 +38,10 @@ const agents = [
   {
     id: 3,
     name: "Arb Navigator",
-    category: "ARBITRAGE PATHS",
-    description: "Discover profitable arbitrage opportunities across DEXs with gas cost optimization.",
-    pricePerSec: 0.0003,
-    icon: <GitBranch className="w-6 h-6 text-primary" />,
+    category: "ARBITRAGE",
+    description: "Plots cross-venue price corridors & neutral legs.",
+    pricePerSec: 0.0002,
+    icon: <GitBranch className="w-6 h-6 text-white" />,
     features: [
       "Multi-DEX price monitoring",
       "Gas-optimized route finding",
@@ -53,9 +53,9 @@ const agents = [
     id: 4,
     name: "Sentiment Radar",
     category: "SENTIMENT",
-    description: "Aggregate social sentiment from Twitter, Reddit, and Discord with AI sentiment scoring.",
-    pricePerSec: 0.0001,
-    icon: <Heart className="w-6 h-6 text-primary" />,
+    description: "Scrapes macro narratives & crowd mood vectors.",
+    pricePerSec: 0.0002,
+    icon: <Heart className="w-6 h-6 text-white" />,
     features: [
       "Multi-platform sentiment aggregation",
       "AI-powered emotion detection",
@@ -66,10 +66,10 @@ const agents = [
   {
     id: 5,
     name: "Risk Sentinel",
-    category: "RISK INDICES",
-    description: "Monitor portfolio risk metrics and get alerts before potential liquidations.",
+    category: "RISK",
+    description: "Scores systemic debt & collateral exposures.",
     pricePerSec: 0.0002,
-    icon: <Shield className="w-6 h-6 text-primary" />,
+    icon: <Shield className="w-6 h-6 text-white" />,
     features: [
       "Real-time liquidation risk scoring",
       "Portfolio health monitoring",
@@ -80,10 +80,10 @@ const agents = [
   {
     id: 6,
     name: "+ Add-on Streams",
-    category: "ADD-ONS",
-    description: "Premium partner data streams. More agents coming soon from vetted providers.",
+    category: "EXTEND",
+    description: "Plug in bespoke alpha modules & partner feeds.",
     pricePerSec: 0,
-    icon: <Sparkles className="w-6 h-6 text-secondary" />,
+    icon: <Sparkles className="w-6 h-6 text-white" />,
     features: [
       "Partner ecosystem integration",
       "Custom data stream creation",
@@ -135,29 +135,44 @@ const Streams = () => {
       <section className="px-6 pb-20">
         <div className="max-w-7xl mx-auto">
           {/* Laptop Screen Container */}
-          <div className="glass-strong rounded-3xl p-8 relative overflow-visible min-h-[800px]">
+          <div 
+            className="rounded-3xl p-12 relative overflow-visible min-h-[900px]"
+            style={{
+              background: 'radial-gradient(circle at 50% 50%, rgba(30, 58, 95, 0.4) 0%, rgba(17, 24, 39, 0.8) 100%)',
+              backdropFilter: 'blur(20px)',
+              border: '1px solid rgba(66, 153, 225, 0.2)',
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), inset 0 0 40px rgba(66, 153, 225, 0.1)'
+            }}
+          >
             {/* SVG for flow lines */}
             <svg className="absolute inset-0 w-full h-full pointer-events-none z-10" style={{ overflow: "visible" }}>
               <defs>
-                <linearGradient id="streamGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                  <stop offset="0%" stopColor="hsl(var(--stream-start))" />
-                  <stop offset="100%" stopColor="hsl(var(--stream-end))" />
+                <linearGradient id="streamGradientActive" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="rgba(66, 153, 225, 1)" />
+                  <stop offset="50%" stopColor="rgba(0, 229, 255, 1)" />
+                  <stop offset="100%" stopColor="rgba(66, 153, 225, 1)" />
+                </linearGradient>
+                <linearGradient id="streamGradientInactive" x1="0%" y1="0%" x2="100%" y2="0%">
+                  <stop offset="0%" stopColor="rgba(66, 153, 225, 0.3)" />
+                  <stop offset="100%" stopColor="rgba(66, 153, 225, 0.3)" />
                 </linearGradient>
               </defs>
 
               {agents.slice(0, 5).map((agent, idx) => {
                 const pos = gridPositions[idx];
-                const cardWidth = 320;
-                const cardHeight = 320;
-                const gap = 24;
+                const cardWidth = 340;
+                const cardHeight = 340;
+                const gap = 32;
                 
-                // Calculate card center positions
-                const fromX = (pos.col * (cardWidth + gap)) + cardWidth / 2 + 32;
-                const fromY = (pos.row * (cardHeight + gap)) + cardHeight / 2 + 32;
+                // Calculate card center positions with padding
+                const fromX = (pos.col * (cardWidth + gap)) + cardWidth / 2 + 48;
+                const fromY = (pos.row * (cardHeight + gap)) + cardHeight / 2 + 48;
                 
-                // Center hub position
-                const toX = 960 / 2; // Half of container width
-                const toY = 800 / 2; // Half of container height
+                // Center hub position (accounting for container size)
+                const containerWidth = (cardWidth * 3) + (gap * 2) + 96;
+                const containerHeight = (cardHeight * 2) + gap + 96;
+                const toX = containerWidth / 2;
+                const toY = containerHeight / 2;
 
                 return (
                   <StreamFlow
@@ -182,33 +197,40 @@ const Streams = () => {
             />
 
             {/* Agent Cards Grid */}
-            <div className="grid grid-cols-3 gap-6 relative z-0">
+            <div className="grid grid-cols-3 gap-8 relative z-0">
               {agents.map((agent, idx) => (
                 <AgentCard
                   key={agent.id}
                   name={agent.name}
                   category={agent.category}
                   description={agent.description}
-                  pricePerSec={`${agent.pricePerSec.toFixed(4)} USDC/sec`}
+                  pricePerSec={agent.id === 6 ? "COMING SOON" : `${agent.pricePerSec.toFixed(4)} USDC / SEC`}
                   icon={agent.icon}
                   features={agent.features}
                   isStreaming={streamStates[agent.id] || false}
                   onToggleStream={(active) => handleToggleStream(agent.id, active)}
+                  isAddon={agent.id === 6}
                 />
               ))}
             </div>
 
             {/* Floating Particles */}
-            <div className="absolute inset-0 pointer-events-none z-0">
-              {[...Array(12)].map((_, i) => (
+            <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
+              {[...Array(20)].map((_, i) => (
                 <div
                   key={i}
-                  className="absolute w-1 h-1 rounded-full bg-primary/30"
+                  className="absolute rounded-full"
                   style={{
+                    width: `${2 + Math.random() * 3}px`,
+                    height: `${2 + Math.random() * 3}px`,
+                    background: Math.random() > 0.5 
+                      ? 'rgba(66, 153, 225, 0.3)' 
+                      : 'rgba(0, 229, 255, 0.2)',
                     left: `${Math.random() * 100}%`,
                     top: `${Math.random() * 100}%`,
-                    animation: `drift ${3 + Math.random() * 2}s ease-in-out infinite`,
-                    animationDelay: `${Math.random() * 2}s`,
+                    animation: `drift ${4 + Math.random() * 3}s ease-in-out infinite`,
+                    animationDelay: `${Math.random() * 3}s`,
+                    boxShadow: '0 0 10px rgba(66, 153, 225, 0.3)',
                   }}
                 />
               ))}

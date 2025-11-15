@@ -12,6 +12,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Activity, TrendingUp, GitBranch, Heart, Shield, Sparkles } from "lucide-react";
+import { StreamingPaymentControl } from "@/components/StreamingPaymentControl";
 import ReactFlow, {
   Node,
   Edge,
@@ -976,23 +977,17 @@ const Streams = () => {
           </DialogHeader>
           
           <div className="space-y-6 py-4">
-            {/* Cost Stats Section */}
+            {/* Streaming Payment Control */}
             <div className="space-y-3">
-              <Label className="text-sm font-semibold text-secondary uppercase tracking-wider">Cost Statistics</Label>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="p-4 rounded-xl border-2 border-secondary/30 bg-secondary/5">
-                  <div className="text-xs text-secondary/60 mb-1">Status</div>
-                  <div className="text-lg font-bold text-secondary">{openModalId !== null && streamStates[openModalId] ? 'Active' : 'Inactive'}</div>
-                </div>
-                <div className="p-4 rounded-xl border-2 border-secondary/30 bg-secondary/5">
-                  <div className="text-xs text-secondary/60 mb-1">Cost/Sec</div>
-                  <div className="text-lg font-bold text-secondary">{openModalId !== null ? agents[openModalId - 1]?.pricePerSec : '0'}</div>
-                </div>
-                <div className="p-4 rounded-xl border-2 border-secondary/30 bg-secondary/5">
-                  <div className="text-xs text-secondary/60 mb-1">Total Spent</div>
-                  <div className="text-lg font-bold text-secondary">{openModalId !== null ? (agentAccumulated[openModalId] || 0).toFixed(6) : '0'}</div>
-                </div>
-              </div>
+              <Label className="text-sm font-semibold text-secondary uppercase tracking-wider">Payment Streaming</Label>
+              {openModalId !== null && (
+                <StreamingPaymentControl
+                  agentId={openModalId}
+                  agentName={agents[openModalId - 1]?.name || ''}
+                  pricePerSecond={agents[openModalId - 1]?.pricePerSec || 0}
+                  isRevenue={false}
+                />
+              )}
             </div>
 
             {/* Agent-Specific Configuration */}
@@ -1285,23 +1280,15 @@ const Streams = () => {
           </DialogHeader>
           
           <div className="space-y-6 py-4">
-            {/* Crawler Stats Section */}
+            {/* Revenue Streaming Control */}
             <div className="space-y-3">
-              <Label className="text-sm font-semibold text-emerald-400 uppercase tracking-wider">Revenue Statistics</Label>
-              <div className="grid grid-cols-3 gap-3">
-                <div className="p-4 rounded-xl border-2 border-emerald-500/30 bg-emerald-500/5">
-                  <div className="text-xs text-emerald-400/60 mb-1">Active Crawlers</div>
-                  <div className="text-2xl font-bold text-emerald-400">1</div>
-                </div>
-                <div className="p-4 rounded-xl border-2 border-emerald-500/30 bg-emerald-500/5">
-                  <div className="text-xs text-emerald-400/60 mb-1">Revenue/Sec</div>
-                  <div className="text-2xl font-bold text-emerald-400">0.0003</div>
-                </div>
-                <div className="p-4 rounded-xl border-2 border-emerald-500/30 bg-emerald-500/5">
-                  <div className="text-xs text-emerald-400/60 mb-1">Total Earned</div>
-                  <div className="text-2xl font-bold text-emerald-400">{totalEarned.toFixed(4)}</div>
-                </div>
-              </div>
+              <Label className="text-sm font-semibold text-emerald-400 uppercase tracking-wider">Revenue Streaming</Label>
+              <StreamingPaymentControl
+                agentId={6}
+                agentName="AI Crawler"
+                pricePerSecond={0.0003}
+                isRevenue={true}
+              />
             </div>
 
             {/* Crawler Configuration */}

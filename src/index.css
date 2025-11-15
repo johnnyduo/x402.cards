@@ -260,4 +260,33 @@ All colors MUST be HSL.
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
+
+  /* ReactFlow Edge Styles */
+  .react-flow__edge-path {
+    stroke-width: 3 !important;
+  }
+
+  .react-flow__edge.animated .react-flow__edge-path {
+    stroke-dasharray: 5;
+    animation: dashdraw 0.5s linear infinite;
+  }
+
+  @keyframes dashdraw {
+    to {
+      stroke-dashoffset: -10;
+    }
+  }
+
+  .react-flow__edge .react-flow__edge-path {
+    opacity: 1 !important;
+  }
+
+  /* Ensure edges are visible */
+  .react-flow__edges {
+    z-index: 100 !important;
+  }
+
+  .react-flow__nodes {
+    z-index: 200 !important;
+  }
 }

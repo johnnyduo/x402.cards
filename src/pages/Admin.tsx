@@ -337,11 +337,20 @@ export default function Admin() {
                           {/* Live Data Section */}
                           {agentLiveData.data && (
                             <div className="mt-4 p-3 rounded-lg bg-secondary/5 border border-secondary/20">
-                              <div className="flex items-center gap-2 mb-2">
-                                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                                <span className="text-xs font-semibold text-white/70 uppercase tracking-wide">
-                                  Live Data from API
-                                </span>
+                              <div className="flex items-center justify-between mb-2">
+                                <div className="flex items-center gap-2">
+                                  <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                                  <span className="text-xs font-semibold text-white/70 uppercase tracking-wide">
+                                    Live Data from API
+                                  </span>
+                                </div>
+                                {selectedAgentData.id === 1 && agentLiveData.data.symbol && (
+                                  <div className="px-2 py-1 bg-black/30 rounded">
+                                    <span className="text-xs font-mono text-secondary font-bold">
+                                      {agentLiveData.data.symbol}
+                                    </span>
+                                  </div>
+                                )}
                               </div>
                               <div className="grid grid-cols-2 gap-2 text-xs">
                                 {selectedAgentData.id === 1 && agentLiveData.data.signal && (

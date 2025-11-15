@@ -214,7 +214,12 @@ function LiveAgentData() {
         {/* Signal Forge */}
         <Card className="glass p-4">
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-display font-semibold">Signal Forge</h3>
+            <div>
+              <h3 className="font-display font-semibold">Signal Forge</h3>
+              {signalData?.symbol && (
+                <span className="text-xs font-mono text-secondary font-bold">{signalData.symbol}</span>
+              )}
+            </div>
             <Activity className="w-4 h-4 text-secondary" />
           </div>
 

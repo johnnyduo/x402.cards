@@ -53,6 +53,23 @@ export function useAPIStatus() {
   const [isChecking, setIsChecking] = useState(false);
 
   const checkStatus = async () => {
+    // Check localStorage cache first (30 second TTL)
+    const cachedStatus = localStorage.getItem('api-health-status');
+    if (cachedStatus) {
+      try {
+        const parsed = JSON.parse(cachedStatus);
+        if (Date.now() - parsed.timestamp < 30000) {
+          setStatus({
+            ...parsed.status,
+            lastChecked: new Date(parsed.status.lastChecked)
+          });
+          return;
+        }
+      } catch (e) {
+        // Invalid cache, continue to fetch
+      }
+    }
+
     setIsChecking(true);
     try {
       const response = await fetch(`${API_BASE_URL}/api/health`, {
@@ -61,28 +78,45 @@ export function useAPIStatus() {
       
       if (response.ok) {
         const data = await response.json();
-        setStatus({
+        const newStatus = {
           connected: true,
           twelveDataConnected: data.twelveData === 'Connected',
           finnhubConnected: data.finnhub === 'Connected',
           lastChecked: new Date(),
-        });
+        };
+        setStatus(newStatus);
+        
+        // Cache in localStorage
+        localStorage.setItem('api-health-status', JSON.stringify({
+          status: newStatus,
+          timestamp: Date.now()
+        }));
       } else {
-        setStatus({
+        const newStatus = {
           connected: false,
           twelveDataConnected: false,
           finnhubConnected: false,
           lastChecked: new Date(),
-        });
+        };
+        setStatus(newStatus);
+        localStorage.setItem('api-health-status', JSON.stringify({
+          status: newStatus,
+          timestamp: Date.now()
+        }));
       }
     } catch (error) {
       console.error('API health check failed:', error);
-      setStatus({
+      const newStatus = {
         connected: false,
         twelveDataConnected: false,
         finnhubConnected: false,
         lastChecked: new Date(),
-      });
+      };
+      setStatus(newStatus);
+      localStorage.setItem('api-health-status', JSON.stringify({
+        status: newStatus,
+        timestamp: Date.now()
+      }));
     } finally {
       setIsChecking(false);
     }
@@ -103,9 +137,6 @@ export function useAgentLiveData(agentId: number) {
   const [error, setError] = useState<string | null>(null);
 
   const fetchData = async () => {
-    setIsLoading(true);
-    setError(null);
-
     const endpoints: { [key: number]: string } = {
       1: '/api/agents/signal-forge?symbol=BTC/USD',
       2: '/api/agents/volatility-pulse?symbol=BTC/USD',
@@ -121,6 +152,26 @@ export function useAgentLiveData(agentId: number) {
       return;
     }
 
+    const cacheKey = `agent-data-${agentId}`;
+    const cachedData = localStorage.getItem(cacheKey);
+    
+    // Check localStorage cache (60 second TTL)
+    if (cachedData) {
+      try {
+        const parsed = JSON.parse(cachedData);
+        if (Date.now() - parsed.timestamp < 60000) {
+          setData(parsed.data);
+          setIsLoading(false);
+          return;
+        }
+      } catch (e) {
+        // Invalid cache, continue to fetch
+      }
+    }
+
+    setIsLoading(true);
+    setError(null);
+
     try {
       const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method: 'GET',
@@ -131,6 +182,13 @@ export function useAgentLiveData(agentId: number) {
       }
 
       const result = await response.json();
+      
+      // Cache in localStorage
+      localStorage.setItem(cacheKey, JSON.stringify({
+        data: result,
+        timestamp: Date.now()
+      }));
+      
       setData(result);
     } catch (err) {
       console.error(`Failed to fetch data for agent ${agentId}:`, err);

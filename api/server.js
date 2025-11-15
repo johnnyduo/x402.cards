@@ -14,6 +14,10 @@ app.use(express.json());
 const TWELVEDATA_API_KEY = process.env.TWELVEDATA_API_KEY || '87f2fa4ff46945ff84fef04b9edaee07';
 const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY || 'd4caq6hr01qudf6henrgd4caq6hr01qudf6hens0';
 
+// Simple cache to avoid rate limits
+const cache = {};
+const CACHE_TTL = 60000; // 60 seconds
+
 // ==================== TWELVE DATA CLIENT ====================
 async function tdGet(path, params) {
   const url = new URL(path, 'https://api.twelvedata.com');
@@ -81,6 +85,12 @@ app.get('/api/agents/signal-forge', async (req, res) => {
     const interval = req.query.interval || '5min';
     const outputsize = parseInt(req.query.outputsize) || 500;
 
+    // Check cache
+    const cacheKey = `sf:${symbol}:${interval}`;
+    if (cache[cacheKey] && (Date.now() - cache[cacheKey].ts < CACHE_TTL)) {
+      return res.json(cache[cacheKey].data);
+    }
+
     const data = await tdGet('/time_series', {
       symbol,
       interval,
@@ -123,6 +133,10 @@ app.get('/api/agents/volatility-pulse', async (req, res) => {
   try {
     const symbol = req.query.symbol || 'BTC/USD';
     const interval = req.query.interval || '5min';
+    const vpcacheKey = `vp:${symbol}:${interval}`;
+    if (cache[vpcacheKey] && (Date.now() - cache[vpcacheKey].ts < CACHE_TTL)) {
+      return res.json(cache[vpcacheKey].data);
+    }
 
     const data = await tdGet('/time_series', {
       symbol,
@@ -170,6 +184,9 @@ app.get('/api/agents/volatility-pulse', async (req, res) => {
 // ==================== ARB NAVIGATOR ====================
 app.get('/api/agents/arb-navigator', async (req, res) => {
   try {
+    if (cache["arb"] && (Date.now() - cache["arb"].ts < CACHE_TTL)) {
+      return res.json(cache["arb"].data);
+    }
     const symbols = (req.query.symbols || 'BTC/USD,ETH/USD,BNB/USD').split(',');
     const symbolStr = symbols.join(',');
 
@@ -218,13 +235,10 @@ app.get('/api/agents/sentiment-radar', async (req, res) => {
     const symbol = req.query.symbol || 'AAPL';
     const cleanSymbol = symbol.split('/')[0];
 
-    const from = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const to = new Date().toISOString().split('T')[0];
-
-    const newsData = await fhGet('/company-news', {
-      symbol: cleanSymbol,
-      from,
-      to,
+    // Use crypto news endpoint instead of company news
+    const newsData = await fhGet('/news', {
+      category: 'crypto',
+      minId: 0
     });
 
     const enrichedNews = newsData.slice(0, 20).map(item => {
@@ -269,6 +283,9 @@ app.get('/api/agents/sentiment-radar', async (req, res) => {
 // ==================== RISK SENTINEL ====================
 app.get('/api/agents/risk-sentinel', async (req, res) => {
   try {
+    if (cache["risk"] && (Date.now() - cache["risk"].ts < CACHE_TTL)) {
+      return res.json(cache["risk"].data);
+    }
     const address = req.query.address;
     
     // Mock data - in production, fetch from your DB/blockchain

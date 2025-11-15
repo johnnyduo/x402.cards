@@ -76,12 +76,12 @@ export default function Admin() {
             </div>
 
             <Tabs defaultValue="register" className="space-y-6">
-              <TabsList className="glass-strong">
-                <TabsTrigger value="register" className="data-[state=active]:bg-secondary/20 data-[state=active]:text-secondary">
+              <TabsList className="bg-black/30 border border-white/10 backdrop-blur-sm">
+                <TabsTrigger value="register" className="data-[state=active]:bg-secondary/20 data-[state=active]:text-secondary text-white/70">
                   <Plus className="w-4 h-4 mr-2" />
                   Register Agent
                 </TabsTrigger>
-                <TabsTrigger value="manage" className="data-[state=active]:bg-secondary/20 data-[state=active]:text-secondary">
+                <TabsTrigger value="manage" className="data-[state=active]:bg-secondary/20 data-[state=active]:text-secondary text-white/70">
                   <TrendingUp className="w-4 h-4 mr-2" />
                   Manage Agents
                 </TabsTrigger>

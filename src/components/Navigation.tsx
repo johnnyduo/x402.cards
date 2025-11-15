@@ -116,11 +116,11 @@ export const Navigation = () => {
               Active
             </NavLink>
             <NavLink
-              to="/developers"
+              to="/agents"
               className="text-sm font-body text-white/50 hover:text-white transition-colors"
               activeClassName="text-white font-semibold"
             >
-              Developers
+              Agents
             </NavLink>
             <NavLink
               to="/admin"

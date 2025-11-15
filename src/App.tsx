@@ -5,7 +5,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Streams from "./pages/Streams";
 import Active from "./pages/Active";
-import Developers from "./pages/Developers";
+import Agents from "./pages/Developers";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 
@@ -25,7 +25,8 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Streams />} />
           <Route path="/active" element={<Active />} />
-          <Route path="/developers" element={<Developers />} />
+          <Route path="/agents" element={<Agents />} />
+          <Route path="/developers" element={<Agents />} />
           <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

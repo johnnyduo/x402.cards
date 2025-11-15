@@ -21,94 +21,9 @@ import {
   Sparkles,
 } from 'lucide-react';
 import { useRegisterAgent, useAllAgents } from '@/hooks/useAgentRegistry';
+import { useAPIStatus, useAgentLiveData } from '@/hooks/useAgentAPI';
+import { AGENTS as predefinedAgents } from '@/data/agents';
 import { formatUnits, parseUnits } from 'viem';
-
-const predefinedAgents = [
-  {
-    id: 1,
-    name: 'Signal Forge',
-    category: 'SIGNALS',
-    description: 'Sculpts high-frequency trade entries with adaptive quants.',
-    pricePerSec: 0.0002,
-    icon: <Activity className="w-5 h-5" />,
-    features: [
-      'Multi-timeframe pattern detection',
-      'ML-powered signal generation',
-      'Risk-adjusted entry/exit points',
-      'Backtested strategy metrics',
-    ],
-  },
-  {
-    id: 2,
-    name: 'Volatility Pulse',
-    category: 'VOLATILITY',
-    description: 'Detects turbulence spikes across majors & synths.',
-    pricePerSec: 0.0002,
-    icon: <TrendingUp className="w-5 h-5" />,
-    features: [
-      'Real-time VIX tracking',
-      'Volatility forecasting models',
-      'Cross-market correlation analysis',
-      'Historical volatility comparisons',
-    ],
-  },
-  {
-    id: 3,
-    name: 'Arb Navigator',
-    category: 'ARBITRAGE',
-    description: 'Plots cross-venue price corridors & neutral legs.',
-    pricePerSec: 0.0002,
-    icon: <GitBranch className="w-5 h-5" />,
-    features: [
-      'Multi-DEX price monitoring',
-      'Gas-optimized route finding',
-      'Flash loan opportunity detection',
-      'Slippage impact calculations',
-    ],
-  },
-  {
-    id: 4,
-    name: 'Sentiment Radar',
-    category: 'SENTIMENT',
-    description: 'Scrapes macro narratives & crowd mood vectors.',
-    pricePerSec: 0.0002,
-    icon: <Heart className="w-5 h-5" />,
-    features: [
-      'Multi-platform sentiment aggregation',
-      'AI-powered emotion detection',
-      'Influencer impact tracking',
-      'Trending topic alerts',
-    ],
-  },
-  {
-    id: 5,
-    name: 'Risk Sentinel',
-    category: 'RISK',
-    description: 'Scores systemic debt & collateral exposures.',
-    pricePerSec: 0.0002,
-    icon: <Shield className="w-5 h-5" />,
-    features: [
-      'Real-time liquidation risk scoring',
-      'Portfolio health monitoring',
-      'Collateral ratio tracking',
-      'Smart contract risk analysis',
-    ],
-  },
-  {
-    id: 6,
-    name: 'AI Crawler Service',
-    category: 'REVENUE',
-    description: 'Deploy AI crawlers to earn passive income from data collection.',
-    pricePerSec: 0.0003,
-    icon: <Sparkles className="w-5 h-5 text-emerald-400" />,
-    features: [
-      'Automated web data collection',
-      'Real-time content indexing',
-      'API monetization streams',
-      'Earn 0.0003 USDC/sec per crawler',
-    ],
-  },
-];
 
 export default function Admin() {
   const { isConnected } = useAccount();
@@ -120,6 +35,8 @@ export default function Admin() {
 
   const { registerAgent, isLoading: isRegistering } = useRegisterAgent();
   const { agents, isLoading: isLoadingAgents, refetch } = useAllAgents();
+  const { status: apiStatus, isChecking: isCheckingAPI, refetch: refetchAPI } = useAPIStatus();
+  const agentLiveData = useAgentLiveData(selectedAgent ? parseInt(selectedAgent) : 0);
 
   const handleRegister = async () => {
     if (!agentName || !walletAddress || !pricePerSecond) {
@@ -173,10 +90,34 @@ export default function Admin() {
         ) : (
           <div className="max-w-5xl mx-auto">
             <div className="mb-8">
-              <h1 className="text-4xl font-display font-bold tracking-tight mb-3 text-white">Admin</h1>
-              <p className="text-white/70 font-body">
-                Register and manage AI agents on the x402 payment protocol
-              </p>
+              <div className="flex items-start justify-between mb-4">
+                <div>
+                  <h1 className="text-4xl font-display font-bold tracking-tight mb-3 text-white">Admin</h1>
+                  <p className="text-white/70 font-body">
+                    Register and manage AI agents on the x402 payment protocol
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/30 border border-white/10">
+                    <div className={`w-2 h-2 rounded-full ${
+                      apiStatus.connected ? 'bg-emerald-400' : 'bg-red-400'
+                    } animate-pulse`} />
+                    <span className="text-xs text-white/70">API</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/30 border border-white/10">
+                    <div className={`w-2 h-2 rounded-full ${
+                      apiStatus.twelveDataConnected ? 'bg-emerald-400' : 'bg-red-400'
+                    }`} />
+                    <span className="text-xs text-white/70">Twelve Data</span>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/30 border border-white/10">
+                    <div className={`w-2 h-2 rounded-full ${
+                      apiStatus.finnhubConnected ? 'bg-emerald-400' : 'bg-red-400'
+                    }`} />
+                    <span className="text-xs text-white/70">Finnhub</span>
+                  </div>
+                </div>
+              </div>
             </div>
 
             <Tabs defaultValue="register" className="space-y-6">
@@ -353,6 +294,151 @@ export default function Admin() {
                               ))}
                             </div>
                           </div>
+
+                          {/* Data Sources */}
+                          {selectedAgentData.dataSources && selectedAgentData.dataSources.length > 0 && (
+                            <div className="mt-4 space-y-2">
+                              <div className="text-xs font-semibold text-white/70 uppercase tracking-wide">
+                                📊 Data Sources
+                              </div>
+                              <div className="space-y-1">
+                                {selectedAgentData.dataSources.map((source, idx) => (
+                                  <div key={idx} className="flex items-start gap-2 text-xs">
+                                    <span className="text-emerald-400 shrink-0">→</span>
+                                    <span className="text-white/60 leading-relaxed">{source}</span>
+                                  </div>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+
+                          {/* Methodology */}
+                          {selectedAgentData.methodology && (
+                            <div className="mt-4 space-y-2">
+                              <div className="text-xs font-semibold text-white/70 uppercase tracking-wide">
+                                🧠 Methodology
+                              </div>
+                              <p className="text-xs text-white/60 leading-relaxed">
+                                {selectedAgentData.methodology}
+                              </p>
+                            </div>
+                          )}
+
+                          {/* API Endpoint */}
+                          {selectedAgentData.apiEndpoint && (
+                            <div className="mt-4 p-2 bg-black/30 rounded-lg">
+                              <div className="text-xs text-white/50 mb-1">API Endpoint</div>
+                              <code className="text-xs text-secondary font-mono">
+                                {selectedAgentData.apiEndpoint}
+                              </code>
+                            </div>
+                          )}
+
+                          {/* Live Data Section */}
+                          {agentLiveData.data && (
+                            <div className="mt-4 p-3 rounded-lg bg-secondary/5 border border-secondary/20">
+                              <div className="flex items-center gap-2 mb-2">
+                                <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                                <span className="text-xs font-semibold text-white/70 uppercase tracking-wide">
+                                  Live Data from API
+                                </span>
+                              </div>
+                              <div className="grid grid-cols-2 gap-2 text-xs">
+                                {selectedAgentData.id === 1 && agentLiveData.data.signal && (
+                                  <>
+                                    <div className="bg-black/20 rounded p-2">
+                                      <div className="text-white/50">Signal</div>
+                                      <div className={`font-bold ${
+                                        agentLiveData.data.signal === 'BUY' ? 'text-emerald-400' :
+                                        agentLiveData.data.signal === 'SELL' ? 'text-red-400' : 'text-yellow-400'
+                                      }`}>{agentLiveData.data.signal}</div>
+                                    </div>
+                                    <div className="bg-black/20 rounded p-2">
+                                      <div className="text-white/50">RSI</div>
+                                      <div className="text-white font-mono">{agentLiveData.data.rsi?.toFixed(2)}</div>
+                                    </div>
+                                    <div className="bg-black/20 rounded p-2">
+                                      <div className="text-white/50">Price</div>
+                                      <div className="text-secondary font-mono">${agentLiveData.data.price?.toFixed(2)}</div>
+                                    </div>
+                                    <div className="bg-black/20 rounded p-2">
+                                      <div className="text-white/50">Volatility</div>
+                                      <div className="text-white font-mono">{agentLiveData.data.volatility?.toFixed(2)}%</div>
+                                    </div>
+                                  </>
+                                )}
+                                {selectedAgentData.id === 2 && agentLiveData.data.volatility && (
+                                  <>
+                                    <div className="bg-black/20 rounded p-2">
+                                      <div className="text-white/50">Volatility</div>
+                                      <div className="text-secondary font-mono">{agentLiveData.data.volatility?.toFixed(2)}%</div>
+                                    </div>
+                                    <div className="bg-black/20 rounded p-2">
+                                      <div className="text-white/50">Regime</div>
+                                      <div className="text-white font-bold">{agentLiveData.data.regime}</div>
+                                    </div>
+                                    <div className="bg-black/20 rounded p-2">
+                                      <div className="text-white/50">Fear Index</div>
+                                      <div className="text-white font-mono">{agentLiveData.data.fearIndex}</div>
+                                    </div>
+                                  </>
+                                )}
+                                {selectedAgentData.id === 3 && agentLiveData.data.opportunities && (
+                                  <div className="col-span-2 bg-black/20 rounded p-2">
+                                    <div className="text-white/50 mb-1">Opportunities Found</div>
+                                    <div className="text-emerald-400 font-bold text-lg">
+                                      {agentLiveData.data.opportunities.length}
+                                    </div>
+                                  </div>
+                                )}
+                                {selectedAgentData.id === 4 && agentLiveData.data.sentiment !== undefined && (
+                                  <>
+                                    <div className="bg-black/20 rounded p-2">
+                                      <div className="text-white/50">Sentiment</div>
+                                      <div className={`font-bold ${
+                                        agentLiveData.data.sentiment > 0 ? 'text-emerald-400' : 'text-red-400'
+                                      }`}>{agentLiveData.data.sentiment?.toFixed(2)}</div>
+                                    </div>
+                                    <div className="bg-black/20 rounded p-2">
+                                      <div className="text-white/50">Mood</div>
+                                      <div className="text-white font-bold">{agentLiveData.data.mood}</div>
+                                    </div>
+                                    <div className="col-span-2 bg-black/20 rounded p-2">
+                                      <div className="text-white/50 mb-1">News Items</div>
+                                      <div className="text-white font-mono">{agentLiveData.data.news?.length || 0}</div>
+                                    </div>
+                                  </>
+                                )}
+                                {selectedAgentData.id === 5 && agentLiveData.data.healthScore && (
+                                  <div className="col-span-2 bg-black/20 rounded p-2">
+                                    <div className="text-white/50">Health Score</div>
+                                    <div className="text-emerald-400 font-bold text-lg">
+                                      {agentLiveData.data.healthScore}/100
+                                    </div>
+                                  </div>
+                                )}
+                              </div>
+                              <div className="mt-2 text-[10px] text-white/40">
+                                Last updated: {new Date().toLocaleTimeString()}
+                              </div>
+                            </div>
+                          )}
+                          {agentLiveData.isLoading && (
+                            <div className="mt-4 p-3 rounded-lg bg-black/20 border border-white/10">
+                              <div className="flex items-center gap-2 text-xs text-white/50">
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                                <span>Fetching live data from API...</span>
+                              </div>
+                            </div>
+                          )}
+                          {agentLiveData.error && !apiStatus.connected && (
+                            <div className="mt-4 p-3 rounded-lg bg-red-500/10 border border-red-500/20">
+                              <div className="flex items-center gap-2 text-xs text-red-400">
+                                <AlertCircle className="w-3 h-3" />
+                                <span>API Server Offline - Start with: cd api && yarn dev</span>
+                              </div>
+                            </div>
+                          )}
 
                           <div className="mt-4 pt-4 border-t border-white/5">
                             <div className="text-xs text-white/50">

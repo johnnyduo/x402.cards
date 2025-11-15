@@ -46,6 +46,34 @@ async function fhGet(endpoint, params = {}) {
   return json;
 }
 
+// ==================== HEALTH CHECK ====================
+app.get('/api/health', async (req, res) => {
+  try {
+    // Quick check if API keys are configured
+    const twelveDataStatus = TWELVEDATA_API_KEY ? 'Connected' : 'Not Configured';
+    const finnhubStatus = FINNHUB_API_KEY ? 'Connected' : 'Not Configured';
+
+    res.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      twelveData: twelveDataStatus,
+      finnhub: finnhubStatus,
+      endpoints: [
+        '/api/agents/signal-forge',
+        '/api/agents/volatility-pulse',
+        '/api/agents/arb-navigator',
+        '/api/agents/sentiment-radar',
+        '/api/agents/risk-sentinel',
+      ],
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      error: error.message,
+    });
+  }
+});
+
 // ==================== SIGNAL FORGE ====================
 app.get('/api/agents/signal-forge', async (req, res) => {
   try {

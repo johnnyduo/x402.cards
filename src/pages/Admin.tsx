@@ -1,15 +1,10 @@
 import { useState } from 'react';
 import { useAccount } from 'wagmi';
 import { Navigation } from '@/components/Navigation';
-import { AppHeader } from '@/components/AppHeader';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Badge } from '@/components/ui/badge';
-import { Separator } from '@/components/ui/separator';
 import { toast } from 'sonner';
 import { Loader2, Plus, CheckCircle2, AlertCircle, Settings2, TrendingUp } from 'lucide-react';
 import { useRegisterAgent, useAllAgents } from '@/hooks/useAgentRegistry';
@@ -59,9 +54,8 @@ export default function Admin() {
       background: 'radial-gradient(ellipse at top, rgba(30, 58, 138, 0.15), transparent 50%), radial-gradient(ellipse at bottom, rgba(17, 24, 39, 0.9), transparent 50%), linear-gradient(to bottom, #0f172a, #020617)'
     }}>
       <Navigation />
-      <AppHeader />
       
-      <div className="container mx-auto px-4 pt-32 pb-16">
+      <div className="container mx-auto px-6 pt-32 pb-20">
         {!isConnected ? (
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
@@ -71,23 +65,31 @@ export default function Admin() {
             </div>
           </div>
         ) : (
-          <div className="max-w-4xl mx-auto">
+          <div className="max-w-5xl mx-auto">
+            <div className="mb-8">
+              <h1 className="text-4xl font-display font-bold tracking-tight mb-3 text-white">
+                Admin
+              </h1>
+              <p className="text-white/70 font-body">
+                Register and manage AI agents on the x402 payment protocol
+              </p>
+            </div>
+
             <Tabs defaultValue="register" className="space-y-6">
-              <TabsList className="bg-black/30 border border-white/10">
-                <TabsTrigger value="register" className="data-[state=active]:bg-secondary/20 data-[state=active]:text-secondary text-white/70">
+              <TabsList className="glass-strong">
+                <TabsTrigger value="register" className="data-[state=active]:bg-secondary/20 data-[state=active]:text-secondary">
                   <Plus className="w-4 h-4 mr-2" />
                   Register Agent
                 </TabsTrigger>
-                <TabsTrigger value="manage" className="data-[state=active]:bg-secondary/20 data-[state=active]:text-secondary text-white/70">
+                <TabsTrigger value="manage" className="data-[state=active]:bg-secondary/20 data-[state=active]:text-secondary">
                   <TrendingUp className="w-4 h-4 mr-2" />
                   Manage Agents
                 </TabsTrigger>
               </TabsList>
 
               {/* Register Agent Tab */}
-              <TabsContent value="register" className="space-y-4">
-                <Card className="bg-black/30 border-white/10">
-                  <CardContent className="pt-6 space-y-4">
+              <TabsContent value="register" className="space-y-6">
+                <div className="glass-strong p-6 rounded-2xl space-y-4">
 
                     <div className="grid grid-cols-2 gap-4">
                       <div className="space-y-1.5">
@@ -149,14 +151,12 @@ export default function Admin() {
                         </>
                       )}
                     </Button>
-                  </CardContent>
-                </Card>
+                  </div>
               </TabsContent>
 
               {/* Manage Agents Tab */}
-              <TabsContent value="manage" className="space-y-4">
-                <Card className="bg-black/30 border-white/10">
-                  <CardContent className="pt-6">
+              <TabsContent value="manage" className="space-y-6">
+                <div className="glass-strong p-6 rounded-2xl">
                     {isLoadingAgents ? (
                       <div className="flex items-center justify-center py-8">
                         <Loader2 className="w-6 h-6 animate-spin text-secondary" />
@@ -210,8 +210,7 @@ export default function Admin() {
                         <p className="text-sm text-white/50">No agents yet</p>
                       </div>
                     )}
-                  </CardContent>
-                </Card>
+                  </div>
               </TabsContent>
             </Tabs>
           </div>

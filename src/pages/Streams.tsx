@@ -120,7 +120,7 @@ const AgentNode = ({ data }: { data: any }) => {
       onClick={isAddon ? data.onToggle : undefined}
       style={{
         cursor: isAddon ? 'pointer' : 'default',
-        width: '280px',
+        width: '240px',
         background: isAddon 
           ? 'linear-gradient(135deg, rgba(100, 100, 100, 0.1), rgba(70, 70, 70, 0.15))'
           : 'linear-gradient(135deg, rgba(66, 153, 225, 0.1), rgba(0, 229, 255, 0.15))',
@@ -305,14 +305,17 @@ const Streams = () => {
   const allStreamsActive = agents.filter(agent => agent.id !== 6).every(agent => streamStates[agent.id]);
 
   const handleToggleAll = () => {
-    const newState = !allStreamsActive;
-    const newStates: Record<number, boolean> = {};
-    agents.forEach((agent) => {
-      if (agent.id !== 6) {
-        newStates[agent.id] = newState;
-      }
+    setStreamStates((prev) => {
+      const currentAllActive = agents.filter(agent => agent.id !== 6).every(agent => prev[agent.id]);
+      const newState = !currentAllActive;
+      const newStates: Record<number, boolean> = {};
+      agents.forEach((agent) => {
+        if (agent.id !== 6) {
+          newStates[agent.id] = newState;
+        }
+      });
+      return newStates;
     });
-    setStreamStates(newStates);
   };
 
   const handleToggleStream = (agentId: number) => {
@@ -324,7 +327,7 @@ const Streams = () => {
     { 
       id: 'agent-1', 
       type: 'agent', 
-      position: { x: 50, y: 100 },
+      position: { x: 50, y: 80 },
       draggable: false,
       data: { 
         name: agents[0].name, 
@@ -339,7 +342,7 @@ const Streams = () => {
     { 
       id: 'agent-2', 
       type: 'agent', 
-      position: { x: 450, y: 50 },
+      position: { x: 540, y: 30 },
       draggable: false,
       data: { 
         name: agents[1].name, 
@@ -354,7 +357,7 @@ const Streams = () => {
     { 
       id: 'agent-3', 
       type: 'agent', 
-      position: { x: 850, y: 100 },
+      position: { x: 1030, y: 80 },
       draggable: false,
       data: { 
         name: agents[2].name, 
@@ -370,7 +373,7 @@ const Streams = () => {
     { 
       id: 'agent-4', 
       type: 'agent', 
-      position: { x: 50, y: 520 },
+      position: { x: 50, y: 680 },
       draggable: false,
       data: { 
         name: agents[3].name, 
@@ -385,7 +388,7 @@ const Streams = () => {
     { 
       id: 'agent-5', 
       type: 'agent', 
-      position: { x: 450, y: 570 },
+      position: { x: 540, y: 730 },
       draggable: false,
       data: { 
         name: agents[4].name, 
@@ -400,7 +403,7 @@ const Streams = () => {
     { 
       id: 'agent-6', 
       type: 'agent', 
-      position: { x: 850, y: 520 },
+      position: { x: 1030, y: 680 },
       draggable: false,
       data: { 
         name: agents[5].name, 
@@ -417,7 +420,7 @@ const Streams = () => {
     { 
       id: 'hub', 
       type: 'hub', 
-      position: { x: 400, y: 320 },
+      position: { x: 540, y: 360 },
       draggable: false,
       data: { 
         activeCount,
@@ -436,16 +439,15 @@ const Streams = () => {
       animated: streamStates[1] || false, 
       type: 'smoothstep',
       style: { 
-        stroke: streamStates[1] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
-        strokeWidth: streamStates[1] ? 4 : 2,
-        strokeDasharray: streamStates[1] ? '0' : '5,5',
-        filter: streamStates[1] ? 'drop-shadow(0 0 8px rgba(0, 229, 255, 0.8))' : 'none',
+        stroke: streamStates[1] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)', 
+        strokeWidth: streamStates[1] ? 6 : 3,
+        filter: streamStates[1] ? 'drop-shadow(0 0 12px rgba(0, 229, 255, 1)) drop-shadow(0 0 24px rgba(0, 229, 255, 0.8))' : 'none',
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
-        color: streamStates[1] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
-        width: 20,
-        height: 20,
+        color: streamStates[1] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)',
+        width: 25,
+        height: 25,
       } 
     },
     { 
@@ -455,16 +457,15 @@ const Streams = () => {
       animated: streamStates[2] || false, 
       type: 'smoothstep',
       style: { 
-        stroke: streamStates[2] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
-        strokeWidth: streamStates[2] ? 4 : 2,
-        strokeDasharray: streamStates[2] ? '0' : '5,5',
-        filter: streamStates[2] ? 'drop-shadow(0 0 8px rgba(0, 229, 255, 0.8))' : 'none',
+        stroke: streamStates[2] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)', 
+        strokeWidth: streamStates[2] ? 6 : 3,
+        filter: streamStates[2] ? 'drop-shadow(0 0 12px rgba(0, 229, 255, 1)) drop-shadow(0 0 24px rgba(0, 229, 255, 0.8))' : 'none',
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
-        color: streamStates[2] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
-        width: 20,
-        height: 20,
+        color: streamStates[2] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)',
+        width: 25,
+        height: 25,
       } 
     },
     { 
@@ -474,16 +475,15 @@ const Streams = () => {
       animated: streamStates[3] || false, 
       type: 'smoothstep',
       style: { 
-        stroke: streamStates[3] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
-        strokeWidth: streamStates[3] ? 4 : 2,
-        strokeDasharray: streamStates[3] ? '0' : '5,5',
-        filter: streamStates[3] ? 'drop-shadow(0 0 8px rgba(0, 229, 255, 0.8))' : 'none',
+        stroke: streamStates[3] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)', 
+        strokeWidth: streamStates[3] ? 6 : 3,
+        filter: streamStates[3] ? 'drop-shadow(0 0 12px rgba(0, 229, 255, 1)) drop-shadow(0 0 24px rgba(0, 229, 255, 0.8))' : 'none',
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
-        color: streamStates[3] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
-        width: 20,
-        height: 20,
+        color: streamStates[3] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)',
+        width: 25,
+        height: 25,
       } 
     },
     { 
@@ -493,16 +493,15 @@ const Streams = () => {
       animated: streamStates[4] || false, 
       type: 'smoothstep',
       style: { 
-        stroke: streamStates[4] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
-        strokeWidth: streamStates[4] ? 4 : 2,
-        strokeDasharray: streamStates[4] ? '0' : '5,5',
-        filter: streamStates[4] ? 'drop-shadow(0 0 8px rgba(0, 229, 255, 0.8))' : 'none',
+        stroke: streamStates[4] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)', 
+        strokeWidth: streamStates[4] ? 6 : 3,
+        filter: streamStates[4] ? 'drop-shadow(0 0 12px rgba(0, 229, 255, 1)) drop-shadow(0 0 24px rgba(0, 229, 255, 0.8))' : 'none',
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
-        color: streamStates[4] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
-        width: 20,
-        height: 20,
+        color: streamStates[4] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)',
+        width: 25,
+        height: 25,
       } 
     },
     { 
@@ -512,16 +511,15 @@ const Streams = () => {
       animated: streamStates[5] || false, 
       type: 'smoothstep',
       style: { 
-        stroke: streamStates[5] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)', 
-        strokeWidth: streamStates[5] ? 4 : 2,
-        strokeDasharray: streamStates[5] ? '0' : '5,5',
-        filter: streamStates[5] ? 'drop-shadow(0 0 8px rgba(0, 229, 255, 0.8))' : 'none',
+        stroke: streamStates[5] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)', 
+        strokeWidth: streamStates[5] ? 6 : 3,
+        filter: streamStates[5] ? 'drop-shadow(0 0 12px rgba(0, 229, 255, 1)) drop-shadow(0 0 24px rgba(0, 229, 255, 0.8))' : 'none',
       }, 
       markerEnd: { 
         type: MarkerType.ArrowClosed, 
-        color: streamStates[5] ? '#00E5FF' : 'rgba(66, 153, 225, 0.4)',
-        width: 20,
-        height: 20,
+        color: streamStates[5] ? '#00E5FF' : 'rgba(66, 153, 225, 0.6)',
+        width: 25,
+        height: 25,
       } 
     },
   ];
@@ -533,6 +531,11 @@ const Streams = () => {
 
   // Update everything when streamStates change
   useEffect(() => {
+    // Calculate current values from streamStates
+    const currentActiveCount = agents.filter(agent => agent.id !== 6 && streamStates[agent.id]).length;
+    const currentTotalCost = agents.filter((agent) => streamStates[agent.id]).reduce((sum, agent) => sum + agent.pricePerSec, 0);
+    const currentAllActive = agents.filter(agent => agent.id !== 6).every(agent => streamStates[agent.id]);
+
     // Update nodes
     setNodes((nds) =>
       nds.map((node) => {
@@ -541,9 +544,9 @@ const Streams = () => {
             ...node,
             data: {
               ...node.data,
-              activeCount,
-              totalCost: totalCostPerSec,
-              active: allStreamsActive,
+              activeCount: currentActiveCount,
+              totalCost: currentTotalCost,
+              active: currentAllActive,
             },
           };
         } else {
@@ -652,7 +655,7 @@ const Streams = () => {
         } 
       },
     ]);
-  }, [streamStates, activeCount, totalCostPerSec, allStreamsActive, setNodes, setEdges]);
+  }, [streamStates]);
 
   return (
     <div className="min-h-screen relative overflow-hidden">

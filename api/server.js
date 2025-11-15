@@ -343,14 +343,10 @@ app.get('/api/agents/sentiment-radar', async (req, res) => {
       return res.json(cache[srcacheKey].data);
     }
 
-    // Use company-news endpoint with date range
-    const toDate = new Date().toISOString().split('T')[0]; // Today
-    const fromDate = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]; // 7 days ago
-    
-    const newsData = await fhGet('/company-news', {
-      symbol: cleanSymbol,
-      from: fromDate,
-      to: toDate
+    // Use crypto news endpoint
+    const newsData = await fhGet('/news', {
+      category: 'crypto',
+      minId: 10
     });
 
     const topNews = newsData.slice(0, 5);

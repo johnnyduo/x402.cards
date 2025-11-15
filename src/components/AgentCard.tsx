@@ -41,7 +41,7 @@ export const AgentCard = ({
 
   return (
     <div
-      className="flip-card h-[300px]"
+      className="flip-card h-[260px]"
       onClick={handleCardClick}
       style={{ cursor: isAddon ? 'default' : 'pointer' }}
     >
@@ -49,7 +49,7 @@ export const AgentCard = ({
         {/* Front Face */}
         <div className="flip-card-front">
           <div 
-            className={`card-gradient h-full p-6 flex flex-col justify-between transition-all duration-300 relative ${
+            className={`card-gradient h-full p-5 flex flex-col justify-between transition-all duration-300 relative ${
               isStreaming ? "animate-pulse-glow" : ""
             }`}
             style={{
@@ -60,16 +60,16 @@ export const AgentCard = ({
             }}
           >
             <div className="relative z-10">
-              <div className="flex items-start justify-between mb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center">
+              <div className="flex items-start justify-between mb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center">
                     {icon}
                   </div>
                 </div>
-                <div className="flex flex-col items-end gap-2">
+                <div className="flex flex-col items-end gap-1.5">
                   <Badge
                     variant={isStreaming ? "default" : "secondary"}
-                    className={`font-display text-[10px] tracking-widest uppercase px-3 py-1 rounded-full ${
+                    className={`font-display text-[9px] tracking-widest uppercase px-2.5 py-0.5 rounded-full ${
                       isStreaming 
                         ? "bg-secondary/90 text-black font-semibold" 
                         : "bg-white/10 text-white/60 border-white/20"
@@ -89,23 +89,23 @@ export const AgentCard = ({
                 </div>
               </div>
 
-              <div className="mb-3">
-                <p className="text-[10px] font-display text-white/50 tracking-[0.2em] uppercase mb-2">
+              <div className="mb-2">
+                <p className="text-[9px] font-display text-white/50 tracking-[0.2em] uppercase mb-1.5">
                   {category}
                 </p>
-                <h3 className="text-xl font-display font-bold mb-2 tracking-tight text-white">
+                <h3 className="text-lg font-display font-bold mb-1.5 tracking-tight text-white">
                   {name}
                 </h3>
               </div>
               
-              <p className="text-sm text-white/70 font-body leading-relaxed mb-4">
+              <p className="text-xs text-white/70 font-body leading-relaxed mb-3">
                 {description}
               </p>
             </div>
 
-            <div className="space-y-3 relative z-10">
-              <div className="flex items-center justify-between pt-3 border-t border-white/10">
-                <span className="text-xs text-white/50 font-body font-medium">
+            <div className="space-y-2 relative z-10">
+              <div className="flex items-center justify-between pt-2 border-t border-white/10">
+                <span className="text-[10px] text-white/50 font-body font-medium">
                   {pricePerSec}
                 </span>
                 {!isAddon && (

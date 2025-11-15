@@ -17,7 +17,7 @@ export const CentralHub = ({
   return (
     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 pointer-events-none">
       <div
-        className="relative rounded-3xl w-[380px] h-[320px] flex flex-col items-center justify-center transition-all duration-500 pointer-events-auto"
+        className="relative rounded-3xl w-[360px] h-[300px] flex flex-col items-center justify-center transition-all duration-500 pointer-events-auto"
         style={{
           background: allStreamsActive 
             ? 'linear-gradient(135deg, rgba(0, 229, 255, 0.25) 0%, rgba(66, 153, 225, 0.3) 50%, rgba(30, 58, 95, 0.85) 100%)'

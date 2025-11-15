@@ -141,10 +141,11 @@ const Streams = () => {
       <AppHeader />
 
       <section className="px-6 pb-20">
-        <div className="max-w-[1800px] mx-auto">
-          {/* Laptop Screen Container - Full-screen card spread */}
+        <div className="max-w-[1850px] mx-auto">
+          {/* Laptop Screen Container - Balanced card layout */}
           <div 
-            className="rounded-3xl p-20 relative overflow-visible min-h-[1000px]"
+            className="rounded-3xl relative overflow-visible min-h-[800px]"
+            style={{ padding: '80px' }}
             style={{
               background: 'radial-gradient(circle at 50% 50%, rgba(30, 58, 95, 0.4) 0%, rgba(17, 24, 39, 0.8) 100%)',
               backdropFilter: 'blur(20px)',
@@ -175,20 +176,23 @@ const Streams = () => {
 
               {agents.slice(0, 5).map((agent, idx) => {
                 const pos = gridPositions[idx];
-                // Smaller cards but wider spread for full-screen distribution
-                const cardWidth = 300;
-                const cardHeight = 300;
-                const gap = 120; // Much larger gap for full-screen spread
+                // Balanced card dimensions
+                const cardWidth = 260;
+                const cardHeight = 260;
+                const gapX = 170; // Horizontal gap
+                const gapY = 160; // Vertical gap
+                const paddingX = 80; // Left padding
+                const paddingY = 80; // Top padding
                 
-                // Calculate card center positions spread across full container
-                const fromX = (pos.col * (cardWidth + gap)) + cardWidth / 2 + 80;
-                const fromY = (pos.row * (cardHeight + gap)) + cardHeight / 2 + 80;
+                // Calculate card center positions for balanced layout
+                const fromX = paddingX + (pos.col * (cardWidth + gapX)) + cardWidth / 2;
+                const fromY = paddingY + (pos.row * (cardHeight + gapY)) + cardHeight / 2;
                 
-                // Center hub position - perfectly centered with wide spacing
-                const containerWidth = (cardWidth * 3) + (gap * 2) + 160;
-                const containerHeight = (cardHeight * 2) + gap + 160;
-                const toX = containerWidth / 2;
-                const toY = containerHeight / 2;
+                // Center hub position - calculate from actual container center
+                const totalWidth = (cardWidth * 3) + (gapX * 2) + (paddingX * 2);
+                const totalHeight = (cardHeight * 2) + gapY + (paddingY * 2);
+                const toX = totalWidth / 2;
+                const toY = totalHeight / 2;
 
                 return (
                   <StreamFlow
@@ -212,8 +216,8 @@ const Streams = () => {
               onToggleAll={handleToggleAll}
             />
 
-            {/* Agent Cards Grid - Full-screen spread with smaller cards */}
-            <div className="grid grid-cols-3 gap-[120px] relative">
+            {/* Agent Cards Grid - Balanced layout */}
+            <div className="grid grid-cols-3 gap-x-[170px] gap-y-[160px] relative">
               {agents.map((agent, idx) => (
                 <AgentCard
                   key={agent.id}

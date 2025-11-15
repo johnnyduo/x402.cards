@@ -13,6 +13,8 @@ app.use(express.json());
 // API Keys
 const TWELVEDATA_API_KEY = process.env.TWELVEDATA_API_KEY || '87f2fa4ff46945ff84fef04b9edaee07';
 const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY || 'd4caq6hr01qudf6henrgd4caq6hr01qudf6hens0';
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || 'AIzaSyAfupL0oYcT-wMq6HE9xoTBMgzGdh3eDQs';
+const BLOCKBERRY_API_KEY = process.env.BLOCKBERRY_API_KEY || 'EpAzX8JKozYq6bF9LagV4majIPzU55';
 
 // Simple cache to avoid rate limits
 const cache = {};
@@ -50,16 +52,55 @@ async function fhGet(endpoint, params = {}) {
   return json;
 }
 
+// ==================== GEMINI AI CLIENT ====================
+async function geminiAnalyze(prompt) {
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
+  
+  const res = await fetch(url, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }]
+    })
+  });
+
+  if (!res.ok) throw new Error(`Gemini error: ${res.status}`);
+  const json = await res.json();
+  return json.candidates[0]?.content?.parts[0]?.text || '';
+}
+
+// ==================== BLOCKBERRY (IOTA EXPLORER) CLIENT ====================
+async function blockberryGet(endpoint, params = {}) {
+  const url = new URL(endpoint, 'https://explorer-api.iota.org/stardust');
+  Object.entries(params).forEach(([k, v]) =>
+    url.searchParams.append(k, String(v))
+  );
+
+  const res = await fetch(url.toString(), {
+    headers: {
+      'X-API-Key': BLOCKBERRY_API_KEY,
+      'Content-Type': 'application/json'
+    }
+  });
+
+  if (!res.ok) throw new Error(`Blockberry error: ${res.status}`);
+  return await res.json();
+}
+
 // ==================== HEALTH CHECK ====================
 app.get('/api/health', async (req, res) => {
   try {
     // Quick check if API keys are configured
+    const geminiStatus = GEMINI_API_KEY ? 'Connected' : 'Not Configured';
+    const blockberryStatus = BLOCKBERRY_API_KEY ? 'Connected' : 'Not Configured';
     const twelveDataStatus = TWELVEDATA_API_KEY ? 'Connected' : 'Not Configured';
     const finnhubStatus = FINNHUB_API_KEY ? 'Connected' : 'Not Configured';
 
     res.json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
+      gemini: geminiStatus,
+      blockberry: blockberryStatus,
       twelveData: twelveDataStatus,
       finnhub: finnhubStatus,
       endpoints: [
@@ -166,15 +207,37 @@ app.get('/api/agents/volatility-pulse', async (req, res) => {
     const fearIndex = Math.min(100, annualized * 100 * 5);
     const regime = annualized < 0.2 ? 'LOW' : annualized < 0.4 ? 'NORMAL' : annualized < 0.7 ? 'ELEVATED' : 'EXTREME';
 
-    res.json({
+    // Fetch IOTA on-chain volatility metrics
+    let onChainData = null;
+    try {
+      // Get recent IOTA network stats from Blockberry
+      const iotaStats = await fetch('https://explorer-api.iota.org/stardust/mainnet/stats', {
+        headers: { 'X-API-Key': BLOCKBERRY_API_KEY }
+      }).then(r => r.json());
+
+      onChainData = {
+        blockRate: iotaStats.blockRate || 0,
+        transactionRate: iotaStats.transactionRate || 0,
+        activeAddresses: iotaStats.activeAddresses || 0,
+        networkHealth: iotaStats.blockRate > 10 ? 'HEALTHY' : 'DEGRADED'
+      };
+    } catch (e) {
+      console.log('Blockberry on-chain data unavailable:', e.message);
+    }
+
+    const response = {
       symbol,
       interval,
       realizedVol: stdDev,
       realizedVolAnnualized: annualized,
       fearIndex,
       regime,
+      onChain: onChainData,
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    cache[vpcacheKey] = { data: response, ts: Date.now() };
+    res.json(response);
   } catch (error) {
     console.error('Volatility Pulse error:', error);
     res.status(500).json({ error: error.message });
@@ -214,15 +277,40 @@ app.get('/api/agents/arb-navigator', async (req, res) => {
 
     opportunities.sort((a, b) => b.spreadPct - a.spreadPct);
 
-    res.json({
+    // Fetch IOTA whale movements from on-chain data
+    let whaleData = null;
+    try {
+      // Get recent large transactions on IOTA network
+      const recentTxs = await fetch('https://explorer-api.iota.org/stardust/mainnet/transactions/recent?limit=20', {
+        headers: { 'X-API-Key': BLOCKBERRY_API_KEY }
+      }).then(r => r.json());
+
+      const largeTxs = (recentTxs.transactions || [])
+        .filter(tx => tx.value && tx.value > 1000000) // Filter large txs
+        .slice(0, 5);
+
+      whaleData = {
+        largeTransactions: largeTxs.length,
+        totalVolume: largeTxs.reduce((sum, tx) => sum + (tx.value || 0), 0),
+        whaleActivity: largeTxs.length > 3 ? 'HIGH' : largeTxs.length > 1 ? 'MEDIUM' : 'LOW'
+      };
+    } catch (e) {
+      console.log('Whale tracking unavailable:', e.message);
+    }
+
+    const response = {
       quotes,
       opportunities: opportunities.slice(0, 10),
       summary: {
         totalOpportunities: opportunities.length,
         topSpread: opportunities[0]?.spreadPct || 0,
       },
+      whaleTracking: whaleData,
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    cache["arb"] = { data: response, ts: Date.now() };
+    res.json(response);
   } catch (error) {
     console.error('Arb Navigator error:', error);
     res.status(500).json({ error: error.message });
@@ -234,12 +322,33 @@ app.get('/api/agents/sentiment-radar', async (req, res) => {
   try {
     const symbol = req.query.symbol || 'AAPL';
     const cleanSymbol = symbol.split('/')[0];
+    const srcacheKey = `sr:${symbol}`;
+    if (cache[srcacheKey] && (Date.now() - cache[srcacheKey].ts < CACHE_TTL)) {
+      return res.json(cache[srcacheKey].data);
+    }
 
     // Use crypto news endpoint instead of company news
     const newsData = await fhGet('/news', {
       category: 'crypto',
       minId: 0
     });
+
+    const topNews = newsData.slice(0, 5);
+    
+    // Use Gemini AI for sentiment analysis
+    let aiSentiment = null;
+    try {
+      const headlines = topNews.map(n => n.headline).join('\n');
+      const prompt = `Analyze the sentiment of these cryptocurrency news headlines. Return ONLY a JSON object with: {"score": <number from -10 to 10>, "mood": "<EXTREME_FEAR|FEAR|NEUTRAL|GREED|EXTREME_GREED>", "summary": "<brief analysis>"}\n\nHeadlines:\n${headlines}`;
+      
+      const aiResponse = await geminiAnalyze(prompt);
+      const jsonMatch = aiResponse.match(/\{[\s\S]*\}/);
+      if (jsonMatch) {
+        aiSentiment = JSON.parse(jsonMatch[0]);
+      }
+    } catch (aiError) {
+      console.log('Gemini AI fallback to naive scoring:', aiError.message);
+    }
 
     const enrichedNews = newsData.slice(0, 20).map(item => {
       const score = naiveSentimentScore(item.headline + ' ' + item.summary);
@@ -259,12 +368,16 @@ app.get('/api/agents/sentiment-radar', async (req, res) => {
     const bullishPct = (bullishCount / enrichedNews.length) * 100;
     const bearishPct = (bearishCount / enrichedNews.length) * 100;
 
-    const mood = avgSentiment < -2 ? 'EXTREME_FEAR' : avgSentiment < -0.5 ? 'FEAR' : avgSentiment > 2 ? 'EXTREME_GREED' : avgSentiment > 0.5 ? 'GREED' : 'NEUTRAL';
+    // Use AI sentiment if available, otherwise fallback to naive
+    const finalScore = aiSentiment?.score !== undefined ? aiSentiment.score : avgSentiment;
+    const finalMood = aiSentiment?.mood || (avgSentiment < -2 ? 'EXTREME_FEAR' : avgSentiment < -0.5 ? 'FEAR' : avgSentiment > 2 ? 'EXTREME_GREED' : avgSentiment > 0.5 ? 'GREED' : 'NEUTRAL');
 
-    res.json({
+    const response = {
       symbol: cleanSymbol,
-      score: avgSentiment,
-      mood,
+      score: finalScore,
+      mood: finalMood,
+      aiPowered: !!aiSentiment,
+      aiSummary: aiSentiment?.summary,
       metrics: {
         bullishPercent: bullishPct,
         bearishPercent: bearishPct,
@@ -273,7 +386,10 @@ app.get('/api/agents/sentiment-radar', async (req, res) => {
       },
       news: enrichedNews.slice(0, 10),
       timestamp: new Date().toISOString(),
-    });
+    };
+
+    cache[srcacheKey] = { data: response, ts: Date.now() };
+    res.json(response);
   } catch (error) {
     console.error('Sentiment Radar error:', error);
     res.status(500).json({ error: error.message });

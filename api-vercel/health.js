@@ -10,15 +10,21 @@ export default async function handler(req, res) {
   }
 
   try {
+    const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
+    const BLOCKBERRY_API_KEY = process.env.BLOCKBERRY_API_KEY;
     const TWELVEDATA_API_KEY = process.env.TWELVEDATA_API_KEY;
     const FINNHUB_API_KEY = process.env.FINNHUB_API_KEY;
 
+    const geminiStatus = GEMINI_API_KEY ? 'Connected' : 'Not Configured';
+    const blockberryStatus = BLOCKBERRY_API_KEY ? 'Connected' : 'Not Configured';
     const twelveDataStatus = TWELVEDATA_API_KEY ? 'Connected' : 'Not Configured';
     const finnhubStatus = FINNHUB_API_KEY ? 'Connected' : 'Not Configured';
 
     res.status(200).json({
       status: 'healthy',
       timestamp: new Date().toISOString(),
+      gemini: geminiStatus,
+      blockberry: blockberryStatus,
       twelveData: twelveDataStatus,
       finnhub: finnhubStatus,
       endpoints: [

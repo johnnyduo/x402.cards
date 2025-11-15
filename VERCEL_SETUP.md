@@ -13,8 +13,15 @@
    In Vercel dashboard → Settings → Environment Variables, add:
 
    ```
+   # AI & On-Chain Data APIs
+   GEMINI_API_KEY=AIzaSyAfupL0oYcT-wMq6HE9xoTBMgzGdh3eDQs
+   BLOCKBERRY_API_KEY=EpAzX8JKozYq6bF9LagV4majIPzU55
+   
+   # Market Data APIs
    TWELVEDATA_API_KEY=87f2fa4ff46945ff84fef04b9edaee07
    FINNHUB_API_KEY=d4caq6hr01qudf6henrgd4caq6hr01qudf6hens0
+   
+   # IOTA EVM Testnet
    VITE_CHAIN_ID=1076
    VITE_RPC_URL=https://json-rpc.evm.testnet.iota.cafe
    VITE_STREAMING_PAYMENTS_ADDRESS=0x37E141fF46c431D8B8C781f0f1d9b6E1A88d93b9

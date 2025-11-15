@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 
 export interface APIStatus {
   connected: boolean;
+  geminiConnected: boolean;
+  blockberryConnected: boolean;
   twelveDataConnected: boolean;
   finnhubConnected: boolean;
   lastChecked: Date | null;
@@ -46,6 +48,8 @@ const API_BASE_URL = import.meta.env.PROD
 export function useAPIStatus() {
   const [status, setStatus] = useState<APIStatus>({
     connected: false,
+    geminiConnected: false,
+    blockberryConnected: false,
     twelveDataConnected: false,
     finnhubConnected: false,
     lastChecked: null,
@@ -80,6 +84,8 @@ export function useAPIStatus() {
         const data = await response.json();
         const newStatus = {
           connected: true,
+          geminiConnected: data.gemini === 'Connected',
+          blockberryConnected: data.blockberry === 'Connected',
           twelveDataConnected: data.twelveData === 'Connected',
           finnhubConnected: data.finnhub === 'Connected',
           lastChecked: new Date(),
@@ -94,6 +100,8 @@ export function useAPIStatus() {
       } else {
         const newStatus = {
           connected: false,
+          geminiConnected: false,
+          blockberryConnected: false,
           twelveDataConnected: false,
           finnhubConnected: false,
           lastChecked: new Date(),
@@ -108,6 +116,8 @@ export function useAPIStatus() {
       console.error('API health check failed:', error);
       const newStatus = {
         connected: false,
+        geminiConnected: false,
+        blockberryConnected: false,
         twelveDataConnected: false,
         finnhubConnected: false,
         lastChecked: new Date(),

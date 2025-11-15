@@ -1,5 +1,3 @@
-import { Button } from "@/components/ui/button";
-import { Wallet } from "lucide-react";
 import { NavLink } from "@/components/NavLink";
 
 export const Navigation = () => {
@@ -50,13 +48,7 @@ export const Navigation = () => {
           </div>
         </div>
 
-        <Button
-          variant="outline"
-          className="font-display tracking-wide border-white/20 text-white hover:border-secondary hover:bg-secondary/10"
-        >
-          <Wallet className="w-4 h-4 mr-2" />
-          Connect Wallet
-        </Button>
+        <appkit-button />
       </div>
     </nav>
   );

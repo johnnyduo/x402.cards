@@ -1,3 +1,5 @@
+@import '@reown/appkit/styles.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -325,6 +327,29 @@ All colors MUST be HSL.
   .react-flow__node {
     z-index: 10 !important;
   }
+
+  /* Reown AppKit Button Customization */
+  appkit-button {
+    --w3m-font-family: 'Space Grotesk', system-ui, -apple-system, sans-serif;
+    --w3m-accent: hsl(var(--secondary));
+    --w3m-color-mix: hsl(var(--background));
+    --w3m-color-mix-strength: 40;
+    --w3m-border-radius-master: 0.75rem;
+  }
+
+  appkit-button::part(button) {
+    font-weight: 500;
+    letter-spacing: 0.025em;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+  }
+
+  appkit-button::part(button):hover {
+    border-color: hsl(var(--secondary));
+    background: rgba(0, 229, 255, 0.1);
+  }
+}
 
   .react-flow__edge .react-flow__edge-path {
     stroke-linecap: round;

@@ -376,17 +376,17 @@ export default function Admin() {
                                     <div className="bg-black/20 rounded p-2">
                                       <div className="text-white/50">Signal</div>
                                       <div className={`font-bold ${
-                                        agentLiveData.data.signal === 'BUY' ? 'text-emerald-400' :
-                                        agentLiveData.data.signal === 'SELL' ? 'text-red-400' : 'text-yellow-400'
-                                      }`}>{agentLiveData.data.signal}</div>
+                                        agentLiveData.data.signal.action === 'BUY' ? 'text-emerald-400' :
+                                        agentLiveData.data.signal.action === 'SELL' ? 'text-red-400' : 'text-yellow-400'
+                                      }`}>{agentLiveData.data.signal.action}</div>
                                     </div>
                                     <div className="bg-black/20 rounded p-2">
                                       <div className="text-white/50">RSI</div>
-                                      <div className="text-white font-mono">{agentLiveData.data.rsi?.toFixed(2)}</div>
+                                      <div className="text-white font-mono">{agentLiveData.data.indicators?.rsi14?.toFixed(2)}</div>
                                     </div>
                                     <div className="bg-black/20 rounded p-2">
                                       <div className="text-white/50">Price</div>
-                                      <div className="text-secondary font-mono">${agentLiveData.data.price?.toFixed(2)}</div>
+                                      <div className="text-secondary font-mono">${agentLiveData.data.currentPrice?.toFixed(2)}</div>
                                     </div>
                                     <div className="bg-black/20 rounded p-2">
                                       <div className="text-white/50">Volatility</div>

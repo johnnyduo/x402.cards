@@ -97,7 +97,6 @@ const agents = [
 const Streams = () => {
   const [streamStates, setStreamStates] = useState<Record<number, boolean>>({});
 
-  // Count only non-addon active streams
   const activeCount = agents
     .filter(agent => agent.id !== 6 && streamStates[agent.id])
     .length;
@@ -106,7 +105,6 @@ const Streams = () => {
     .filter((agent) => streamStates[agent.id])
     .reduce((sum, agent) => sum + agent.pricePerSec, 0);
 
-  // Check if all non-addon streams (5 agents) are active
   const allStreamsActive = agents
     .filter(agent => agent.id !== 6)
     .every(agent => streamStates[agent.id]);
@@ -115,7 +113,7 @@ const Streams = () => {
     const newState = !allStreamsActive;
     const newStates: Record<number, boolean> = {};
     agents.forEach((agent) => {
-      if (agent.id !== 6) { // Exclude add-ons from master toggle
+      if (agent.id !== 6) {
         newStates[agent.id] = newState;
       }
     });
@@ -126,175 +124,163 @@ const Streams = () => {
     setStreamStates((prev) => ({ ...prev, [agentId]: active }));
   };
 
-  // Grid positions for 6 cards (2x3 layout)
-  const gridPositions = [
-    { row: 0, col: 0 }, // top-left
-    { row: 0, col: 1 }, // top-center
-    { row: 0, col: 2 }, // top-right
-    { row: 1, col: 0 }, // bottom-left
-    { row: 1, col: 1 }, // bottom-center
-    { row: 1, col: 2 }, // bottom-right
-  ];
-
   return (
     <div className="min-h-screen">
       <Navigation />
       <AppHeader />
 
       <section className="px-4 md:px-6 pb-20">
-        <div className="max-w-[1850px] mx-auto">
-          {/* Laptop Screen Container - Balanced card layout */}
+        <div className="max-w-[1400px] mx-auto">
           <div 
-            className="rounded-3xl relative overflow-visible min-h-[800px] p-4 md:p-12 lg:p-20"
+            className="rounded-3xl relative min-h-[900px] p-12"
             style={{
               background: 'radial-gradient(circle at 50% 50%, rgba(30, 58, 95, 0.4) 0%, rgba(17, 24, 39, 0.8) 100%)',
               backdropFilter: 'blur(20px)',
               border: '1px solid rgba(66, 153, 225, 0.2)',
-              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5), inset 0 0 40px rgba(66, 153, 225, 0.1)'
+              boxShadow: '0 20px 60px rgba(0, 0, 0, 0.5)'
             }}
           >
-            {/* Connecting lines from cards to central hub */}
-            <div className="absolute inset-0 pointer-events-none hidden lg:block overflow-hidden">
-              {agents.slice(0, 5).map((agent, idx) => {
-                const isActive = streamStates[agent.id] || false;
-                const pos = gridPositions[idx];
-                
-                // Card dimensions and spacing
-                const cardWidth = 260;
-                const cardHeight = 260;
-                const gapX = 170;
-                const gapY = 160;
-                const paddingX = 80;
-                const paddingY = 80;
-                
-                // Calculate card center
-                const cardCenterX = paddingX + (pos.col * (cardWidth + gapX)) + cardWidth / 2;
-                const cardCenterY = paddingY + (pos.row * (cardHeight + gapY)) + cardHeight / 2;
-                
-                // Hub center (same calculation as before)
-                const totalWidth = (cardWidth * 3) + (gapX * 2) + (paddingX * 2);
-                const totalHeight = (cardHeight * 2) + gapY + (paddingY * 2);
-                const hubCenterX = totalWidth / 2;
-                const hubCenterY = totalHeight / 2;
-                
-                // Calculate line dimensions
-                const lineWidth = Math.abs(hubCenterX - cardCenterX);
-                const lineHeight = Math.abs(hubCenterY - cardCenterY);
-                
-                // Determine line position and direction
-                const isLeft = cardCenterX < hubCenterX;
-                const isTop = cardCenterY < hubCenterY;
-                
-                return (
-                  <div key={agent.id}>
-                    {/* Vertical line */}
-                    <div
-                      className={`absolute transition-all duration-500 ${
-                        isActive ? 'opacity-100' : 'opacity-30'
-                      }`}
-                      style={{
-                        left: `${cardCenterX}px`,
-                        top: isTop ? `${cardCenterY}px` : `${hubCenterY}px`,
-                        width: '2px',
-                        height: `${lineHeight}px`,
-                        background: isActive 
-                          ? 'linear-gradient(180deg, rgba(0, 229, 255, 0.8), rgba(66, 153, 225, 0.6))'
-                          : 'rgba(66, 153, 225, 0.4)',
-                        boxShadow: isActive ? '0 0 8px rgba(0, 229, 255, 0.5)' : 'none',
-                      }}
-                    >
-                      {isActive && (
-                        <div 
-                          className="absolute w-2 h-2 rounded-full bg-secondary"
-                          style={{
-                            left: '50%',
-                            transform: 'translateX(-50%)',
-                            animation: 'flowVertical 2s ease-in-out infinite',
-                            boxShadow: '0 0 8px rgba(0, 229, 255, 0.8)',
-                          }}
-                        />
-                      )}
-                    </div>
-                    
-                    {/* Horizontal line */}
-                    <div
-                      className={`absolute transition-all duration-500 ${
-                        isActive ? 'opacity-100' : 'opacity-30'
-                      }`}
-                      style={{
-                        left: isLeft ? `${cardCenterX}px` : `${hubCenterX}px`,
-                        top: isTop ? `${hubCenterY}px` : `${cardCenterY}px`,
-                        width: `${lineWidth}px`,
-                        height: '2px',
-                        background: isActive 
-                          ? 'linear-gradient(90deg, rgba(66, 153, 225, 0.6), rgba(0, 229, 255, 0.8))'
-                          : 'rgba(66, 153, 225, 0.4)',
-                        boxShadow: isActive ? '0 0 8px rgba(0, 229, 255, 0.5)' : 'none',
-                      }}
-                    >
-                      {isActive && (
-                        <div 
-                          className="absolute w-2 h-2 rounded-full bg-secondary"
-                          style={{
-                            top: '50%',
-                            transform: 'translateY(-50%)',
-                            animation: 'flowHorizontal 2s ease-in-out infinite',
-                            boxShadow: '0 0 8px rgba(0, 229, 255, 0.8)',
-                          }}
-                        />
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
-
-            {/* Central Hub - Perfect centered positioning with expanded spacing */}
-            <div className="hidden lg:block">
-              <CentralHub
-                activeCount={activeCount}
-                totalCostPerSec={totalCostPerSec}
-                allStreamsActive={allStreamsActive}
-                onToggleAll={handleToggleAll}
+            {/* Connection lines SVG */}
+            <svg className="absolute top-0 left-0 w-full h-full pointer-events-none hidden lg:block" style={{ zIndex: 1 }}>
+              <defs>
+                <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="3" orient="auto" markerUnits="strokeWidth">
+                  <path d="M0,0 L0,6 L9,3 z" fill="rgba(0, 229, 255, 0.8)" />
+                </marker>
+              </defs>
+              
+              {/* Card 1 (top-left) to hub */}
+              <path
+                d="M 160 280 L 160 450 L 690 450"
+                stroke={streamStates[1] ? "rgba(0, 229, 255, 0.8)" : "rgba(66, 153, 225, 0.3)"}
+                strokeWidth="2"
+                strokeDasharray="6 4"
+                fill="none"
+                markerEnd={streamStates[1] ? "url(#arrow)" : ""}
+                className="transition-all duration-300"
               />
-            </div>
-            
-            {/* Mobile/Tablet Master Control */}
-            <div className="lg:hidden sticky top-20 z-50 mb-6">
-              <div className="glass-strong p-4 rounded-2xl flex items-center justify-between">
-                <div>
-                  <div className="text-sm font-display text-white/60">Active: {activeCount} / 6</div>
-                  <div className="text-lg font-display font-bold gradient-text">{totalCostPerSec.toFixed(4)} USDC/s</div>
-                </div>
-                <Button
-                  onClick={handleToggleAll}
-                  className={`rounded-xl px-6 py-3 font-display font-bold text-xs ${
-                    allStreamsActive
-                      ? "bg-secondary hover:bg-secondary/90 text-black"
-                      : "bg-white/10 hover:bg-white/20 text-white border-2 border-white/30"
-                  }`}
-                >
-                  {allStreamsActive ? "CLOSE ALL" : "OPEN ALL"}
-                </Button>
-              </div>
-            </div>
+              
+              {/* Card 2 (top-center) to hub */}
+              <path
+                d="M 690 280 L 690 450"
+                stroke={streamStates[2] ? "rgba(0, 229, 255, 0.8)" : "rgba(66, 153, 225, 0.3)"}
+                strokeWidth="2"
+                strokeDasharray="6 4"
+                fill="none"
+                markerEnd={streamStates[2] ? "url(#arrow)" : ""}
+                className="transition-all duration-300"
+              />
+              
+              {/* Card 3 (top-right) to hub */}
+              <path
+                d="M 1220 280 L 1220 450 L 690 450"
+                stroke={streamStates[3] ? "rgba(0, 229, 255, 0.8)" : "rgba(66, 153, 225, 0.3)"}
+                strokeWidth="2"
+                strokeDasharray="6 4"
+                fill="none"
+                markerEnd={streamStates[3] ? "url(#arrow)" : ""}
+                className="transition-all duration-300"
+              />
+              
+              {/* Card 4 (bottom-left) to hub */}
+              <path
+                d="M 160 620 L 160 450 L 690 450"
+                stroke={streamStates[4] ? "rgba(0, 229, 255, 0.8)" : "rgba(66, 153, 225, 0.3)"}
+                strokeWidth="2"
+                strokeDasharray="6 4"
+                fill="none"
+                markerEnd={streamStates[4] ? "url(#arrow)" : ""}
+                className="transition-all duration-300"
+              />
+              
+              {/* Card 5 (bottom-right) to hub */}
+              <path
+                d="M 1220 620 L 1220 450 L 690 450"
+                stroke={streamStates[5] ? "rgba(0, 229, 255, 0.8)" : "rgba(66, 153, 225, 0.3)"}
+                strokeWidth="2"
+                strokeDasharray="6 4"
+                fill="none"
+                markerEnd={streamStates[5] ? "url(#arrow)" : ""}
+                className="transition-all duration-300"
+              />
+            </svg>
 
-            {/* Agent Cards Grid - Responsive balanced layout */}
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 md:gap-12 lg:gap-x-[170px] lg:gap-y-[160px] relative">
-              {agents.map((agent, idx) => (
+            {/* Layout grid */}
+            <div className="relative" style={{ minHeight: '900px' }}>
+              {/* Left column cards */}
+              <div className="absolute left-0 top-0 space-y-8" style={{ width: '320px', zIndex: 10 }}>
                 <AgentCard
-                  key={agent.id}
-                  name={agent.name}
-                  category={agent.category}
-                  description={agent.description}
-                  pricePerSec={agent.id === 6 ? "COMING SOON" : `${agent.pricePerSec.toFixed(4)} USDC / SEC`}
-                  icon={agent.icon}
-                  features={agent.features}
-                  isStreaming={streamStates[agent.id] || false}
-                  onToggleStream={(active) => handleToggleStream(agent.id, active)}
-                  isAddon={agent.id === 6}
+                  name={agents[0].name}
+                  category={agents[0].category}
+                  description={agents[0].description}
+                  pricePerSec={`${agents[0].pricePerSec.toFixed(4)} USDC / SEC`}
+                  icon={agents[0].icon}
+                  features={agents[0].features}
+                  isStreaming={streamStates[1] || false}
+                  onToggleStream={(active) => handleToggleStream(1, active)}
                 />
-              ))}
+                <AgentCard
+                  name={agents[3].name}
+                  category={agents[3].category}
+                  description={agents[3].description}
+                  pricePerSec={`${agents[3].pricePerSec.toFixed(4)} USDC / SEC`}
+                  icon={agents[3].icon}
+                  features={agents[3].features}
+                  isStreaming={streamStates[4] || false}
+                  onToggleStream={(active) => handleToggleStream(4, active)}
+                />
+              </div>
+
+              {/* Center column - Hub and cards */}
+              <div className="absolute left-1/2 -translate-x-1/2 top-0" style={{ zIndex: 20 }}>
+                <div className="space-y-8">
+                  <div style={{ width: '320px' }}>
+                    <AgentCard
+                      name={agents[1].name}
+                      category={agents[1].category}
+                      description={agents[1].description}
+                      pricePerSec={`${agents[1].pricePerSec.toFixed(4)} USDC / SEC`}
+                      icon={agents[1].icon}
+                      features={agents[1].features}
+                      isStreaming={streamStates[2] || false}
+                      onToggleStream={(active) => handleToggleStream(2, active)}
+                    />
+                  </div>
+                  
+                  {/* Central Hub */}
+                  <div className="flex justify-center my-8">
+                    <CentralHub
+                      activeCount={activeCount}
+                      totalCostPerSec={totalCostPerSec}
+                      allStreamsActive={allStreamsActive}
+                      onToggleAll={handleToggleAll}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Right column cards */}
+              <div className="absolute right-0 top-0 space-y-8" style={{ width: '320px', zIndex: 10 }}>
+                <AgentCard
+                  name={agents[2].name}
+                  category={agents[2].category}
+                  description={agents[2].description}
+                  pricePerSec={`${agents[2].pricePerSec.toFixed(4)} USDC / SEC`}
+                  icon={agents[2].icon}
+                  features={agents[2].features}
+                  isStreaming={streamStates[3] || false}
+                  onToggleStream={(active) => handleToggleStream(3, active)}
+                />
+                <AgentCard
+                  name={agents[4].name}
+                  category={agents[4].category}
+                  description={agents[4].description}
+                  pricePerSec={`${agents[4].pricePerSec.toFixed(4)} USDC / SEC`}
+                  icon={agents[4].icon}
+                  features={agents[4].features}
+                  isStreaming={streamStates[5] || false}
+                  onToggleStream={(active) => handleToggleStream(5, active)}
+                />
+              </div>
             </div>
 
             {/* Floating Particles - Ambient background glow */}

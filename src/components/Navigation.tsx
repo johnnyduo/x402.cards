@@ -109,13 +109,6 @@ export const Navigation = () => {
               Streams
             </NavLink>
             <NavLink
-              to="/flow"
-              className="text-sm font-body text-white/50 hover:text-white transition-colors"
-              activeClassName="text-white font-semibold"
-            >
-              Flow
-            </NavLink>
-            <NavLink
               to="/active"
               className="text-sm font-body text-white/50 hover:text-white transition-colors"
               activeClassName="text-white font-semibold"
@@ -128,6 +121,13 @@ export const Navigation = () => {
               activeClassName="text-white font-semibold"
             >
               Developers
+            </NavLink>
+            <NavLink
+              to="/admin"
+              className="text-sm font-body text-white/50 hover:text-white transition-colors"
+              activeClassName="text-white font-semibold"
+            >
+              Admin
             </NavLink>
           </div>
         </div>

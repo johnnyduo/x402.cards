@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.26;
 
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/token/ERC20/utils/SafeERC20.sol";
@@ -556,7 +556,8 @@ contract X402StreamingPayments is Ownable, ReentrancyGuard, EIP712 {
         uint256 claimable,
         bool active
     ) {
-        Stream storage stream = streams[streamId];
+        Stream memory stream = streams[streamId];
+        claimable = getClaimableAmount(streamId);
         return (
             stream.payer,
             stream.agentId,
@@ -565,7 +566,7 @@ contract X402StreamingPayments is Ownable, ReentrancyGuard, EIP712 {
             stream.startTime,
             stream.endTime,
             stream.totalPaid,
-            getClaimableAmount(streamId),
+            claimable,
             stream.active
         );
     }

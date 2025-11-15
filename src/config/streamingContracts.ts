@@ -1,6 +1,6 @@
-// Contract addresses (update after deployment)
-export const STREAMING_PAYMENTS_ADDRESS = "0x..." as `0x${string}`;
-export const AGENT_REGISTRY_ADDRESS = "0x..." as `0x${string}`;
+// Contract addresses (IOTA EVM Testnet)
+export const STREAMING_PAYMENTS_ADDRESS = "0x37E141fF46c431D8B8C781f0f1d9b6E1A88d93b9" as `0x${string}`;
+export const AGENT_REGISTRY_ADDRESS = "0xA3630777E25021B1DA2b5BA0a5F5Eed0bB5f0c0d" as `0x${string}`;
 
 // ABI for streaming payments contract
 export const STREAMING_PAYMENTS_ABI = [

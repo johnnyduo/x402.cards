@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.24;
+pragma solidity ^0.8.26;
 
 import "@openzeppelin/contracts/token/ERC721/extensions/ERC721URIStorage.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/utils/Counters.sol";
 
 /**
  * @title EIP8004AgentRegistry
@@ -11,11 +10,9 @@ import "@openzeppelin/contracts/utils/Counters.sol";
  * @dev ERC-721 based agent registration with metadata and discovery
  */
 contract EIP8004AgentRegistry is ERC721URIStorage, Ownable {
-    using Counters for Counters.Counter;
-    
     // ============ State Variables ============
     
-    Counters.Counter private _agentIdCounter;
+    uint256 private _agentIdCounter;
     
     /// @notice Agent ID => Key => Metadata value
     mapping(uint256 => mapping(string => bytes)) private _agentMetadata;
@@ -49,7 +46,7 @@ contract EIP8004AgentRegistry is ERC721URIStorage, Ownable {
     
     constructor() ERC721("EIP8004 Agent", "AGENT") Ownable(msg.sender) {
         // Start agent IDs at 1
-        _agentIdCounter.increment();
+        _agentIdCounter = 1;
     }
     
     // ============ Registration Functions ============
@@ -64,8 +61,10 @@ contract EIP8004AgentRegistry is ERC721URIStorage, Ownable {
         string memory tokenURI,
         MetadataEntry[] calldata metadata
     ) external returns (uint256 agentId) {
-        agentId = _agentIdCounter.current();
-        _agentIdCounter.increment();
+        agentId = _agentIdCounter;
+        unchecked {
+            _agentIdCounter++;
+        }
         
         _safeMint(msg.sender, agentId);
         _setTokenURI(agentId, tokenURI);
@@ -83,8 +82,10 @@ contract EIP8004AgentRegistry is ERC721URIStorage, Ownable {
      * @notice Register a new agent with only URI
      */
     function register(string memory tokenURI) external returns (uint256 agentId) {
-        agentId = _agentIdCounter.current();
-        _agentIdCounter.increment();
+        agentId = _agentIdCounter;
+        unchecked {
+            _agentIdCounter++;
+        }
         
         _safeMint(msg.sender, agentId);
         _setTokenURI(agentId, tokenURI);
@@ -97,8 +98,10 @@ contract EIP8004AgentRegistry is ERC721URIStorage, Ownable {
      * @notice Register a new agent (URI to be set later)
      */
     function register() external returns (uint256 agentId) {
-        agentId = _agentIdCounter.current();
-        _agentIdCounter.increment();
+        agentId = _agentIdCounter;
+        unchecked {
+            _agentIdCounter++;
+        }
         
         _safeMint(msg.sender, agentId);
         
@@ -179,7 +182,7 @@ contract EIP8004AgentRegistry is ERC721URIStorage, Ownable {
      * @notice Get total number of registered agents
      */
     function totalAgents() external view returns (uint256) {
-        return _agentIdCounter.current() - 1;
+        return _agentIdCounter - 1;
     }
     
     /**

@@ -36,18 +36,25 @@ export function useAgentStreamStatus(agentId: number) {
 
   // Extract stream details
   const isActive = streamDetails ? (streamDetails as any)[8] : false;
+  const endTime = streamDetails ? (streamDetails as any)[5] : 0n;
   const isStreaming = hasActiveStream && isActive;
   const claimableAmount = streamDetails ? (streamDetails as any)[7] : 0n;
   const totalPaid = streamDetails ? (streamDetails as any)[6] : 0n;
+  
+  // Check if stream is expired (past endTime)
+  const currentTime = BigInt(Math.floor(Date.now() / 1000));
+  const isExpired = hasActiveStream && endTime > 0n && currentTime >= endTime;
 
   return {
     streamId,
     hasActiveStream,
     isActive,
     isStreaming, // True only if stream exists AND is active (not paused)
+    isExpired, // True if stream has passed its endTime
     streamDetails,
     claimableAmount, // Real-time USDC streamed (not yet claimed)
     totalPaid, // Total USDC already paid/claimed
+    endTime, // When the stream expires
     refetchStream,
     refetchDetails,
   };

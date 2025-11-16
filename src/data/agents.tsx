@@ -118,9 +118,9 @@ export const AGENTS: Agent[] = [
   {
     id: 5,
     name: 'Risk Sentinel',
-    category: 'RISK',
+    category: 'COST',
     description: 'Scores systemic debt & collateral exposures.',
-    pricePerSec: 0.0002,
+    pricePerSec: 0.001,
     icon: <Shield className="w-5 h-5" />,
     features: [
       'Real-time liquidation risk scoring',
@@ -141,15 +141,15 @@ export const AGENTS: Agent[] = [
   {
     id: 6,
     name: 'AI Crawler Service',
-    category: 'REVENUE',
-    description: 'Deploy AI crawlers to earn passive income from data collection.',
-    pricePerSec: 0.0003,
+    category: 'COST',
+    description: 'Deploy AI crawlers to collect and index web data.',
+    pricePerSec: 0.003,
     icon: <Sparkles className="w-5 h-5 text-emerald-400" />,
     features: [
       'Automated web data collection',
       'Real-time content indexing',
-      'API monetization streams',
-      'Earn 0.0003 USDC/sec per crawler',
+      'API integration support',
+      'Cost: 0.003 USDC/sec per crawler',
     ],
     dataSources: [
       'Custom web scraping targets (configurable)',

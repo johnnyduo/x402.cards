@@ -1,4 +1,6 @@
-import { useState, useCallback, useEffect } from "react";
+import { useState, useCallback, useEffect, useMemo } from "react";
+import { useNavigate } from "react-router-dom";
+import { useAccount } from "wagmi";
 import { Navigation } from "@/components/Navigation";
 import { AppHeader } from "@/components/AppHeader";
 import { Button } from "@/components/ui/button";
@@ -88,7 +90,7 @@ const agents = [
   {
     id: 5,
     name: "Risk Sentinel",
-    category: "RISK",
+    category: "COST",
     description: "Scores systemic debt & collateral exposures.",
     pricePerSec: 0.001,
     icon: <Shield className="w-6 h-6 text-white" />,
@@ -102,15 +104,15 @@ const agents = [
   {
     id: 6,
     name: "AI Crawler Service",
-    category: "REVENUE",
-    description: "Deploy AI crawlers to earn passive income from data collection.",
-    pricePerSec: 0.0003,
+    category: "COST",
+    description: "Deploy AI crawlers to collect and index web data.",
+    pricePerSec: 0.003,
     icon: <Sparkles className="w-6 h-6 text-emerald-400" />,
     features: [
       "Automated web data collection",
       "Real-time content indexing",
-      "API monetization streams",
-      "Earn 0.0003 USDC/sec per crawler"
+      "API integration support",
+      "Cost: 0.003 USDC/sec per crawler"
     ],
   },
 ];
@@ -196,11 +198,13 @@ const AgentNode = ({ data }: { data: any }) => {
                     ? data.active
                       ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
                       : 'bg-emerald-900/30 text-emerald-600 border border-emerald-800/30'
-                    : data.active 
-                      ? 'bg-secondary/20 text-secondary border border-secondary/30' 
-                      : 'bg-gray-700/50 text-gray-400 border border-gray-600/30'
+                    : data.expired
+                      ? 'bg-amber-500/20 text-amber-400 border border-amber-500/30'
+                      : data.active 
+                        ? 'bg-secondary/20 text-secondary border border-secondary/30' 
+                        : 'bg-gray-700/50 text-gray-400 border border-gray-600/30'
                 }`}>
-                  {data.active ? 'ON' : 'OFF'}
+                  {isAddon ? (data.active ? 'ON' : 'OFF') : data.expired ? 'EXPIRED' : data.active ? 'ON' : 'OFF'}
                 </span>
               </div>
             </div>
@@ -398,7 +402,7 @@ const HubNode = ({ data }: any) => (
     <div className="text-center">
       <div className="flex items-center justify-center gap-2 mb-2">
         <Activity className="w-4 h-4 text-secondary" />
-        <span className="text-xs font-display text-white/70 tracking-wider uppercase">x402 Active Agents</span>
+        <span className="text-xs font-display text-white/70 tracking-wider uppercase">x402.Cards Active Agents</span>
       </div>
       <div className="text-4xl font-display font-bold text-white mb-2">
         {data.activeCount} <span className="text-white/40">/ 6</span>
@@ -437,21 +441,19 @@ const HubNode = ({ data }: any) => (
       </div>
       
       <button
-        onClick={data.onToggle}
-        className={`w-full py-3 rounded-xl text-sm font-display font-bold tracking-wider transition-all duration-500 ${
-          data.active
-            ? 'bg-secondary hover:bg-secondary/90 text-black shadow-2xl'
-            : 'bg-white/10 hover:bg-white/20 text-white border-2 border-white/30'
-        }`}
+        onClick={() => {
+          window.location.href = '/agents';
+        }}
+        className="w-full py-3 rounded-xl text-sm font-display font-bold tracking-wider transition-all duration-500 bg-gradient-to-r from-secondary to-primary hover:opacity-90 text-black shadow-2xl"
         style={{
-          boxShadow: data.active ? '0 0 60px rgba(0, 229, 255, 0.5)' : 'none',
+          boxShadow: '0 0 40px rgba(0, 229, 255, 0.4)',
           pointerEvents: 'auto',
           cursor: 'pointer',
           position: 'relative',
           zIndex: 300,
         }}
       >
-        {data.active ? 'CLOSE ALL' : 'OPEN ALL'}
+        GO TO AGENTS →
       </button>
     </div>
   </div>
@@ -464,9 +466,11 @@ const nodeTypes = {
 };
 
 const Streams = () => {
+  const { address } = useAccount();
+  
   // Check on-chain status for agents 1-2 to sync with Developers page
-  const { isStreaming: agent1Streaming, claimableAmount: agent1Claimable } = useAgentStreamStatus(1);
-  const { isStreaming: agent2Streaming, claimableAmount: agent2Claimable } = useAgentStreamStatus(2);
+  const { isStreaming: agent1Streaming, isExpired: agent1Expired, claimableAmount: agent1Claimable, totalPaid: agent1TotalPaid } = useAgentStreamStatus(1);
+  const { isStreaming: agent2Streaming, isExpired: agent2Expired, claimableAmount: agent2Claimable, totalPaid: agent2TotalPaid } = useAgentStreamStatus(2);
   
   // Use local state only for visualization of agents 3-6
   const [localStreamStates, setLocalStreamStates] = useState<Record<number, boolean>>({});
@@ -481,17 +485,29 @@ const Streams = () => {
     6: localStreamStates[6] || false,
   };
 
+  // Build expired states for agents 1-2 (on-chain only)
+  const expiredStates = {
+    1: agent1Expired || false,
+    2: agent2Expired || false,
+  };
+
   const [isAddonModalOpen, setIsAddonModalOpen] = useState(false);
   const [openModalId, setOpenModalId] = useState<number | null>(null);
+  
+  // totalSpent is calculated from sum of all agentAccumulated values
   const [totalSpent, setTotalSpent] = useState(0);
-  const [totalEarned, setTotalEarned] = useState(0);
+  const [totalEarned, setTotalEarned] = useState(() => {
+    if (!address) return 0;
+    const stored = localStorage.getItem(`streams_total_earned_${address}`);
+    return stored ? parseFloat(stored) : 0;
+  });
   const [agentAccumulated, setAgentAccumulated] = useState<Record<number, number>>({});
 
   const activeCount = agents.filter(agent => streamStates[agent.id]).length;
-  const totalCostPerSec = agents.filter((agent) => agent.id !== 6 && streamStates[agent.id]).reduce((sum, agent) => sum + agent.pricePerSec, 0);
-  const addonRevenue = streamStates[6] ? 0.0003 : 0; // AI Crawler generates revenue
+  const totalCostPerSec = agents.filter((agent) => streamStates[agent.id]).reduce((sum, agent) => sum + agent.pricePerSec, 0);
+  const addonRevenue = 0; // No revenue agents currently
   const netRatePerSec = totalCostPerSec - addonRevenue; // Net rate after revenue
-  const allStreamsActive = agents.filter(agent => agent.id !== 6).every(agent => streamStates[agent.id]);
+  const allStreamsActive = agents.every(agent => streamStates[agent.id]);
 
   // Open settings modal to control stream activation (on-chain)
   const handleToggleStream = useCallback((agentId: number) => {
@@ -501,22 +517,24 @@ const Streams = () => {
 
   // Note: handleToggleAll removed - users should activate streams individually via modals
 
-  // Sync on-chain accumulated amounts for agents 1-2 (same as Dev page)
+  // Sync on-chain accumulated amounts for agents 1-2 (totalPaid + claimable)
   useEffect(() => {
-    if (!agent1Streaming && !agent2Streaming) return;
-    
     setAgentAccumulated(prev => {
       const newAccumulated = { ...prev };
       
-      // Use real on-chain claimable amount for agents 1-2
-      if (agent1Streaming && agent1Claimable) {
-        const newValue = Number(formatUnits(agent1Claimable, 6));
+      // For agents 1-2: total spent = totalPaid + claimable
+      if (agent1Streaming || agent1TotalPaid) {
+        const paid = agent1TotalPaid ? Number(formatUnits(agent1TotalPaid, 6)) : 0;
+        const claimable = agent1Claimable ? Number(formatUnits(agent1Claimable, 6)) : 0;
+        const newValue = paid + claimable;
         if (Math.abs((prev[1] || 0) - newValue) > 0.0001) {
           newAccumulated[1] = newValue;
         }
       }
-      if (agent2Streaming && agent2Claimable) {
-        const newValue = Number(formatUnits(agent2Claimable, 6));
+      if (agent2Streaming || agent2TotalPaid) {
+        const paid = agent2TotalPaid ? Number(formatUnits(agent2TotalPaid, 6)) : 0;
+        const claimable = agent2Claimable ? Number(formatUnits(agent2Claimable, 6)) : 0;
+        const newValue = paid + claimable;
         if (Math.abs((prev[2] || 0) - newValue) > 0.0001) {
           newAccumulated[2] = newValue;
         }
@@ -524,14 +542,16 @@ const Streams = () => {
       
       return JSON.stringify(newAccumulated) !== JSON.stringify(prev) ? newAccumulated : prev;
     });
-  }, [agent1Streaming, agent1Claimable, agent2Streaming, agent2Claimable]);
+  }, [agent1Streaming, agent1Claimable, agent1TotalPaid, agent2Streaming, agent2Claimable, agent2TotalPaid]);
 
-  // Real-time spending/earning tracker (reduced frequency for performance)
+  // Calculate totalSpent from all agent accumulated amounts
+  const totalSpentCalculated = useMemo(() => {
+    return Object.values(agentAccumulated).reduce((sum, val) => sum + val, 0);
+  }, [agentAccumulated]);
+
+  // Real-time spending/earning tracker for local agents 3-6 (reduced frequency for performance)
   useEffect(() => {
     const interval = setInterval(() => {
-      if (totalCostPerSec > 0) {
-        setTotalSpent(prev => prev + (totalCostPerSec * 3)); // Multiply by 3 since we update every 3 seconds
-      }
       if (addonRevenue > 0) {
         setTotalEarned(prev => prev + (addonRevenue * 3));
       }
@@ -551,7 +571,18 @@ const Streams = () => {
     }, 3000); // Update every 3 seconds instead of 1 (less CPU load)
 
     return () => clearInterval(interval);
-  }, [totalCostPerSec, addonRevenue, streamStates]);
+  }, [addonRevenue, streamStates]);
+
+  // Update totalSpent state
+  useEffect(() => {
+    setTotalSpent(totalSpentCalculated);
+  }, [totalSpentCalculated]);
+
+  // Save totalEarned to localStorage
+  useEffect(() => {
+    if (!address) return;
+    localStorage.setItem(`streams_total_earned_${address}`, totalEarned.toString());
+  }, [address, totalEarned]);
 
   const initialNodes: Node[] = [
     // Top row agents
@@ -567,6 +598,7 @@ const Streams = () => {
         pricePerSec: agents[0].pricePerSec,
         icon: agents[0].icon,
         active: streamStates[1] || false,
+        expired: expiredStates[1] || false,
         onToggle: () => handleToggleStream(1),
         onSettings: () => setOpenModalId(1),
         accumulated: 0,
@@ -584,6 +616,7 @@ const Streams = () => {
         pricePerSec: agents[1].pricePerSec,
         icon: agents[1].icon,
         active: streamStates[2] || false,
+        expired: expiredStates[2] || false,
         onToggle: () => handleToggleStream(2),
         onSettings: () => setOpenModalId(2),
         accumulated: 0,
@@ -601,6 +634,7 @@ const Streams = () => {
         pricePerSec: agents[2].pricePerSec,
         icon: agents[2].icon,
         active: streamStates[3] || false,
+        expired: false,
         onToggle: () => handleToggleStream(3),
         onSettings: () => setOpenModalId(3),
         accumulated: 0,
@@ -619,6 +653,7 @@ const Streams = () => {
         pricePerSec: agents[3].pricePerSec,
         icon: agents[3].icon,
         active: streamStates[4] || false,
+        expired: false,
         onToggle: () => handleToggleStream(4),
         onSettings: () => setOpenModalId(4),
         accumulated: 0,
@@ -636,6 +671,7 @@ const Streams = () => {
         pricePerSec: agents[4].pricePerSec,
         icon: agents[4].icon,
         active: streamStates[5] || false,
+        expired: false,
         onToggle: () => handleToggleStream(5),
         onSettings: () => setOpenModalId(5),
         accumulated: 0,
@@ -653,8 +689,9 @@ const Streams = () => {
         pricePerSec: agents[5].pricePerSec,
         icon: agents[5].icon,
         active: streamStates[6] || false,
+        expired: false,
         onToggle: () => handleToggleStream(6),
-        onSettings: () => setIsAddonModalOpen(true),
+        onSettings: () => setOpenModalId(6),
         isAddon: true,
         accumulated: 0,
       }
@@ -669,7 +706,7 @@ const Streams = () => {
         activeCount,
         totalCost: totalCostPerSec,
         netRate: netRatePerSec,
-        revenueActive: streamStates[6],
+        revenueActive: false, // No revenue agents currently
         active: allStreamsActive,
         onToggle: undefined, // Disabled - activate agents individually via their modals
         totalSpent,

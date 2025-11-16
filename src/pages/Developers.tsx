@@ -727,7 +727,7 @@ function LiveAgentData() {
               <AgentStreamToggle
                 agentId={5}
                 agentName="Risk Sentinel"
-                pricePerSecond={0.0002}
+                pricePerSecond={0.001}
               />
             </div>
           )}
@@ -818,7 +818,7 @@ function LiveAgentData() {
               <AgentStreamToggle
                 agentId={6}
                 agentName="AI Crawler Service"
-                pricePerSecond={0.0003}
+                pricePerSecond={0.003}
               />
             </div>
           )}

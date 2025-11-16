@@ -446,49 +446,26 @@ export default function Admin() {
                     Register and manage AI agents on the x402 payment protocol
                   </p>
                 </div>
-                <div className="flex flex-col gap-2">
-                  {/* Network Status - Top Row */}
-                  <div className="flex gap-2">
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/30 border border-white/10">
-                      <div className={`w-2 h-2 rounded-full ${
-                        apiStatus.connected ? 'bg-emerald-400' : 'bg-red-400'
-                      } animate-pulse`} />
-                      <span className="text-xs text-white/70">API Server</span>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/30 border border-amber-500/30">
-                      <Zap className="w-3 h-3 text-amber-400" />
-                      <span className="text-xs text-white/70">Gas:</span>
-                      <span className="text-xs text-amber-400 font-mono font-semibold">
-                        {gasPrice ? `${formatGwei(gasPrice)} Gwei` : '...'}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/30 border border-secondary/30">
-                      <div className={`w-2 h-2 rounded-full ${
-                        apiStatus.geminiConnected ? 'bg-emerald-400' : 'bg-amber-400'
-                      }`} />
-                      <span className="text-xs text-secondary font-semibold">Gemini AI</span>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/30 border border-secondary/30">
-                      <div className={`w-2 h-2 rounded-full ${
-                        apiStatus.blockberryConnected ? 'bg-emerald-400' : 'bg-amber-400'
-                      }`} />
-                      <span className="text-xs text-secondary font-semibold">IOTA On-Chain</span>
-                    </div>
+                <div className="flex gap-2">
+                  {/* Core Status Indicators */}
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/30 border border-white/10">
+                    <div className={`w-2 h-2 rounded-full ${
+                      apiStatus.connected ? 'bg-emerald-400' : 'bg-red-400'
+                    } animate-pulse`} />
+                    <span className="text-xs text-white/70">API Server</span>
                   </div>
-                  {/* Market Data APIs - Bottom Row */}
-                  <div className="flex gap-2">
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/30 border border-white/10">
-                      <div className={`w-2 h-2 rounded-full ${
-                        apiStatus.twelveDataConnected ? 'bg-emerald-400' : 'bg-red-400'
-                      }`} />
-                      <span className="text-xs text-white/60">Twelve Data</span>
-                    </div>
-                    <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/30 border border-white/10">
-                      <div className={`w-2 h-2 rounded-full ${
-                        apiStatus.finnhubConnected ? 'bg-emerald-400' : 'bg-red-400'
-                      }`} />
-                      <span className="text-xs text-white/60">Finnhub</span>
-                    </div>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/30 border border-amber-500/30">
+                    <Zap className="w-3 h-3 text-amber-400" />
+                    <span className="text-xs text-white/70">Gas:</span>
+                    <span className="text-xs text-amber-400 font-mono font-semibold">
+                      {gasPrice ? `${formatGwei(gasPrice)} Gwei` : '...'}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-black/30 border border-secondary/30">
+                    <div className={`w-2 h-2 rounded-full ${
+                      apiStatus.blockberryConnected ? 'bg-emerald-400' : 'bg-amber-400'
+                    }`} />
+                    <span className="text-xs text-secondary font-semibold">IOTA On-Chain</span>
                   </div>
                 </div>
               </div>

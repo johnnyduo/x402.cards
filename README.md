@@ -1,154 +1,432 @@
-# **x402.Cards**
+# x402.Cards - Streaming Intelligence Dashboard
 
-## *Autonomous Streaming Intelligence Dashboard · Powered by IOTA EVM & x402*
+<div align="center">
 
-### 🚀 Overview
+[![IOTA EVM](https://img.shields.io/badge/IOTA-EVM-00E5FF?style=for-the-badge&logo=iota)](https://evm.iota.org/)
+[![Solidity](https://img.shields.io/badge/Solidity-0.8.28-363636?style=for-the-badge&logo=solidity)](https://soliditylang.org/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
+[![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
+[![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?style=for-the-badge&logo=vite)](https://vitejs.dev/)
 
-x402.Cards is a real-time DeFi intelligence platform where users activate **flip-card agents** that stream live data and pay **per second** using x402 streaming payments on IOTA EVM.
+**Autonomous DeFi intelligence agents with per-second streaming payments on IOTA EVM**
+
+[Live Demo](https://your-deployment.vercel.app) | [Documentation](#-features) | [Contracts](#-smart-contracts) | [API](#-api-endpoints)
+
+</div>
 
 ---
 
-## 📦 Deployment on Vercel
+## 🎯 Overview
 
-### Quick Deploy
+x402.Cards is a next-generation DeFi intelligence platform that revolutionizes how users access on-chain data. Instead of traditional subscriptions, users activate AI-powered agents that stream real-time market intelligence while automatically paying per second via smart contracts on IOTA EVM.
 
-1. **Push to GitHub**
-   ```bash
-   git add .
-   git commit -m "Ready for deployment"
-   git push origin main
-   ```
+### Key Innovations
 
-2. **Deploy to Vercel**
-   - Go to [vercel.com](https://vercel.com)
-   - Import your GitHub repository
-   - Add environment variable:
-     - `VITE_REOWN_PROJECT_ID` = `2aaa6469698af00874e7e688d69eab25`
-   - Click **Deploy**
+- **⚡ Streaming Payments**: Pay only for what you use - per-second granularity powered by custom smart contracts
+- **🤖 Autonomous Agents**: Six specialized AI agents providing real-time DeFi intelligence
+- **🔄 ReactFlow Visualization**: Interactive flow-based UI showing active streams and cost metrics
+- **💰 USDC Faucet**: Built-in testnet USDC faucet with 24-hour cooldown
+- **📊 Real-time Analytics**: Live tracking of spending, earnings, and net balance
+- **🔗 IOTA EVM Native**: Leverages IOTA's low fees and high throughput for micro-payments
 
-3. **Environment Variables** (Required)
-   ```
-   VITE_REOWN_PROJECT_ID=2aaa6469698af00874e7e688d69eab25
-   ```
+---
 
-### Local Development
+## 🚀 Features
 
-```bash
-# Install dependencies
-yarn install
+### Intelligent Agents
 
-# Copy environment file
-cp .env.example .env
+| Agent | Category | Cost/Sec | Description |
+|-------|----------|----------|-------------|
+| **Signal Forge** | Trading | 0.0010 USDC | High-frequency trade signal generator with adaptive quantitative strategies |
+| **Volatility Pulse** | Analysis | 0.0010 USDC | Real-time volatility detection across majors and synthetic pairs |
+| **Arb Navigator** | MEV | 0.0005 USDC | Cross-DEX arbitrage opportunity scanner with gas optimization |
+| **Sentiment Radar** | Social | 0.0008 USDC | AI-powered sentiment analysis from crypto Twitter and influencers |
+| **Risk Sentinel** | Risk | 0.0010 USDC | Liquidation risk scoring and collateral exposure monitoring |
+| **AI Crawler Service** | Data | 0.0030 USDC | Distributed web crawler for blockchain data indexing |
 
-# Start dev server
-yarn dev
+### Core Functionality
+
+- **Stream Management**: Create, pause, resume, and cancel payment streams on-chain
+- **Agent Registration**: Register agents with custom pricing and wallet addresses
+- **Real-time Sync**: On-chain state automatically syncs across all UI components
+- **Gas Optimization**: Batched operations and efficient contract design
+- **Wallet Integration**: WalletConnect v2 support via Reown
+- **Responsive Design**: Mobile-first UI with glassmorphic design system
+
+---
+
+## 🏗️ Architecture
+
+### Tech Stack
+
+**Frontend**
+- React 18.3 + TypeScript 5.5
+- Vite 5.4 (Build tool)
+- TailwindCSS 3.4 (Styling)
+- shadcn/ui (Component library)
+- ReactFlow (Flow visualization)
+- wagmi 2.x + viem (Web3 integration)
+- Reown/WalletConnect (Wallet connection)
+
+**Smart Contracts**
+- Solidity 0.8.28
+- Hardhat (Development framework)
+- IOTA EVM Testnet
+- OpenZeppelin Contracts
+
+**API Layer**
+- Node.js/Express endpoints
+- Vercel Edge Functions
+- Redis caching (optional)
+
+### Contract Architecture
+
+```
+StreamingPayments.sol (Core payment logic)
+├── Agent Registry (stores agent metadata)
+├── Stream Management (create/pause/cancel streams)
+├── Payment Calculation (per-second accrual)
+└── Claim System (withdraw accumulated funds)
+
+MockUSDC.sol (Testnet token)
+├── ERC20 Standard
+├── Mint Function (faucet)
+└── 6 decimal precision
 ```
 
 ---
 
-Agents provide:
+## 🔧 Installation
 
-* Trading signals
-* Volatility alerts
-* Arbitrage routes
-* Sentiment scores
-* Risk indices
+### Prerequisites
 
-All flows are visualized with **animated water-like streams** feeding into a **central dashboard hub**.
+- Node.js 18+ 
+- npm/yarn/bun
+- Git
+- MetaMask or compatible Web3 wallet
+
+### Setup
+
+```bash
+# Clone repository
+git clone https://github.com/johnnyduo/x402-streamflow.git
+cd x402-streamflow
+
+# Install dependencies
+npm install
+
+# Configure environment
+cp .env.example .env
+```
+
+### Environment Variables
+
+Create `.env` file in project root:
+
+```env
+# Required
+VITE_REOWN_PROJECT_ID=2aaa6469698af00874e7e688d69eab25
+
+# Optional (for local development)
+VITE_IOTA_RPC_URL=https://json-rpc.evm.testnet.iotaledger.net
+VITE_CHAIN_ID=1075
+```
+
+### Development
+
+```bash
+# Start dev server
+npm run dev
+
+# Build for production
+npm run build
+
+# Preview production build
+npm run preview
+
+# Type check
+npm run type-check
+
+# Lint
+npm run lint
+```
 
 ---
 
-## 🧩 Features
+## 📜 Smart Contracts
 
-### ✔ 6 Flip-Card Agents
+### Deployed Addresses (IOTA EVM Testnet)
 
-5 core agents + 1 add-on card
-Each card:
+| Contract | Address | Explorer |
+|----------|---------|----------|
+| StreamingPayments | `0x7b7193e9419e35f97fCE8ecA0bd1BFa00a4a9379` | [View](https://explorer.evm.testnet.iotaledger.net/address/0x7b7193e9419e35f97fCE8ecA0bd1BFa00a4a9379) |
+| MockUSDC | `0x3dF99fae76a5dF4c0004a965F59E0a818eAD9fC1` | [View](https://explorer.evm.testnet.iotaledger.net/address/0x3dF99fae76a5dF4c0004a965F59E0a818eAD9fC1) |
 
-* Flips to show preview
-* Has toggle switch for streaming
-* Sends animated data stream to central hub
+### Key Functions
 
-### ✔ Central Hub
+**StreamingPayments.sol**
 
-* Master control for all 6 agents
-* Aggregated metrics
-* Animated gradient streams flowing from each card
+```solidity
+// Register new agent
+function registerAgent(uint256 agentId, address wallet, uint256 pricePerSecond)
 
-### ✔ Add-On Plugin Modal
+// Create streaming payment
+function createStream(uint256 agentId, uint256 durationSeconds) returns (uint256 streamId)
 
-Users can enable optional services:
+// Claim accumulated payments
+function claimStream(uint256 streamId) returns (uint256 amount)
 
-* AI Crawler Plugin
-* AI Content Monitor
-* On-Chain Anomaly Scanner
-* Social Stream Scraper
-* Custom Plugin Receiver
+// Pause/Cancel streams
+function pauseStream(uint256 streamId)
+function cancelStream(uint256 streamId)
 
-Each plugin generates its own x402-powered stream integration.
+// View functions
+function getStreamDetails(uint256 streamId) returns (...)
+function getAgentStats(uint256 agentId) returns (...)
+```
+
+**MockUSDC.sol**
+
+```solidity
+// Mint testnet USDC (faucet)
+function mint(address to, uint256 amount)
+
+// Check if can claim (24hr cooldown)
+function canClaim(address account) returns (bool)
+```
 
 ---
 
-## 🔧 Tech Stack
+## 🌐 API Endpoints
 
-* **React + Vite**
-* TypeScript
-* TailwindCSS
-* Framer Motion (3D flip animations)
-* shadcn-ui components
-* IOTA EVM RPC
-* x402 facilitator backend
+API endpoints are deployed as Vercel Edge Functions in the `/api` directory.
+
+### Available Endpoints
+
+```
+GET  /api/agents/signal-forge        # Trading signals
+GET  /api/agents/volatility-pulse    # Volatility metrics  
+GET  /api/agents/arb-navigator       # Arbitrage opportunities
+GET  /api/agents/sentiment-radar     # Social sentiment
+GET  /api/agents/risk-sentinel       # Risk scores
+GET  /api/agents/ai-crawler          # Crawler stats
+```
+
+### Response Format
+
+```json
+{
+  "status": "success",
+  "agentId": 1,
+  "timestamp": 1731782400,
+  "data": {
+    // Agent-specific data
+  }
+}
+```
 
 ---
 
-## 📁 Project Structure
+## 🎨 Component Structure
 
 ```
 src/
-  App.tsx
-  main.tsx
-  components/
-    AgentCard.tsx
-    CentralHub.tsx
-    StreamFlow.tsx
-    AppHeader.tsx
-    Navigation.tsx
-  pages/
-    Streams.tsx
-    Active.tsx
-    Developers.tsx
+├── components/
+│   ├── AgentCard.tsx              # Individual agent display
+│   ├── AgentStreamToggle.tsx      # Stream control widget
+│   ├── StreamingPaymentControl.tsx # Modal for stream management
+│   ├── Navigation.tsx             # Top nav with wallet & faucet
+│   └── ui/                        # shadcn components
+├── pages/
+│   ├── Index.tsx                  # Landing page
+│   ├── Developers.tsx             # Agent dashboard (main)
+│   ├── Streams.tsx                # ReactFlow visualization
+│   ├── Flow.tsx                   # Flow hub page
+│   └── Admin.tsx                  # Settings & registration
+├── hooks/
+│   ├── useAgentStreamStatus.ts    # On-chain stream status
+│   ├── useStreamingPayments.ts    # Payment operations
+│   └── useAgentRegistry.ts        # Agent management
+├── config/
+│   ├── streamingContracts.ts      # Contract ABIs & addresses
+│   └── contracts.ts               # USDC config
+└── data/
+    └── agents.tsx                 # Agent metadata
 ```
 
 ---
 
-## ▶️ Running the App
+## 🚢 Deployment
+
+### Vercel (Recommended)
 
 ```bash
-# Install dependencies
-yarn install
+# Install Vercel CLI
+npm i -g vercel
 
-# Start development server
-yarn dev
+# Deploy
+vercel
 
-# Build for production
-yarn build
+# Add environment variables in Vercel dashboard
+# Project Settings → Environment Variables
+```
 
-# Preview production build
-yarn preview
+### Manual Build
+
+```bash
+# Build static assets
+npm run build
+
+# Deploy /dist folder to any static host
+# (Netlify, Cloudflare Pages, AWS S3, etc.)
 ```
 
 ---
 
-## 🧠 Architecture Summary
+## 🧪 Testing
 
-* x402 validates payment headers
-* Agents publish real-time signals
-* User toggles activate microstreams
-* Water-flow visualization connects all agents to hub
-* Add-on plugins integrate external crawlers
+### Test USDC Faucet
+
+1. Connect wallet to IOTA EVM Testnet
+2. Navigate to any page with Navigation component
+3. Click "Claim 100 USDC" button
+4. Confirm transaction in wallet
+5. Wait 24 hours for cooldown to reset
+
+### Test Agent Streaming
+
+1. Go to Agents page (`/agents`)
+2. Select an agent and click **Register Agent** (first time only)
+3. After registration, click **Activate Stream**
+4. Enter stream duration (1-24 hours)
+5. Approve USDC spending
+6. Confirm stream creation
+7. Watch real-time accumulation in agent cards
+8. Navigate to Streams page to see flow visualization
 
 ---
 
-## 📜 License
+## 📊 Stream Economics
 
-MIT
+### Cost Calculation
+
+```
+Cost per Hour = pricePerSecond × 3600
+Cost per Day = pricePerSecond × 86400
+
+Example (Signal Forge @ 0.001 USDC/sec):
+- 1 hour = 3.6 USDC
+- 1 day = 86.4 USDC
+- 1 month = 2,592 USDC
+```
+
+### Gas Costs (IOTA EVM Testnet)
+
+| Operation | Estimated Gas | Cost (at 10 Gwei) |
+|-----------|---------------|-------------------|
+| Create Stream | ~150,000 | ~$0.001 |
+| Claim Stream | ~80,000 | ~$0.0005 |
+| Pause Stream | ~50,000 | ~$0.0003 |
+| Cancel Stream | ~70,000 | ~$0.0004 |
+
+---
+
+## 🔐 Security
+
+### Smart Contract Security
+
+- ✅ Reentrancy guards on all state-changing functions
+- ✅ Overflow protection (Solidity 0.8+)
+- ✅ Access control for admin functions
+- ✅ Input validation and bounds checking
+- ✅ Emergency pause mechanism
+
+### Frontend Security
+
+- ✅ Type-safe contract interactions (wagmi + viem)
+- ✅ Transaction simulation before execution
+- ✅ User confirmation for all state changes
+- ✅ Secure wallet connection (WalletConnect v2)
+- ✅ localStorage with address scoping
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Please follow these guidelines:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit changes (`git commit -m 'Add amazing feature'`)
+4. Push to branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+### Development Guidelines
+
+- Follow existing code style (ESLint + Prettier)
+- Write TypeScript with strict mode
+- Add JSDoc comments for public functions
+- Test on IOTA EVM Testnet before submitting
+- Update README if adding new features
+
+---
+
+## 📝 License
+
+This project is licensed under the MIT License. See [LICENSE](LICENSE) file for details.
+
+---
+
+## 🙏 Acknowledgments
+
+- **IOTA Foundation** - For IOTA EVM infrastructure
+- **Reown (WalletConnect)** - For wallet connection protocol
+- **shadcn** - For beautiful UI components
+- **OpenZeppelin** - For secure contract primitives
+- **Vercel** - For seamless deployment
+
+---
+
+## 📞 Support
+
+- **GitHub Issues**: [Report bugs](https://github.com/johnnyduo/x402-streamflow/issues)
+- **Twitter**: [@x402cards](https://twitter.com/x402cards)
+- **Discord**: [Join community](https://discord.gg/x402)
+- **Email**: support@x402.cards
+
+---
+
+## 🗺️ Roadmap
+
+### Q1 2025
+- ✅ Core streaming payment contracts
+- ✅ Agent dashboard with 6 agents
+- ✅ ReactFlow visualization
+- ✅ USDC faucet integration
+- ✅ IOTA EVM testnet deployment
+
+### Q2 2025
+- [ ] Mainnet launch on IOTA EVM
+- [ ] Additional agent types (10+ total)
+- [ ] Advanced analytics dashboard
+- [ ] Mobile app (React Native)
+- [ ] Agent marketplace
+
+### Q3 2025
+- [ ] Cross-chain support (Ethereum L2s)
+- [ ] Agent SDK for developers
+- [ ] Governance token launch
+- [ ] Revenue sharing for agent creators
+- [ ] Enterprise tier
+
+---
+
+<div align="center">
+
+**Built with ❤️ for the IOTA ecosystem**
+
+⭐ Star us on GitHub if you find this project useful!
+
+[Website](https://x402.cards) | [Docs](https://docs.x402.cards) | [Twitter](https://twitter.com/x402cards) | [Discord](https://discord.gg/x402)
+
+</div>

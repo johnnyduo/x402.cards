@@ -172,7 +172,7 @@ export const Navigation = () => {
         abi: USDC_ABI,
         functionName: 'mint',
         args: [address, amount],
-      });
+      } as any);
 
       // Store claim time in localStorage
       const lastClaimKey = `usdc_faucet_${address}`;

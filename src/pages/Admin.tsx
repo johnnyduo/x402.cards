@@ -108,7 +108,7 @@ export default function Admin() {
     
     // Check if we're on the right network
     if (window.ethereum) {
-      (window.ethereum.request({ method: 'eth_chainId' }) as Promise<string>).then((chainId: string) => {
+      ((window.ethereum as any).request({ method: 'eth_chainId' }) as Promise<string>).then((chainId: string) => {
         const chainIdDecimal = parseInt(chainId, 16);
         console.log('🔢 Current Chain ID:', chainIdDecimal, '(should be 1076 for IOTA EVM Testnet)');
         if (chainIdDecimal !== 1076) {

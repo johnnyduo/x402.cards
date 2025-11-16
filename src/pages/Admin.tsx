@@ -34,6 +34,7 @@ export default function Admin() {
   const [walletAddress, setWalletAddress] = useState('0x5ebaddf71482d40044391923be1fc42938129988');
   const [pricePerSecond, setPricePerSecond] = useState('');
   const [tokenURI, setTokenURI] = useState('');
+  const [isRegisteringAll, setIsRegisteringAll] = useState(false);
   
   // Contract deployer/owner address
   const DEPLOYER_ADDRESS = '0x5ebaddf71482d40044391923be1fc42938129988';
@@ -95,6 +96,57 @@ export default function Admin() {
     }
   };
 
+  const handleRegisterAll = async () => {
+    if (!walletAddress) {
+      toast.error('Please enter a wallet address');
+      return;
+    }
+
+    // Validate wallet address format
+    if (!walletAddress.match(/^0x[a-fA-F0-9]{40}$/)) {
+      toast.error('Invalid wallet address format');
+      return;
+    }
+
+    setIsRegisteringAll(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    toast.loading(`Registering ${predefinedAgents.length} agents...`);
+
+    for (const agent of predefinedAgents) {
+      try {
+        const priceInWei = parseUnits(agent.pricePerSec.toString(), 6);
+        const agentId = BigInt(agent.id);
+
+        await registerAgent(agentId, walletAddress as `0x${string}`, priceInWei);
+        successCount++;
+        
+        toast.dismiss();
+        toast.loading(`Registered ${agent.name} (${successCount}/${predefinedAgents.length})...`);
+        
+        // Small delay between registrations to avoid overwhelming the network
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      } catch (error: any) {
+        console.error(`Failed to register ${agent.name}:`, error);
+        failCount++;
+      }
+    }
+
+    toast.dismiss();
+    setIsRegisteringAll(false);
+    
+    if (successCount === predefinedAgents.length) {
+      toast.success(`Successfully registered all ${successCount} agents!`);
+    } else if (successCount > 0) {
+      toast.success(`Registered ${successCount} agents (${failCount} failed)`);
+    } else {
+      toast.error('Failed to register agents');
+    }
+
+    await refetch();
+  };
+
   const selectedAgentData = selectedAgent
     ? predefinedAgents.find((a) => a.id.toString() === selectedAgent)
     : undefined;
@@ -114,7 +166,7 @@ export default function Admin() {
           <div className="flex items-center justify-center min-h-[60vh]">
             <div className="text-center">
               <AlertCircle className="w-12 h-12 text-white/20 mx-auto mb-3" />
-              <p className="text-white/70 mb-4">Connect wallet to access admin</p>
+              <p className="text-white/70 mb-4">Connect wallet to manage agents</p>
               <w3m-button />
             </div>
           </div>
@@ -123,7 +175,7 @@ export default function Admin() {
             <div className="mb-8">
               <div className="flex items-start justify-between mb-4">
                 <div>
-                  <h1 className="text-4xl font-display font-bold tracking-tight mb-3 text-white">Admin</h1>
+                  <h1 className="text-4xl font-display font-bold tracking-tight mb-3 text-white">Settings</h1>
                   <p className="text-white/70 font-body">
                     Register and manage AI agents on the x402 payment protocol
                   </p>
@@ -559,24 +611,44 @@ export default function Admin() {
                     </div>
                   )}
 
-                  <Button
-                    onClick={handleRegister}
-                    disabled={isRegistering || !selectedAgent || !walletAddress || !pricePerSecond}
-                    className="w-full bg-secondary/20 hover:bg-secondary/30 border border-secondary/30 text-secondary h-9"
-                    variant="outline"
-                  >
-                    {isRegistering ? (
-                      <>
-                        <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                        Registering...
-                      </>
-                    ) : (
-                      <>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Register Agent
-                      </>
-                    )}
-                  </Button>
+                  <div className="flex gap-3">
+                    <Button
+                      onClick={handleRegister}
+                      disabled={isRegistering || isRegisteringAll || !selectedAgent || !walletAddress || !pricePerSecond}
+                      className="flex-1 bg-secondary/20 hover:bg-secondary/30 border border-secondary/30 text-secondary h-9"
+                      variant="outline"
+                    >
+                      {isRegistering ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Registering...
+                        </>
+                      ) : (
+                        <>
+                          <Plus className="w-4 h-4 mr-2" />
+                          Register Agent
+                        </>
+                      )}
+                    </Button>
+                    <Button
+                      onClick={handleRegisterAll}
+                      disabled={isRegistering || isRegisteringAll || !walletAddress}
+                      className="flex-1 bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/30 text-emerald-400 h-9"
+                      variant="outline"
+                    >
+                      {isRegisteringAll ? (
+                        <>
+                          <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                          Registering All...
+                        </>
+                      ) : (
+                        <>
+                          <Sparkles className="w-4 h-4 mr-2" />
+                          Register All {predefinedAgents.length} Agents
+                        </>
+                      )}
+                    </Button>
+                  </div>
                 </div>
               </TabsContent>
 
@@ -627,14 +699,15 @@ export default function Admin() {
                                     <h4 className="text-white font-semibold">
                                       {agentInfo?.name || `Agent #${agent.id}`}
                                     </h4>
-                                    {agent.isActive ? (
+                                    {agent.totalStreams > 0n ? (
                                       <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-xs">
-                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5" />
-                                        Active
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5 animate-pulse" />
+                                        Streaming
                                       </Badge>
                                     ) : (
-                                      <Badge variant="outline" className="border-white/20 text-white/40 text-xs">
-                                        Inactive
+                                      <Badge variant="outline" className="border-blue-500/50 text-blue-400 text-xs">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mr-1.5" />
+                                        Registered
                                       </Badge>
                                     )}
                                   </div>
@@ -677,10 +750,18 @@ export default function Admin() {
                               </div>
                               <div className="bg-black/30 rounded-lg p-3">
                                 <div className="text-xs text-white/50 mb-1">Status</div>
-                                <div className={`font-semibold ${
-                                  agent.isActive ? 'text-emerald-400' : 'text-white/40'
-                                }`}>
-                                  {agent.isActive ? 'Registered' : 'Paused'}
+                                <div className="flex items-center gap-1.5">
+                                  {agent.totalStreams > 0n ? (
+                                    <>
+                                      <div className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
+                                      <span className="font-semibold text-emerald-400">Streaming</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <div className="w-2 h-2 rounded-full bg-blue-400" />
+                                      <span className="font-semibold text-blue-400">Registered</span>
+                                    </>
+                                  )}
                                 </div>
                                 <div className="text-xs text-white/40 mt-0.5">on-chain</div>
                               </div>

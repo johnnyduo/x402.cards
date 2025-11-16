@@ -1,8 +1,10 @@
 import { Navigation } from "@/components/Navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
-import { Loader2, TrendingUp, Activity, GitBranch } from "lucide-react";
+import { Loader2, TrendingUp, Activity, GitBranch, AlertCircle, Zap } from "lucide-react";
 import { useAgentData } from "@/hooks/useAgentData";
+import { useAllAgents } from "@/hooks/useAgentRegistry";
+import { AGENTS as predefinedAgents } from "@/data/agents";
 
 const Agents = () => {
   return (
@@ -21,6 +23,37 @@ const Agents = () => {
           </div>
 
           <div className="space-y-6">
+            {/* Status Info Banner */}
+            <div className="glass-strong p-4 rounded-xl border border-secondary/20">
+              <div className="flex items-start gap-3">
+                <AlertCircle className="w-5 h-5 text-secondary mt-0.5 shrink-0" />
+                <div className="flex-1">
+                  <h3 className="text-sm font-semibold text-white mb-2">Agent Status Flow</h3>
+                  <div className="flex flex-wrap gap-4 text-xs text-white/70">
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="border-white/20 text-white/40 text-[10px] px-1.5 py-0">
+                        NOT REGISTERED
+                      </Badge>
+                      <span>→ Register in Admin</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="border-blue-500/50 text-blue-400 text-[10px] px-1.5 py-0">
+                        REGISTERED
+                      </Badge>
+                      <span>→ Create payment stream</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-[10px] px-1.5 py-0">
+                        <Zap className="w-2.5 h-2.5 mr-1" />
+                        STREAMING
+                      </Badge>
+                      <span>→ Agent is active</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             {/* Live Agent Data */}
             <LiveAgentData />
 
@@ -57,6 +90,18 @@ function LiveAgentData() {
   const { data: volData, loading: volLoading } = useAgentData('volatility-pulse', { symbol: 'BTC/USD' });
   const { data: arbData, loading: arbLoading } = useAgentData('arb-navigator', { symbols: 'BTC/USD,ETH/USD,BNB/USD' });
   const { data: sentimentData, loading: sentimentLoading } = useAgentData('sentiment-radar', { symbol: 'BTC' });
+  const { agents, isLoading: isLoadingAgents } = useAllAgents();
+
+  // Map agent IDs to their on-chain data
+  const getAgentStatus = (agentId: number) => {
+    const agent = agents.find(a => a.id === agentId);
+    if (!agent || agent.wallet === '0x0') return { registered: false, streaming: false };
+    return {
+      registered: true,
+      streaming: agent.totalStreams > 0n,
+      totalStreams: Number(agent.totalStreams),
+    };
+  };
 
   return (
     <div className="glass-strong p-6 rounded-2xl">
@@ -64,15 +109,39 @@ function LiveAgentData() {
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Signal Forge */}
-        <Card className="glass p-4">
+        <Card className={`glass p-4 relative overflow-hidden ${
+          getAgentStatus(1).streaming ? 'ring-2 ring-emerald-500/30' : 
+          getAgentStatus(1).registered ? 'ring-1 ring-blue-500/30' : 'opacity-60'
+        }`}>
+          {getAgentStatus(1).streaming && (
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-secondary to-emerald-500 animate-pulse" />
+          )}
           <div className="flex items-center justify-between mb-3">
-            <div>
-              <h3 className="font-display font-semibold">Signal Forge</h3>
+            <div className="flex-1">
+              <div className="flex items-center gap-2 mb-1">
+                <h3 className="font-display font-semibold">Signal Forge</h3>
+                {getAgentStatus(1).streaming ? (
+                  <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-[10px] px-1.5 py-0">
+                    <Zap className="w-2.5 h-2.5 mr-1 animate-pulse" />
+                    STREAMING
+                  </Badge>
+                ) : getAgentStatus(1).registered ? (
+                  <Badge variant="outline" className="border-blue-500/50 text-blue-400 text-[10px] px-1.5 py-0">
+                    REGISTERED
+                  </Badge>
+                ) : (
+                  <Badge variant="outline" className="border-white/20 text-white/40 text-[10px] px-1.5 py-0">
+                    NOT REGISTERED
+                  </Badge>
+                )}
+              </div>
               {signalData?.symbol && (
                 <span className="text-xs font-mono text-secondary font-bold">{signalData.symbol}</span>
               )}
             </div>
-            <Activity className="w-4 h-4 text-secondary" />
+            <Activity className={`w-4 h-4 ${
+              getAgentStatus(1).streaming ? 'text-emerald-400 animate-pulse' : 'text-secondary'
+            }`} />
           </div>
 
           {signalLoading ? (
@@ -104,10 +173,34 @@ function LiveAgentData() {
         </Card>
 
         {/* Volatility Pulse */}
-        <Card className="glass p-4">
+        <Card className={`glass p-4 relative overflow-hidden ${
+          getAgentStatus(2).streaming ? 'ring-2 ring-emerald-500/30' : 
+          getAgentStatus(2).registered ? 'ring-1 ring-blue-500/30' : 'opacity-60'
+        }`}>
+          {getAgentStatus(2).streaming && (
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-secondary to-emerald-500 animate-pulse" />
+          )}
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-display font-semibold">Volatility Pulse</h3>
-            <TrendingUp className="w-4 h-4 text-secondary" />
+            <div className="flex items-center gap-2">
+              <h3 className="font-display font-semibold">Volatility Pulse</h3>
+              {getAgentStatus(2).streaming ? (
+                <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-[10px] px-1.5 py-0">
+                  <Zap className="w-2.5 h-2.5 mr-1 animate-pulse" />
+                  STREAMING
+                </Badge>
+              ) : getAgentStatus(2).registered ? (
+                <Badge variant="outline" className="border-blue-500/50 text-blue-400 text-[10px] px-1.5 py-0">
+                  REGISTERED
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="border-white/20 text-white/40 text-[10px] px-1.5 py-0">
+                  NOT REGISTERED
+                </Badge>
+              )}
+            </div>
+            <TrendingUp className={`w-4 h-4 ${
+              getAgentStatus(2).streaming ? 'text-emerald-400 animate-pulse' : 'text-secondary'
+            }`} />
           </div>
 
           {volLoading ? (
@@ -140,10 +233,34 @@ function LiveAgentData() {
         </Card>
 
         {/* Arb Navigator */}
-        <Card className="glass p-4">
+        <Card className={`glass p-4 relative overflow-hidden ${
+          getAgentStatus(3).streaming ? 'ring-2 ring-emerald-500/30' : 
+          getAgentStatus(3).registered ? 'ring-1 ring-blue-500/30' : 'opacity-60'
+        }`}>
+          {getAgentStatus(3).streaming && (
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-secondary to-emerald-500 animate-pulse" />
+          )}
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-display font-semibold">Arb Navigator</h3>
-            <GitBranch className="w-4 h-4 text-secondary" />
+            <div className="flex items-center gap-2">
+              <h3 className="font-display font-semibold">Arb Navigator</h3>
+              {getAgentStatus(3).streaming ? (
+                <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-[10px] px-1.5 py-0">
+                  <Zap className="w-2.5 h-2.5 mr-1 animate-pulse" />
+                  STREAMING
+                </Badge>
+              ) : getAgentStatus(3).registered ? (
+                <Badge variant="outline" className="border-blue-500/50 text-blue-400 text-[10px] px-1.5 py-0">
+                  REGISTERED
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="border-white/20 text-white/40 text-[10px] px-1.5 py-0">
+                  NOT REGISTERED
+                </Badge>
+              )}
+            </div>
+            <GitBranch className={`w-4 h-4 ${
+              getAgentStatus(3).streaming ? 'text-emerald-400 animate-pulse' : 'text-secondary'
+            }`} />
           </div>
 
           {arbLoading ? (
@@ -186,10 +303,34 @@ function LiveAgentData() {
         </Card>
 
         {/* Sentiment Radar */}
-        <Card className="glass p-4">
+        <Card className={`glass p-4 relative overflow-hidden ${
+          getAgentStatus(4).streaming ? 'ring-2 ring-emerald-500/30' : 
+          getAgentStatus(4).registered ? 'ring-1 ring-blue-500/30' : 'opacity-60'
+        }`}>
+          {getAgentStatus(4).streaming && (
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-secondary to-emerald-500 animate-pulse" />
+          )}
           <div className="flex items-center justify-between mb-3">
-            <h3 className="font-display font-semibold">Sentiment Radar</h3>
-            <Activity className="w-4 h-4 text-secondary" />
+            <div className="flex items-center gap-2">
+              <h3 className="font-display font-semibold">Sentiment Radar</h3>
+              {getAgentStatus(4).streaming ? (
+                <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-[10px] px-1.5 py-0">
+                  <Zap className="w-2.5 h-2.5 mr-1 animate-pulse" />
+                  STREAMING
+                </Badge>
+              ) : getAgentStatus(4).registered ? (
+                <Badge variant="outline" className="border-blue-500/50 text-blue-400 text-[10px] px-1.5 py-0">
+                  REGISTERED
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="border-white/20 text-white/40 text-[10px] px-1.5 py-0">
+                  NOT REGISTERED
+                </Badge>
+              )}
+            </div>
+            <Activity className={`w-4 h-4 ${
+              getAgentStatus(4).streaming ? 'text-emerald-400 animate-pulse' : 'text-secondary'
+            }`} />
           </div>
 
           {sentimentLoading ? (

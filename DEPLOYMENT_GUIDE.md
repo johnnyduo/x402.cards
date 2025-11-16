@@ -5,9 +5,7 @@
 ### ✅ Already Deployed:
 - **USDC**: `0x1ce14fD9dd6678fC3d192f02207d6ff999B04037`
 - **EIP8004AgentRegistry**: `0xcd5709C04D9Ffb775cb5eF492a7512C9B3f15631`
-
-### 🚀 To Deploy:
-- **X402StreamingPayments**: (pending deployment)
+- **X402StreamingPayments**: `0x340DeE0a3EA33304C59d15d37D951A5B72A7b563`
 
 ---
 

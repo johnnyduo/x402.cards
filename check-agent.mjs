@@ -6,7 +6,7 @@ const client = createPublicClient({
   transport: http('https://json-rpc.evm.testnet.iotaledger.net'),
 });
 
-const STREAMING_PAYMENTS_ADDRESS = '0x37E141fF46c431D8B8C781f0f1d9b6E1A88d93b9';
+const STREAMING_PAYMENTS_ADDRESS = '0x340DeE0a3EA33304C59d15d37D951A5B72A7b563';
 
 const ABI = [
   {

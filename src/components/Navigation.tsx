@@ -109,13 +109,6 @@ export const Navigation = () => {
               Streams
             </NavLink>
             <NavLink
-              to="/active"
-              className="text-sm font-body text-white/50 hover:text-white transition-colors"
-              activeClassName="text-white font-semibold"
-            >
-              Active
-            </NavLink>
-            <NavLink
               to="/agents"
               className="text-sm font-body text-white/50 hover:text-white transition-colors"
               activeClassName="text-white font-semibold"
@@ -127,7 +120,7 @@ export const Navigation = () => {
               className="text-sm font-body text-white/50 hover:text-white transition-colors"
               activeClassName="text-white font-semibold"
             >
-              Admin
+              Settings
             </NavLink>
           </div>
         </div>

@@ -23,15 +23,13 @@ const Landing = () => {
           <div className="flex flex-col lg:flex-row items-center justify-center lg:justify-between gap-12 lg:gap-16">
             {/* Left Content */}
             <div className="flex-1 max-w-2xl text-center lg:text-left space-y-6 pt-8 md:pt-12">
-              <h1 className="text-4xl md:text-5xl lg:text-6xl xl:text-7xl font-display font-bold leading-tight">
-                <span className="gradient-text">Streaming Intelligence</span>
-                <br />
-                <span className="text-white">At Your Command</span>
+              <h1 className="text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-display font-bold leading-[1.2]">
+                <span className="gradient-text block">Tokenized AI Agents</span>
+                <span className="text-white block">Real-Time Streaming Payments</span>
               </h1>
               
               <p className="text-lg md:text-xl lg:text-2xl text-white/70 font-light leading-relaxed">
-                Deploy autonomous AI agents that stream real-time DeFi intelligence using <span className="text-secondary font-semibold">X402 streaming payments</span> and <span className="text-primary font-semibold">EIP-8004 agent registry</span>. 
-                Pay only for what you use—<span className="text-secondary font-semibold">per second</span>, on-chain.
+                Deploy autonomous <span className="text-primary font-semibold">tokenized agents</span> for real-time DeFi intelligence and automated web crawling. Powered by <span className="text-secondary font-semibold">X402 streaming payments</span>—pay only per second for active automation flows, on-chain.
               </p>
               
               <div className="flex flex-wrap gap-2 justify-center lg:justify-start">

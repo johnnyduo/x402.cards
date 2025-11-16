@@ -51,7 +51,7 @@ x402.Cards is a revolutionary DeFi automation platform powered by **EIP-8004 tok
 | **Risk Sentinel** | Risk | 0.0010 USDC | Liquidation risk scoring and collateral exposure monitoring |
 | **AI Crawler Service** | Data | 0.0030 USDC | Distributed web crawler for blockchain data indexing |
 
-<img width="1432" height="916" alt="Screenshot 2568-11-16 at 19 59 10" src="https://github.com/user-attachments/assets/0a0690bb-b51e-4b87-a1a1-a484bc0a9d6e" />
+<img width="1274" height="858" alt="Screenshot 2568-11-16 at 23 34 37" src="https://github.com/user-attachments/assets/bdad9a91-723d-46d7-a04f-f3ff0675a424" />
 
 ### Core Functionality
 

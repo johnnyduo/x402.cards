@@ -34,7 +34,7 @@ const agents = [
     name: "Signal Forge",
     category: "SIGNALS",
     description: "Sculpts high-frequency trade entries with adaptive quants.",
-    pricePerSec: 0.0002,
+    pricePerSec: 0.001,
     icon: <Activity className="w-6 h-6 text-white" />,
     features: [
       "Multi-timeframe pattern detection",
@@ -48,7 +48,7 @@ const agents = [
     name: "Volatility Pulse",
     category: "VOLATILITY",
     description: "Detects turbulence spikes across majors & synths.",
-    pricePerSec: 0.0002,
+    pricePerSec: 0.001,
     icon: <TrendingUp className="w-6 h-6 text-white" />,
     features: [
       "Real-time VIX tracking",
@@ -62,7 +62,7 @@ const agents = [
     name: "Arb Navigator",
     category: "ARBITRAGE",
     description: "Plots cross-venue price corridors & neutral legs.",
-    pricePerSec: 0.0002,
+    pricePerSec: 0.001,
     icon: <GitBranch className="w-6 h-6 text-white" />,
     features: [
       "Multi-DEX price monitoring",
@@ -76,7 +76,7 @@ const agents = [
     name: "Sentiment Radar",
     category: "SENTIMENT",
     description: "Scrapes macro narratives & crowd mood vectors.",
-    pricePerSec: 0.0002,
+    pricePerSec: 0.001,
     icon: <Heart className="w-6 h-6 text-white" />,
     features: [
       "Multi-platform sentiment aggregation",
@@ -90,7 +90,7 @@ const agents = [
     name: "Risk Sentinel",
     category: "RISK",
     description: "Scores systemic debt & collateral exposures.",
-    pricePerSec: 0.0002,
+    pricePerSec: 0.001,
     icon: <Shield className="w-6 h-6 text-white" />,
     features: [
       "Real-time liquidation risk scoring",
@@ -295,7 +295,7 @@ const AgentNode = ({ data }: { data: any }) => {
             <p className={`text-xs font-medium ${
               isAddon ? 'text-emerald-400/60' : 'text-white/50'
             }`}>
-              {isAddon ? 'Revenue' : 'Cost'} / SEC
+              {isAddon ? 'Revenue' : 'Cost'} / Sec
             </p>
             <p className={`text-xs font-bold ${
               isAddon ? 'text-emerald-400' : 'text-secondary'
@@ -398,7 +398,7 @@ const HubNode = ({ data }: any) => (
     <div className="text-center">
       <div className="flex items-center justify-center gap-2 mb-2">
         <Activity className="w-4 h-4 text-secondary" />
-        <span className="text-xs font-display text-white/70 tracking-wider uppercase">Active Agents</span>
+        <span className="text-xs font-display text-white/70 tracking-wider uppercase">x402 Active Agents</span>
       </div>
       <div className="text-4xl font-display font-bold text-white mb-2">
         {data.activeCount} <span className="text-white/40">/ 6</span>
@@ -464,13 +464,17 @@ const nodeTypes = {
 };
 
 const Streams = () => {
-  // Use local state only for visualization (no on-chain polling on this page for performance)
+  // Check on-chain status for agents 1-2 to sync with Developers page
+  const { isStreaming: agent1Streaming } = useAgentStreamStatus(1);
+  const { isStreaming: agent2Streaming } = useAgentStreamStatus(2);
+  
+  // Use local state only for visualization of agents 3-6
   const [localStreamStates, setLocalStreamStates] = useState<Record<number, boolean>>({});
 
-  // Build streamStates: use local state for all agents (visualization only)
+  // Build streamStates: sync agents 1-2 from on-chain, use local state for 3-6
   const streamStates = {
-    1: localStreamStates[1] || false,
-    2: localStreamStates[2] || false,
+    1: agent1Streaming || false,
+    2: agent2Streaming || false,
     3: localStreamStates[3] || false,
     4: localStreamStates[4] || false,
     5: localStreamStates[5] || false,
@@ -790,6 +794,76 @@ const Streams = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onConnect = () => {};
+
+  // Lightweight sync: only update when stream states actually change
+  useEffect(() => {
+    const currentActiveCount = agents.filter(agent => streamStates[agent.id]).length;
+    const currentAllActive = agents.filter(agent => agent.id !== 6).every(agent => streamStates[agent.id]);
+    
+    setNodes((nds) =>
+      nds.map((node) => {
+        if (node.id === 'hub') {
+          return {
+            ...node,
+            data: {
+              ...node.data,
+              activeCount: currentActiveCount,
+              active: currentAllActive,
+            },
+          };
+        } else if (node.type === 'agent') {
+          const agentId = parseInt(node.id.split('-')[1]);
+          const isActive = streamStates[agentId] || false;
+          const accumulated = agentAccumulated[agentId] || 0;
+          if (node.data.active !== isActive || node.data.accumulated !== accumulated) {
+            return {
+              ...node,
+              data: {
+                ...node.data,
+                active: isActive,
+                accumulated: accumulated,
+              },
+            };
+          }
+        }
+        return node;
+      })
+    );
+    
+    // Update edges to reflect active state
+    setEdges((eds) =>
+      eds.map((edge) => {
+        const agentId = parseInt(edge.source.split('-')[1]);
+        const isActive = streamStates[agentId] || false;
+        const isAddon = agentId === 6;
+        
+        return {
+          ...edge,
+          animated: isActive,
+          className: isActive ? (isAddon ? 'animated-edge-glow-green' : 'animated-edge-glow') : '',
+          style: {
+            ...edge.style,
+            stroke: isActive 
+              ? (isAddon ? 'url(#edge-gradient-6)' : `url(#edge-gradient-${agentId})`)
+              : (isAddon ? 'rgba(16, 185, 129, 0.4)' : 'rgba(66, 153, 225, 0.4)'),
+            strokeWidth: isActive ? 4 : 1.5,
+            filter: isActive 
+              ? (isAddon 
+                  ? 'drop-shadow(0 0 10px rgba(16, 185, 129, 0.8)) drop-shadow(0 0 20px rgba(16, 185, 129, 0.5))' 
+                  : 'drop-shadow(0 0 10px rgba(0, 229, 255, 0.8)) drop-shadow(0 0 20px rgba(0, 229, 255, 0.5))')
+              : 'none',
+            opacity: isActive ? 1 : 0.6,
+          },
+          markerEnd: {
+            ...edge.markerEnd,
+            color: isActive 
+              ? (isAddon ? '#10B981' : '#00E5FF')
+              : (isAddon ? 'rgba(16, 185, 129, 0.4)' : 'rgba(66, 153, 225, 0.4)'),
+          }
+        };
+      })
+    );
+  }, [streamStates[1], streamStates[2], streamStates[3], streamStates[4], streamStates[5], streamStates[6], agentAccumulated]);
 
   return (
     <div className="min-h-screen relative overflow-hidden">

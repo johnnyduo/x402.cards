@@ -220,7 +220,19 @@ app.get('/api/agents/volatility-pulse', async (req, res) => {
     const periodsPerYear = { '1min': 525600, '5min': 105120, '15min': 35040, '1h': 8760, '4h': 2190, '1day': 365 }[interval] || 105120;
     const annualized = stdDev * Math.sqrt(periodsPerYear);
 
-    const fearIndex = Math.min(100, annualized * 100 * 5);
+    // Fetch real Fear & Greed Index from Alternative.me API
+    let fearIndex = 50; // Default neutral
+    try {
+      const fngResponse = await fetch('https://api.alternative.me/fng/');
+      const fngData = await fngResponse.json();
+      if (fngData.data && fngData.data[0]) {
+        fearIndex = parseInt(fngData.data[0].value);
+      }
+    } catch (e) {
+      console.log('Fear & Greed Index API unavailable, using volatility-based fallback');
+      fearIndex = Math.min(100, annualized * 100 * 5);
+    }
+
     const regime = annualized < 0.2 ? 'LOW' : annualized < 0.4 ? 'NORMAL' : annualized < 0.7 ? 'ELEVATED' : 'EXTREME';
 
     // Fetch IOTA on-chain volatility metrics

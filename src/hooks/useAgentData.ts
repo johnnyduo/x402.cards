@@ -1,5 +1,12 @@
 import { useState, useEffect } from 'react';
 
+const CACHE_TTL = 10000; // 10 seconds cache
+
+interface CacheEntry {
+  data: any;
+  timestamp: number;
+}
+
 export function useAgentData(
   agentType: string, 
   params: Record<string, string> = {},
@@ -20,10 +27,32 @@ export function useAgentData(
 
     const fetchData = async () => {
       try {
+        const queryString = new URLSearchParams(params).toString();
+        const cacheKey = `agent_${agentType}_${queryString}`;
+        
+        // Check localStorage cache first
+        const cachedData = localStorage.getItem(cacheKey);
+        if (cachedData) {
+          try {
+            const cached: CacheEntry = JSON.parse(cachedData);
+            const age = Date.now() - cached.timestamp;
+            
+            // Use cached data if less than TTL
+            if (age < CACHE_TTL) {
+              if (isMounted) {
+                setData(cached.data);
+                setLoading(false);
+              }
+              return;
+            }
+          } catch (e) {
+            // Invalid cache, continue to fetch
+          }
+        }
+
         setLoading(true);
         setError(null);
 
-        const queryString = new URLSearchParams(params).toString();
         const url = `http://localhost:3001/api/agents/${agentType}${queryString ? `?${queryString}` : ''}`;
 
         const response = await fetch(url);
@@ -36,6 +65,17 @@ export function useAgentData(
         if (isMounted) {
           setData(result);
           setLoading(false);
+          
+          // Store in localStorage cache
+          const cacheEntry: CacheEntry = {
+            data: result,
+            timestamp: Date.now()
+          };
+          try {
+            localStorage.setItem(cacheKey, JSON.stringify(cacheEntry));
+          } catch (e) {
+            // localStorage full or disabled, continue without caching
+          }
         }
       } catch (err: any) {
         if (isMounted) {

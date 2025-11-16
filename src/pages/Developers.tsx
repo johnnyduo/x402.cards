@@ -1,6 +1,8 @@
+import { useState } from "react";
 import { Navigation } from "@/components/Navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Loader2, TrendingUp, Activity, GitBranch, AlertCircle, Zap } from "lucide-react";
 import { useAgentData } from "@/hooks/useAgentData";
 import { useAllAgents } from "@/hooks/useAgentRegistry";
@@ -93,6 +95,9 @@ const Agents = () => {
 
 // Live Agent Data Component
 function LiveAgentData() {
+  // Signal Forge active symbol tab
+  const [signalForgeSymbol, setSignalForgeSymbol] = useState<'BTC/USD' | 'ETH/USD' | 'SOL/USD'>('BTC/USD');
+  
   // Get on-chain stream status for each agent (synced across pages)
   const { isStreaming: signalForgeStreamActive } = useAgentStreamStatus(1);
   const { isStreaming: volatilityPulseStreamActive } = useAgentStreamStatus(2);
@@ -102,7 +107,7 @@ function LiveAgentData() {
   // Only fetch API data when stream is active for each agent
   const { data: signalData, loading: signalLoading } = useAgentData(
     'signal-forge', 
-    { symbol: 'BTC/USD', interval: '5min' },
+    { symbol: signalForgeSymbol, interval: '5min' },
     signalForgeStreamActive
   );
   const { data: volData, loading: volLoading } = useAgentData(
@@ -179,9 +184,6 @@ function LiveAgentData() {
                   </Badge>
                 )}
               </div>
-              {signalData?.symbol && (
-                <span className="text-xs font-mono text-secondary font-bold">{signalData.symbol}</span>
-              )}
             </div>
             <Activity className={`w-4 h-4 ${
               getAgentStatus(1).streaming ? 'text-emerald-400 animate-pulse' : 'text-secondary'
@@ -201,36 +203,53 @@ function LiveAgentData() {
 
           {/* Data Display - Only when streaming */}
           {signalForgeStreamActive ? (
-            signalLoading ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="w-5 h-5 text-secondary animate-spin" />
-              </div>
-            ) : signalData ? (
-              <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Price</span>
-                  <span className="font-semibold">${signalData.currentPrice?.toFixed(2)}</span>
+            <Tabs value={signalForgeSymbol} onValueChange={(v) => setSignalForgeSymbol(v as any)} className="w-full">
+              <TabsList className="grid w-full grid-cols-3 bg-black/20 mb-3">
+                <TabsTrigger value="BTC/USD" className="text-xs data-[state=active]:bg-secondary/20 data-[state=active]:text-secondary">
+                  BTC
+                </TabsTrigger>
+                <TabsTrigger value="ETH/USD" className="text-xs data-[state=active]:bg-secondary/20 data-[state=active]:text-secondary">
+                  ETH
+                </TabsTrigger>
+                <TabsTrigger value="SOL/USD" className="text-xs data-[state=active]:bg-secondary/20 data-[state=active]:text-secondary">
+                  SOL
+                </TabsTrigger>
+              </TabsList>
+
+              {signalLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="w-5 h-5 text-secondary animate-spin" />
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">RSI</span>
-                  <span className="font-semibold">{signalData.indicators?.rsi14?.toFixed(1)}</span>
+              ) : signalData ? (
+                <div className="space-y-2">
+                  <div className="mb-2">
+                    <span className="text-xs font-mono text-secondary font-bold">{signalData.symbol}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">Price</span>
+                    <span className="font-semibold">${signalData.currentPrice?.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between text-sm">
+                    <span className="text-muted-foreground">RSI</span>
+                    <span className="font-semibold">{signalData.indicators?.rsi14?.toFixed(1)}</span>
+                  </div>
+                  <div className="bg-black/20 rounded p-2 mt-2">
+                    <Badge variant="outline" className={
+                      signalData.signal?.action === 'BUY' ? 'border-green-500 text-green-500' :
+                      signalData.signal?.action === 'SELL' ? 'border-red-500 text-red-500' :
+                      'border-white/30'
+                    }>
+                      {signalData.signal?.action}
+                    </Badge>
+                    <p className="text-xs text-muted-foreground mt-1">{signalData.signal?.reason}</p>
+                  </div>
                 </div>
-                <div className="bg-black/20 rounded p-2 mt-2">
-                  <Badge variant="outline" className={
-                    signalData.signal?.action === 'BUY' ? 'border-green-500 text-green-500' :
-                    signalData.signal?.action === 'SELL' ? 'border-red-500 text-red-500' :
-                    'border-white/30'
-                  }>
-                    {signalData.signal?.action}
-                  </Badge>
-                  <p className="text-xs text-muted-foreground mt-1">{signalData.signal?.reason}</p>
+              ) : (
+                <div className="text-center py-6 text-white/40 text-sm">
+                  Waiting for data...
                 </div>
-              </div>
-            ) : (
-              <div className="text-center py-6 text-white/40 text-sm">
-                Waiting for data...
-              </div>
-            )
+              )}
+            </Tabs>
           ) : (
             <div className="text-center py-6 text-white/40 text-sm italic">
               {getAgentStatus(1).registered 
@@ -294,7 +313,7 @@ function LiveAgentData() {
                 <Loader2 className="w-5 h-5 text-secondary animate-spin" />
               </div>
             ) : volData ? (
-              <div className="space-y-2">
+              <div className="space-y-3">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Regime</span>
                   <Badge variant="outline" className={
@@ -306,10 +325,42 @@ function LiveAgentData() {
                     {volData.regime}
                   </Badge>
                 </div>
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Fear Index</span>
-                  <span className="font-bold text-lg">{volData.fearIndex?.toFixed(0)}</span>
+
+                {/* Fear Index Chart */}
+                <div className="bg-black/20 rounded p-3 space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-muted-foreground">Fear & Greed Index</span>
+                    <span className="font-bold text-2xl gradient-text">
+                      {volData.fearIndex?.toFixed(0) || 'N/A'}
+                    </span>
+                  </div>
+                  
+                  {/* Visual Scale Bar */}
+                  <div className="relative h-8 rounded-full overflow-hidden" style={{
+                    background: 'linear-gradient(90deg, hsl(210, 100%, 56%), hsl(180, 100%, 50%))'
+                  }}>
+                    {/* Indicator */}
+                    {volData.fearIndex != null && (
+                      <div 
+                        className="absolute top-0 bottom-0 w-1 bg-white shadow-lg transition-all duration-500"
+                        style={{ 
+                          left: `${volData.fearIndex}%`,
+                          boxShadow: '0 0 10px rgba(255, 255, 255, 0.8)'
+                        }}
+                      />
+                    )}
+                  </div>
+                  
+                  {/* Scale Labels */}
+                  <div className="flex justify-between text-[9px] text-white/60 font-medium">
+                    <span>0<br/>Extreme Fear</span>
+                    <span className="text-center">25<br/>Fear</span>
+                    <span className="text-center">50<br/>Neutral</span>
+                    <span className="text-center">75<br/>Greed</span>
+                    <span className="text-right">100<br/>Extreme Greed</span>
+                  </div>
                 </div>
+
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">Annualized Vol</span>
                   <span className="font-semibold">{(volData.realizedVolAnnualized * 100)?.toFixed(2)}%</span>

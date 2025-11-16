@@ -38,7 +38,7 @@ x402.Cards is a revolutionary DeFi automation platform powered by **EIP-8004 tok
 
 ## 🚀 Features
 
-<img width="1309" height="818" alt="Screenshot 2568-11-16 at 19 58 26" src="https://github.com/user-attachments/assets/90cf3030-0554-48b1-b389-8ae02dc46bc3" />
+<img width="1354" height="850" alt="Screenshot 2568-11-16 at 23 32 18" src="https://github.com/user-attachments/assets/8e310fab-97b3-4151-b1c8-3854be7177e8" />
 
 ### Intelligent Agents
 

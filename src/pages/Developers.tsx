@@ -29,25 +29,30 @@ const Agents = () => {
                 <AlertCircle className="w-5 h-5 text-secondary mt-0.5 shrink-0" />
                 <div className="flex-1">
                   <h3 className="text-sm font-semibold text-white mb-2">Agent Status Flow</h3>
-                  <div className="flex flex-wrap gap-4 text-xs text-white/70">
+                  <div className="flex flex-wrap gap-3 text-xs text-white/70">
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="border-white/20 text-white/40 text-[10px] px-1.5 py-0">
                         NOT REGISTERED
                       </Badge>
-                      <span>→ Register in Admin</span>
+                      <span>→</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="border-blue-500/50 text-blue-400 text-[10px] px-1.5 py-0">
                         REGISTERED
                       </Badge>
-                      <span>→ Create payment stream</span>
+                      <span>→</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Badge variant="outline" className="border-yellow-500/50 text-yellow-400 text-[10px] px-1.5 py-0">
+                        AWAITING STREAM
+                      </Badge>
+                      <span>→</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-[10px] px-1.5 py-0">
                         <Zap className="w-2.5 h-2.5 mr-1" />
                         STREAMING
                       </Badge>
-                      <span>→ Agent is active</span>
                     </div>
                   </div>
                 </div>
@@ -95,10 +100,19 @@ function LiveAgentData() {
   // Map agent IDs to their on-chain data
   const getAgentStatus = (agentId: number) => {
     const agent = agents.find(a => a.id === agentId);
-    if (!agent || agent.wallet === '0x0') return { registered: false, streaming: false };
+    if (!agent || agent.wallet === '0x0') return { registered: false, streaming: false, awaitingStream: false };
+    
+    // Registered = agent exists on-chain
+    // Awaiting Stream = registered but no active streams yet
+    // Streaming = has active streams
+    const registered = true;
+    const hasStreams = agent.totalStreams > 0n;
+    const isActive = agent.isActive;
+    
     return {
-      registered: true,
-      streaming: agent.totalStreams > 0n,
+      registered,
+      awaitingStream: registered && !hasStreams && isActive,
+      streaming: hasStreams && isActive,
       totalStreams: Number(agent.totalStreams),
     };
   };
@@ -111,6 +125,7 @@ function LiveAgentData() {
         {/* Signal Forge */}
         <Card className={`glass p-4 relative overflow-hidden ${
           getAgentStatus(1).streaming ? 'ring-2 ring-emerald-500/30' : 
+          getAgentStatus(1).awaitingStream ? 'ring-2 ring-yellow-500/30' :
           getAgentStatus(1).registered ? 'ring-1 ring-blue-500/30' : 'opacity-60'
         }`}>
           {getAgentStatus(1).streaming && (
@@ -124,6 +139,10 @@ function LiveAgentData() {
                   <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-[10px] px-1.5 py-0">
                     <Zap className="w-2.5 h-2.5 mr-1 animate-pulse" />
                     STREAMING
+                  </Badge>
+                ) : getAgentStatus(1).awaitingStream ? (
+                  <Badge variant="outline" className="border-yellow-500/50 text-yellow-400 text-[10px] px-1.5 py-0 animate-pulse">
+                    AWAITING STREAM
                   </Badge>
                 ) : getAgentStatus(1).registered ? (
                   <Badge variant="outline" className="border-blue-500/50 text-blue-400 text-[10px] px-1.5 py-0">
@@ -175,6 +194,7 @@ function LiveAgentData() {
         {/* Volatility Pulse */}
         <Card className={`glass p-4 relative overflow-hidden ${
           getAgentStatus(2).streaming ? 'ring-2 ring-emerald-500/30' : 
+          getAgentStatus(2).awaitingStream ? 'ring-2 ring-yellow-500/30' :
           getAgentStatus(2).registered ? 'ring-1 ring-blue-500/30' : 'opacity-60'
         }`}>
           {getAgentStatus(2).streaming && (
@@ -187,6 +207,10 @@ function LiveAgentData() {
                 <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-[10px] px-1.5 py-0">
                   <Zap className="w-2.5 h-2.5 mr-1 animate-pulse" />
                   STREAMING
+                </Badge>
+              ) : getAgentStatus(2).awaitingStream ? (
+                <Badge variant="outline" className="border-yellow-500/50 text-yellow-400 text-[10px] px-1.5 py-0 animate-pulse">
+                  AWAITING STREAM
                 </Badge>
               ) : getAgentStatus(2).registered ? (
                 <Badge variant="outline" className="border-blue-500/50 text-blue-400 text-[10px] px-1.5 py-0">
@@ -235,6 +259,7 @@ function LiveAgentData() {
         {/* Arb Navigator */}
         <Card className={`glass p-4 relative overflow-hidden ${
           getAgentStatus(3).streaming ? 'ring-2 ring-emerald-500/30' : 
+          getAgentStatus(3).awaitingStream ? 'ring-2 ring-yellow-500/30' :
           getAgentStatus(3).registered ? 'ring-1 ring-blue-500/30' : 'opacity-60'
         }`}>
           {getAgentStatus(3).streaming && (
@@ -247,6 +272,10 @@ function LiveAgentData() {
                 <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-[10px] px-1.5 py-0">
                   <Zap className="w-2.5 h-2.5 mr-1 animate-pulse" />
                   STREAMING
+                </Badge>
+              ) : getAgentStatus(3).awaitingStream ? (
+                <Badge variant="outline" className="border-yellow-500/50 text-yellow-400 text-[10px] px-1.5 py-0 animate-pulse">
+                  AWAITING STREAM
                 </Badge>
               ) : getAgentStatus(3).registered ? (
                 <Badge variant="outline" className="border-blue-500/50 text-blue-400 text-[10px] px-1.5 py-0">
@@ -305,6 +334,7 @@ function LiveAgentData() {
         {/* Sentiment Radar */}
         <Card className={`glass p-4 relative overflow-hidden ${
           getAgentStatus(4).streaming ? 'ring-2 ring-emerald-500/30' : 
+          getAgentStatus(4).awaitingStream ? 'ring-2 ring-yellow-500/30' :
           getAgentStatus(4).registered ? 'ring-1 ring-blue-500/30' : 'opacity-60'
         }`}>
           {getAgentStatus(4).streaming && (
@@ -317,6 +347,10 @@ function LiveAgentData() {
                 <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-[10px] px-1.5 py-0">
                   <Zap className="w-2.5 h-2.5 mr-1 animate-pulse" />
                   STREAMING
+                </Badge>
+              ) : getAgentStatus(4).awaitingStream ? (
+                <Badge variant="outline" className="border-yellow-500/50 text-yellow-400 text-[10px] px-1.5 py-0 animate-pulse">
+                  AWAITING STREAM
                 </Badge>
               ) : getAgentStatus(4).registered ? (
                 <Badge variant="outline" className="border-blue-500/50 text-blue-400 text-[10px] px-1.5 py-0">

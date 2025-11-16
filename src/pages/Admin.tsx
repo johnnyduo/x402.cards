@@ -121,47 +121,6 @@ export default function Admin() {
         ) : (
           <div className="max-w-5xl mx-auto">
             <div className="mb-8">
-              {/* Access Control Warning */}
-              <div className={`mb-6 p-4 rounded-lg border ${
-                isDeployer 
-                  ? 'bg-emerald-500/10 border-emerald-500/30' 
-                  : 'bg-amber-500/10 border-amber-500/30'
-              }`}>
-                <div className="flex items-start gap-3">
-                  <Shield className={`w-5 h-5 mt-0.5 ${
-                    isDeployer ? 'text-emerald-400' : 'text-amber-400'
-                  }`} />
-                  <div>
-                    <div className={`font-semibold mb-1 ${
-                      isDeployer ? 'text-emerald-400' : 'text-amber-400'
-                    }`}>
-                      {isDeployer ? '✓ Owner Access Verified' : '⚠ Owner-Only Access'}
-                    </div>
-                    <div className="text-xs text-white/70">
-                      {isDeployer ? (
-                        <>
-                          You are connected as the contract deployer. You can register agents.
-                          <br />
-                          Your address: <span className="font-mono text-xs text-emerald-400">{address?.slice(0, 10)}...{address?.slice(-8)}</span>
-                        </>
-                      ) : (
-                        <>
-                          Agent registration requires contract owner privileges. If you're not the contract owner, registration will fail.
-                          <br />
-                          Required: <span className="font-mono text-xs text-amber-400">0x5eba...9988</span>
-                          {address && (
-                            <>
-                              <br />
-                              Connected: <span className="font-mono text-xs">{address.slice(0, 10)}...{address.slice(-8)}</span>
-                            </>
-                          )}
-                        </>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
               <div className="flex items-start justify-between mb-4">
                 <div>
                   <h1 className="text-4xl font-display font-bold tracking-tight mb-3 text-white">Admin</h1>
@@ -624,55 +583,128 @@ export default function Admin() {
               {/* Manage Agents Tab */}
               <TabsContent value="manage" className="space-y-6 mt-6">
                 <div className="glass-strong p-6 rounded-2xl">
+                  <div className="flex items-center justify-between mb-6">
+                    <div>
+                      <h3 className="text-lg font-semibold text-white">Registered Agents</h3>
+                      <p className="text-xs text-white/50 mt-1">On-chain agent registry data</p>
+                    </div>
+                    <Button
+                      onClick={() => refetch()}
+                      variant="outline"
+                      size="sm"
+                      className="border-white/10 text-white/70 hover:text-white hover:border-secondary/30"
+                    >
+                      <Activity className="w-3 h-3 mr-1" />
+                      Refresh
+                    </Button>
+                  </div>
+
                   {isLoadingAgents ? (
-                    <div className="flex items-center justify-center py-8">
-                      <Loader2 className="w-6 h-6 animate-spin text-secondary" />
+                    <div className="flex items-center justify-center py-12">
+                      <div className="text-center">
+                        <Loader2 className="w-8 h-8 animate-spin text-secondary mx-auto mb-2" />
+                        <p className="text-xs text-white/50">Loading agents from blockchain...</p>
+                      </div>
                     </div>
                   ) : agents && agents.length > 0 ? (
-                    <div className="space-y-3">
-                      {agents.map((agent) => (
-                        <div
-                          key={agent.id}
-                          className="bg-black/20 rounded-lg p-3 border border-white/10 hover:border-secondary/30 transition-colors"
-                        >
-                          <div className="flex items-center justify-between mb-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-xs font-mono text-secondary">#{agent.id}</span>
-                              {agent.isActive ? (
-                                <div className="w-1.5 h-1.5 rounded-full bg-emerald-400" />
-                              ) : (
-                                <div className="w-1.5 h-1.5 rounded-full bg-white/20" />
-                              )}
-                            </div>
-                            <span className="text-xs text-white/40 font-mono">
-                              {agent.wallet.slice(0, 6)}...{agent.wallet.slice(-4)}
-                            </span>
-                          </div>
-                          <div className="grid grid-cols-3 gap-3 text-xs">
-                            <div>
-                              <div className="text-white/50">Price/sec</div>
-                              <div className="text-secondary font-mono">
-                                {formatUnits(agent.pricePerSecond, 6)}
+                    <div className="space-y-4">
+                      {agents.map((agent) => {
+                        const agentInfo = predefinedAgents.find(a => a.id === agent.id);
+                        return (
+                          <div
+                            key={agent.id}
+                            className="bg-black/30 rounded-xl p-5 border border-white/10 hover:border-secondary/20 transition-all"
+                          >
+                            <div className="flex items-start justify-between mb-4">
+                              <div className="flex items-start gap-3">
+                                {agentInfo && (
+                                  <div className="p-2 bg-secondary/10 rounded-lg text-secondary">
+                                    {agentInfo.icon}
+                                  </div>
+                                )}
+                                <div>
+                                  <div className="flex items-center gap-2 mb-1">
+                                    <h4 className="text-white font-semibold">
+                                      {agentInfo?.name || `Agent #${agent.id}`}
+                                    </h4>
+                                    {agent.isActive ? (
+                                      <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-xs">
+                                        <div className="w-1.5 h-1.5 rounded-full bg-emerald-400 mr-1.5" />
+                                        Active
+                                      </Badge>
+                                    ) : (
+                                      <Badge variant="outline" className="border-white/20 text-white/40 text-xs">
+                                        Inactive
+                                      </Badge>
+                                    )}
+                                  </div>
+                                  <div className="flex items-center gap-3 text-xs">
+                                    <span className="text-white/50">ID:</span>
+                                    <span className="font-mono text-secondary">#{agent.id}</span>
+                                    <span className="text-white/30">•</span>
+                                    <span className="text-white/50">Wallet:</span>
+                                    <span className="font-mono text-white/70">
+                                      {agent.wallet.slice(0, 10)}...{agent.wallet.slice(-8)}
+                                    </span>
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                            <div>
-                              <div className="text-white/50">Earned</div>
-                              <div className="text-emerald-400 font-mono">
-                                {formatUnits(agent.totalEarned, 6)}
+
+                            <div className="grid grid-cols-4 gap-4 mb-4">
+                              <div className="bg-black/30 rounded-lg p-3">
+                                <div className="text-xs text-white/50 mb-1">Price per Second</div>
+                                <div className="text-secondary font-mono font-semibold">
+                                  ${formatUnits(agent.pricePerSecond, 6)}
+                                </div>
+                                <div className="text-xs text-white/40 mt-0.5">
+                                  ${(Number(formatUnits(agent.pricePerSecond, 6)) * 3600).toFixed(4)}/hr
+                                </div>
+                              </div>
+                              <div className="bg-black/30 rounded-lg p-3">
+                                <div className="text-xs text-white/50 mb-1">Total Earned</div>
+                                <div className="text-emerald-400 font-mono font-semibold">
+                                  ${formatUnits(agent.totalEarned, 6)}
+                                </div>
+                                <div className="text-xs text-white/40 mt-0.5">USDC</div>
+                              </div>
+                              <div className="bg-black/30 rounded-lg p-3">
+                                <div className="text-xs text-white/50 mb-1">Total Streams</div>
+                                <div className="text-white font-mono font-semibold">
+                                  {agent.totalStreams.toString()}
+                                </div>
+                                <div className="text-xs text-white/40 mt-0.5">streams</div>
+                              </div>
+                              <div className="bg-black/30 rounded-lg p-3">
+                                <div className="text-xs text-white/50 mb-1">Status</div>
+                                <div className={`font-semibold ${
+                                  agent.isActive ? 'text-emerald-400' : 'text-white/40'
+                                }`}>
+                                  {agent.isActive ? 'Registered' : 'Paused'}
+                                </div>
+                                <div className="text-xs text-white/40 mt-0.5">on-chain</div>
                               </div>
                             </div>
-                            <div>
-                              <div className="text-white/50">Streams</div>
-                              <div className="text-white">{agent.totalStreams.toString()}</div>
-                            </div>
+
+                            {agentInfo && (
+                              <div className="mt-3 pt-3 border-t border-white/5">
+                                <div className="text-xs text-white/50 mb-2">Category</div>
+                                <Badge variant="outline" className="border-secondary/30 text-secondary">
+                                  {agentInfo.category}
+                                </Badge>
+                              </div>
+                            )}
                           </div>
-                        </div>
-                      ))}
+                        );
+                      })}
                     </div>
                   ) : (
-                    <div className="text-center py-8">
-                      <AlertCircle className="w-8 h-8 text-white/20 mx-auto mb-2" />
-                      <p className="text-sm text-white/50">No agents yet</p>
+                    <div className="text-center py-12">
+                      <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-white/5 mb-4">
+                        <AlertCircle className="w-8 h-8 text-white/20" />
+                      </div>
+                      <p className="text-white/70 font-medium mb-1">No Registered Agents</p>
+                      <p className="text-xs text-white/40">Register your first agent to get started</p>
                     </div>
                   )}
                 </div>

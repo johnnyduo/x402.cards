@@ -16,6 +16,17 @@ export const STREAMING_PAYMENTS_ABI = [
     stateMutability: "nonpayable",
     type: "function"
   },
+  {
+    inputs: [
+      { name: "agentId", type: "uint256" },
+      { name: "wallet", type: "address" },
+      { name: "pricePerSecond", type: "uint256" }
+    ],
+    name: "updateAgent",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function"
+  },
   // Stream Management
   {
     inputs: [

@@ -36,10 +36,8 @@ export function useRegisterAgent() {
         errorMessage = 'This agent ID is already registered';
       } else if (error?.message?.includes('Price too low')) {
         errorMessage = 'Price too low. Contract requires minimum 0.001 USDC per second (1000 in 6 decimals).';
-      } else if (error?.message?.includes('0x49a2f91e')) {
-        errorMessage = '⚠️ Access Denied: Only the contract owner can register agents. Please contact the protocol admin.';
       } else if (error?.message?.includes('execution reverted')) {
-        errorMessage = 'Transaction reverted. Check price requirements (min 0.001 USDC/sec) and permissions.';
+        errorMessage = 'Transaction reverted. Check price requirements (min 0.001 USDC/sec).';
       } else if (error?.shortMessage) {
         errorMessage = error.shortMessage;
       }

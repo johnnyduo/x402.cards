@@ -432,26 +432,21 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) file for 
 
 ## 🗺️ Roadmap
 
-### Q1 2025
-- ✅ Core streaming payment contracts
-- ✅ Agent dashboard with 6 agents
-- ✅ ReactFlow visualization
-- ✅ USDC faucet integration
-- ✅ IOTA EVM testnet deployment
+### Phase 1: Q4 2025
+- ✅ Complete agent registry integration (EIP-8004)
+- ✅ Add wallet connector (IOTA)
+- ✅ Move Expansion
+- [ ] Full x402 on-chain payment streams
+- [ ] Live ReactFlow orchestration for task graphs
 
-### Q2 2025
-- [ ] Mainnet launch on IOTA EVM
-- [ ] Additional agent types (10+ total)
-- [ ] Advanced analytics dashboard
-- [ ] Mobile app (React Native)
-- [ ] Agent marketplace
+### Phase 2: Q1 2026
+- [ ] Full x402 on-chain payment streams
+- [ ] Live ReactFlow orchestration for task graphs
 
-### Q3 2025
-- [ ] Cross-chain support (Ethereum L2s)
-- [ ] Agent SDK for developers
-- [ ] Governance token launch
-- [ ] Revenue sharing for agent creators
-- [ ] Enterprise tier
+### Phase 3: Q2 2026
+- [ ] Tokenized Agent Marketplace
+- [ ] DeFi workflow templates (MM bots, liquidation bots, oracles, yield strategies)
+- [ ] Cross-chain automation network
 
 ---
 

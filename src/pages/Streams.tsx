@@ -881,11 +881,11 @@ const Streams = () => {
             opacity: isActive ? 1 : 0.6,
           },
           markerEnd: {
-            ...edge.markerEnd,
+            ...(edge.markerEnd || {}),
             color: isActive 
               ? (isAddon ? '#10B981' : '#00E5FF')
               : (isAddon ? 'rgba(16, 185, 129, 0.4)' : 'rgba(66, 153, 225, 0.4)'),
-          }
+          } as any
         };
       })
     );

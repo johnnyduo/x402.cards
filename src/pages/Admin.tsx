@@ -108,12 +108,14 @@ export default function Admin() {
     
     // Check if we're on the right network
     if (window.ethereum) {
-      window.ethereum.request({ method: 'eth_chainId' }).then((chainId: string) => {
+      (window.ethereum.request({ method: 'eth_chainId' }) as Promise<string>).then((chainId: string) => {
         const chainIdDecimal = parseInt(chainId, 16);
         console.log('🔢 Current Chain ID:', chainIdDecimal, '(should be 1076 for IOTA EVM Testnet)');
         if (chainIdDecimal !== 1076) {
           console.error('❌ WRONG NETWORK! Please switch to IOTA EVM Testnet (Chain ID 1076)');
         }
+      }).catch((err) => {
+        console.error('Failed to get chain ID:', err);
       });
     }
   }, [isConnected, address, agents]);

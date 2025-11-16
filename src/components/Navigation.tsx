@@ -54,7 +54,7 @@ export const Navigation = () => {
           abi: USDC_ABI,
           functionName: 'balanceOf',
           args: [address],
-        });
+        } as any);
         
         console.log('USDC balance fetched:', balance);
         setDirectUsdcBalance(balance as bigint);

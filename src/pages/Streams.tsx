@@ -13,6 +13,8 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Activity, TrendingUp, GitBranch, Heart, Shield, Sparkles } from "lucide-react";
 import { StreamingPaymentControl } from "@/components/StreamingPaymentControl";
+import { useAgentStreamStatus } from "@/hooks/useAgentStreamStatus";
+import { formatUnits } from "viem";
 import ReactFlow, {
   Node,
   Edge,
@@ -462,7 +464,19 @@ const nodeTypes = {
 };
 
 const Streams = () => {
-  const [streamStates, setStreamStates] = useState<Record<number, boolean>>({});
+  // Use local state only for visualization (no on-chain polling on this page for performance)
+  const [localStreamStates, setLocalStreamStates] = useState<Record<number, boolean>>({});
+
+  // Build streamStates: use local state for all agents (visualization only)
+  const streamStates = {
+    1: localStreamStates[1] || false,
+    2: localStreamStates[2] || false,
+    3: localStreamStates[3] || false,
+    4: localStreamStates[4] || false,
+    5: localStreamStates[5] || false,
+    6: localStreamStates[6] || false,
+  };
+
   const [isAddonModalOpen, setIsAddonModalOpen] = useState(false);
   const [openModalId, setOpenModalId] = useState<number | null>(null);
   const [totalSpent, setTotalSpent] = useState(0);
@@ -475,51 +489,36 @@ const Streams = () => {
   const netRatePerSec = totalCostPerSec - addonRevenue; // Net rate after revenue
   const allStreamsActive = agents.filter(agent => agent.id !== 6).every(agent => streamStates[agent.id]);
 
-  const handleToggleAll = useCallback(() => {
-    setStreamStates((prev) => {
-      const currentAllActive = agents.filter(agent => agent.id !== 6).every(agent => prev[agent.id]);
-      const newState = !currentAllActive;
-      const newStates: Record<number, boolean> = {};
-      agents.forEach((agent) => {
-        if (agent.id !== 6) {
-          newStates[agent.id] = newState;
-        }
-      });
-      console.log('Toggle All - Current:', currentAllActive, 'New State:', newState, 'New States:', newStates);
-      return newStates;
-    });
-  }, []);
-
+  // Open settings modal to control stream activation (on-chain)
   const handleToggleStream = useCallback((agentId: number) => {
-    setStreamStates((prev) => {
-      const newState = !prev[agentId];
-      console.log(`Toggle Agent ${agentId} - Old:`, prev[agentId], 'New:', newState);
-      return { ...prev, [agentId]: newState };
-    });
+    // Open the settings modal for this agent to control stream
+    setOpenModalId(agentId);
   }, []);
 
-  // Real-time spending/earning tracker
+  // Note: handleToggleAll removed - users should activate streams individually via modals
+
+  // Real-time spending/earning tracker (reduced frequency for performance)
   useEffect(() => {
     const interval = setInterval(() => {
       if (totalCostPerSec > 0) {
-        setTotalSpent(prev => prev + totalCostPerSec);
+        setTotalSpent(prev => prev + (totalCostPerSec * 3)); // Multiply by 3 since we update every 3 seconds
       }
       if (addonRevenue > 0) {
-        setTotalEarned(prev => prev + addonRevenue);
+        setTotalEarned(prev => prev + (addonRevenue * 3));
       }
       
-      // Update individual agent accumulated amounts
+      // Update individual agent accumulated amounts (local calculation for visualization)
       setAgentAccumulated(prev => {
         const newAccumulated = { ...prev };
         agents.forEach(agent => {
           if (streamStates[agent.id]) {
-            const rate = agent.pricePerSec;
+            const rate = agent.pricePerSec * 3; // Multiply by 3
             newAccumulated[agent.id] = (newAccumulated[agent.id] || 0) + rate;
           }
         });
         return newAccumulated;
       });
-    }, 1000); // Update every second
+    }, 3000); // Update every 3 seconds instead of 1 (less CPU load)
 
     return () => clearInterval(interval);
   }, [totalCostPerSec, addonRevenue, streamStates]);
@@ -642,7 +641,7 @@ const Streams = () => {
         netRate: netRatePerSec,
         revenueActive: streamStates[6],
         active: allStreamsActive,
-        onToggle: handleToggleAll,
+        onToggle: undefined, // Disabled - activate agents individually via their modals
         totalSpent,
         totalEarned,
       },
@@ -791,54 +790,6 @@ const Streams = () => {
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialEdges);
 
   const onConnect = () => {};
-
-  // Update everything when streamStates change
-  useEffect(() => {
-    // Calculate current values from streamStates
-    const currentActiveCount = agents.filter(agent => streamStates[agent.id]).length;
-    const currentTotalCost = agents.filter((agent) => agent.id !== 6 && streamStates[agent.id]).reduce((sum, agent) => sum + agent.pricePerSec, 0);
-    const currentRevenue = streamStates[6] ? 0.0003 : 0;
-    const currentNetRate = currentTotalCost - currentRevenue;
-    const currentAllActive = agents.filter(agent => agent.id !== 6).every(agent => streamStates[agent.id]);
-
-    // Update nodes
-    setNodes((nds) =>
-      nds.map((node) => {
-        if (node.id === 'hub') {
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              activeCount: currentActiveCount,
-              totalCost: currentTotalCost,
-              netRate: currentNetRate,
-              revenueActive: streamStates[6],
-              active: currentAllActive,
-              onToggle: handleToggleAll,
-              totalSpent,
-              totalEarned,
-            },
-          };
-        } else if (node.type === 'agent') {
-          const agentId = parseInt(node.id.split('-')[1]);
-          return {
-            ...node,
-            data: {
-              ...node.data,
-              active: streamStates[agentId] || false,
-              onToggle: () => handleToggleStream(agentId),
-              onSettings: agentId === 6 ? () => setIsAddonModalOpen(true) : () => setOpenModalId(agentId),
-              accumulated: agentAccumulated[agentId] || 0,
-            },
-          };
-        }
-        return node;
-      })
-    );
-
-    // Update edges with createEdges function
-    setEdges(createEdges());
-  }, [streamStates, handleToggleAll, handleToggleStream, createEdges, totalSpent, totalEarned, agentAccumulated]);
 
   return (
     <div className="min-h-screen relative overflow-hidden">

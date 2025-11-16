@@ -1,11 +1,21 @@
 import { useState, useEffect } from 'react';
 
-export function useAgentData(agentType: string, params: Record<string, string> = {}) {
+export function useAgentData(
+  agentType: string, 
+  params: Record<string, string> = {},
+  enabled: boolean = true // Add enabled parameter to control fetching
+) {
   const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(enabled);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
+    // Skip fetching if not enabled
+    if (!enabled) {
+      setLoading(false);
+      return;
+    }
+
     let isMounted = true;
 
     const fetchData = async () => {
@@ -14,7 +24,7 @@ export function useAgentData(agentType: string, params: Record<string, string> =
         setError(null);
 
         const queryString = new URLSearchParams(params).toString();
-        const url = `/api/agents/${agentType}${queryString ? `?${queryString}` : ''}`;
+        const url = `http://localhost:3001/api/agents/${agentType}${queryString ? `?${queryString}` : ''}`;
 
         const response = await fetch(url);
         if (!response.ok) {
@@ -37,14 +47,14 @@ export function useAgentData(agentType: string, params: Record<string, string> =
 
     fetchData();
 
-    // Poll every 30 seconds
+    // Poll every 30 seconds when enabled
     const interval = setInterval(fetchData, 30000);
 
     return () => {
       isMounted = false;
       clearInterval(interval);
     };
-  }, [agentType, JSON.stringify(params)]);
+  }, [agentType, JSON.stringify(params), enabled]);
 
   return { data, loading, error };
 }

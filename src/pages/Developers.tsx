@@ -5,6 +5,8 @@ import { Loader2, TrendingUp, Activity, GitBranch, AlertCircle, Zap } from "luci
 import { useAgentData } from "@/hooks/useAgentData";
 import { useAllAgents } from "@/hooks/useAgentRegistry";
 import { AGENTS as predefinedAgents } from "@/data/agents";
+import { AgentStreamToggle } from "@/components/AgentStreamToggle";
+import { useAgentStreamStatus } from "@/hooks/useAgentStreamStatus";
 
 const Agents = () => {
   return (
@@ -91,10 +93,33 @@ const Agents = () => {
 
 // Live Agent Data Component
 function LiveAgentData() {
-  const { data: signalData, loading: signalLoading } = useAgentData('signal-forge', { symbol: 'BTC/USD', interval: '5min' });
-  const { data: volData, loading: volLoading } = useAgentData('volatility-pulse', { symbol: 'BTC/USD' });
-  const { data: arbData, loading: arbLoading } = useAgentData('arb-navigator', { symbols: 'BTC/USD,ETH/USD,BNB/USD' });
-  const { data: sentimentData, loading: sentimentLoading } = useAgentData('sentiment-radar', { symbol: 'BTC' });
+  // Get on-chain stream status for each agent (synced across pages)
+  const { isStreaming: signalForgeStreamActive } = useAgentStreamStatus(1);
+  const { isStreaming: volatilityPulseStreamActive } = useAgentStreamStatus(2);
+  const { isStreaming: arbNavigatorStreamActive } = useAgentStreamStatus(3);
+  const { isStreaming: sentimentRadarStreamActive } = useAgentStreamStatus(4);
+  
+  // Only fetch API data when stream is active for each agent
+  const { data: signalData, loading: signalLoading } = useAgentData(
+    'signal-forge', 
+    { symbol: 'BTC/USD', interval: '5min' },
+    signalForgeStreamActive
+  );
+  const { data: volData, loading: volLoading } = useAgentData(
+    'volatility-pulse', 
+    { symbol: 'BTC/USD' },
+    volatilityPulseStreamActive
+  );
+  const { data: arbData, loading: arbLoading } = useAgentData(
+    'arb-navigator', 
+    { symbols: 'BTC/USD,ETH/USD,BNB/USD' },
+    arbNavigatorStreamActive
+  );
+  const { data: sentimentData, loading: sentimentLoading } = useAgentData(
+    'sentiment-radar', 
+    { symbol: 'BTC' },
+    sentimentRadarStreamActive
+  );
   const { agents, isLoading: isLoadingAgents } = useAllAgents();
 
   // Map agent IDs to their on-chain data
@@ -163,32 +188,56 @@ function LiveAgentData() {
             }`} />
           </div>
 
-          {signalLoading ? (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="w-5 h-5 text-secondary animate-spin" />
+          {/* Stream Activation Toggle */}
+          {getAgentStatus(1).registered && (
+            <div className="mb-4 pb-4 border-b border-white/10">
+              <AgentStreamToggle
+                agentId={1}
+                agentName="Signal Forge"
+                pricePerSecond={0.001}
+              />
             </div>
-          ) : signalData ? (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Price</span>
-                <span className="font-semibold">${signalData.currentPrice?.toFixed(2)}</span>
+          )}
+
+          {/* Data Display - Only when streaming */}
+          {signalForgeStreamActive ? (
+            signalLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-5 h-5 text-secondary animate-spin" />
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">RSI</span>
-                <span className="font-semibold">{signalData.indicators?.rsi14?.toFixed(1)}</span>
+            ) : signalData ? (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Price</span>
+                  <span className="font-semibold">${signalData.currentPrice?.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">RSI</span>
+                  <span className="font-semibold">{signalData.indicators?.rsi14?.toFixed(1)}</span>
+                </div>
+                <div className="bg-black/20 rounded p-2 mt-2">
+                  <Badge variant="outline" className={
+                    signalData.signal?.action === 'BUY' ? 'border-green-500 text-green-500' :
+                    signalData.signal?.action === 'SELL' ? 'border-red-500 text-red-500' :
+                    'border-white/30'
+                  }>
+                    {signalData.signal?.action}
+                  </Badge>
+                  <p className="text-xs text-muted-foreground mt-1">{signalData.signal?.reason}</p>
+                </div>
               </div>
-              <div className="bg-black/20 rounded p-2 mt-2">
-                <Badge variant="outline" className={
-                  signalData.signal?.action === 'BUY' ? 'border-green-500 text-green-500' :
-                  signalData.signal?.action === 'SELL' ? 'border-red-500 text-red-500' :
-                  'border-white/30'
-                }>
-                  {signalData.signal?.action}
-                </Badge>
-                <p className="text-xs text-muted-foreground mt-1">{signalData.signal?.reason}</p>
+            ) : (
+              <div className="text-center py-6 text-white/40 text-sm">
+                Waiting for data...
               </div>
+            )
+          ) : (
+            <div className="text-center py-6 text-white/40 text-sm italic">
+              {getAgentStatus(1).registered 
+                ? 'Activate stream to view real-time data'
+                : 'Register agent in Admin first'}
             </div>
-          ) : null}
+          )}
         </Card>
 
         {/* Volatility Pulse */}
@@ -227,33 +276,57 @@ function LiveAgentData() {
             }`} />
           </div>
 
-          {volLoading ? (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="w-5 h-5 text-secondary animate-spin" />
+          {/* Stream Activation Toggle */}
+          {getAgentStatus(2).registered && (
+            <div className="mb-4 pb-4 border-b border-white/10">
+              <AgentStreamToggle
+                agentId={2}
+                agentName="Volatility Pulse"
+                pricePerSecond={0.001}
+              />
             </div>
-          ) : volData ? (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Regime</span>
-                <Badge variant="outline" className={
-                  volData.regime === 'LOW' ? 'border-green-500 text-green-500' :
-                  volData.regime === 'NORMAL' ? 'border-blue-500 text-blue-500' :
-                  volData.regime === 'ELEVATED' ? 'border-yellow-500 text-yellow-500' :
-                  'border-red-500 text-red-500'
-                }>
-                  {volData.regime}
-                </Badge>
+          )}
+
+          {/* Data Display - Only when streaming */}
+          {volatilityPulseStreamActive ? (
+            volLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-5 h-5 text-secondary animate-spin" />
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Fear Index</span>
-                <span className="font-bold text-lg">{volData.fearIndex?.toFixed(0)}</span>
+            ) : volData ? (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Regime</span>
+                  <Badge variant="outline" className={
+                    volData.regime === 'LOW' ? 'border-green-500 text-green-500' :
+                    volData.regime === 'NORMAL' ? 'border-blue-500 text-blue-500' :
+                    volData.regime === 'ELEVATED' ? 'border-yellow-500 text-yellow-500' :
+                    'border-red-500 text-red-500'
+                  }>
+                    {volData.regime}
+                  </Badge>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Fear Index</span>
+                  <span className="font-bold text-lg">{volData.fearIndex?.toFixed(0)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Annualized Vol</span>
+                  <span className="font-semibold">{(volData.realizedVolAnnualized * 100)?.toFixed(2)}%</span>
+                </div>
               </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Annualized Vol</span>
-                <span className="font-semibold">{(volData.realizedVolAnnualized * 100)?.toFixed(2)}%</span>
+            ) : (
+              <div className="text-center py-6 text-white/40 text-sm">
+                Waiting for data...
               </div>
+            )
+          ) : (
+            <div className="text-center py-6 text-white/40 text-sm italic">
+              {getAgentStatus(2).registered 
+                ? 'Activate stream to view real-time data'
+                : 'Register agent in Admin first'}
             </div>
-          ) : null}
+          )}
         </Card>
 
         {/* Arb Navigator */}
@@ -292,43 +365,57 @@ function LiveAgentData() {
             }`} />
           </div>
 
-          {arbLoading ? (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="w-5 h-5 text-secondary animate-spin" />
+          {!getAgentStatus(3).registered ? (
+            <div className="text-center py-6 text-white/40 text-sm italic">
+              Register agent in Admin first
             </div>
-          ) : arbData ? (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Opportunities</span>
-                <span className="text-secondary font-bold">{arbData.summary?.totalOpportunities || 0}</span>
+          ) : arbNavigatorStreamActive ? (
+            arbLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-5 h-5 text-secondary animate-spin" />
               </div>
-              {arbData.whaleTracking && (
-                <div className="bg-black/20 rounded p-2">
-                  <div className="flex items-center justify-between mb-1">
-                    <span className="text-xs text-muted-foreground">Whale Activity</span>
-                    <Badge variant="outline" className={
-                      arbData.whaleTracking.whaleActivity === 'HIGH' ? 'border-red-500 text-red-500 text-xs' :
-                      arbData.whaleTracking.whaleActivity === 'MEDIUM' ? 'border-yellow-500 text-yellow-500 text-xs' :
-                      'border-green-500 text-green-500 text-xs'
-                    }>
-                      {arbData.whaleTracking.whaleActivity}
-                    </Badge>
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    IOTA Mainnet: {arbData.whaleTracking.totalTransactions} txs • {arbData.whaleTracking.recentBlocks} blocks
-                  </div>
+            ) : arbData ? (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Opportunities</span>
+                  <span className="text-secondary font-bold">{arbData.summary?.totalOpportunities || 0}</span>
                 </div>
-              )}
-              {arbData.opportunities?.slice(0, 1).map((opp: any, idx: number) => (
-                <div key={idx} className="bg-black/20 rounded p-2 text-xs">
-                  <div className="font-semibold mb-1">{opp.pair.join(' ↔ ')}</div>
-                  <div className="text-muted-foreground">
-                    Spread: <span className="text-secondary">{opp.spreadPct?.toFixed(3)}%</span>
+                {arbData.whaleTracking && (
+                  <div className="bg-black/20 rounded p-2">
+                    <div className="flex items-center justify-between mb-1">
+                      <span className="text-xs text-muted-foreground">Whale Activity</span>
+                      <Badge variant="outline" className={
+                        arbData.whaleTracking.whaleActivity === 'HIGH' ? 'border-red-500 text-red-500 text-xs' :
+                        arbData.whaleTracking.whaleActivity === 'MEDIUM' ? 'border-yellow-500 text-yellow-500 text-xs' :
+                        'border-green-500 text-green-500 text-xs'
+                      }>
+                        {arbData.whaleTracking.whaleActivity}
+                      </Badge>
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      IOTA Mainnet: {arbData.whaleTracking.totalTransactions} txs • {arbData.whaleTracking.recentBlocks} blocks
+                    </div>
                   </div>
-                </div>
-              ))}
+                )}
+                {arbData.opportunities?.slice(0, 1).map((opp: any, idx: number) => (
+                  <div key={idx} className="bg-black/20 rounded p-2 text-xs">
+                    <div className="font-semibold mb-1">{opp.pair.join(' ↔ ')}</div>
+                    <div className="text-muted-foreground">
+                      Spread: <span className="text-secondary">{opp.spreadPct?.toFixed(3)}%</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-6 text-white/40 text-sm">
+                Waiting for data...
+              </div>
+            )
+          ) : (
+            <div className="text-center py-6 text-white/40 text-sm italic">
+              Activate stream to view real-time data
             </div>
-          ) : null}
+          )}
         </Card>
 
         {/* Sentiment Radar */}
@@ -367,38 +454,52 @@ function LiveAgentData() {
             }`} />
           </div>
 
-          {sentimentLoading ? (
-            <div className="flex items-center justify-center py-4">
-              <Loader2 className="w-5 h-5 text-secondary animate-spin" />
+          {!getAgentStatus(4).registered ? (
+            <div className="text-center py-6 text-white/40 text-sm italic">
+              Register agent in Admin first
             </div>
-          ) : sentimentData ? (
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-muted-foreground">Mood</span>
-                <Badge variant="outline" className={
-                  sentimentData.mood?.includes('GREED') ? 'border-green-500 text-green-500' :
-                  sentimentData.mood?.includes('FEAR') ? 'border-red-500 text-red-500' :
-                  'border-white/30'
-                }>
-                  {sentimentData.mood}
-                </Badge>
+          ) : sentimentRadarStreamActive ? (
+            sentimentLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-5 h-5 text-secondary animate-spin" />
               </div>
-              <div className="grid grid-cols-3 gap-2 mt-2">
-                <div className="text-center">
-                  <div className="text-green-500 font-bold">{sentimentData.metrics?.bullishPercent?.toFixed(0)}%</div>
-                  <div className="text-xs text-muted-foreground">Bull</div>
+            ) : sentimentData ? (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Mood</span>
+                  <Badge variant="outline" className={
+                    sentimentData.mood?.includes('GREED') ? 'border-green-500 text-green-500' :
+                    sentimentData.mood?.includes('FEAR') ? 'border-red-500 text-red-500' :
+                    'border-white/30'
+                  }>
+                    {sentimentData.mood}
+                  </Badge>
                 </div>
-                <div className="text-center">
-                  <div className="font-bold">{sentimentData.metrics?.neutralPercent?.toFixed(0)}%</div>
-                  <div className="text-xs text-muted-foreground">Neutral</div>
-                </div>
-                <div className="text-center">
-                  <div className="text-red-500 font-bold">{sentimentData.metrics?.bearishPercent?.toFixed(0)}%</div>
-                  <div className="text-xs text-muted-foreground">Bear</div>
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  <div className="text-center">
+                    <div className="text-green-500 font-bold">{sentimentData.metrics?.bullishPercent?.toFixed(0)}%</div>
+                    <div className="text-xs text-muted-foreground">Bull</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-bold">{sentimentData.metrics?.neutralPercent?.toFixed(0)}%</div>
+                    <div className="text-xs text-muted-foreground">Neutral</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-red-500 font-bold">{sentimentData.metrics?.bearishPercent?.toFixed(0)}%</div>
+                    <div className="text-xs text-muted-foreground">Bear</div>
+                  </div>
                 </div>
               </div>
+            ) : (
+              <div className="text-center py-6 text-white/40 text-sm">
+                Waiting for data...
+              </div>
+            )
+          ) : (
+            <div className="text-center py-6 text-white/40 text-sm italic">
+              Activate stream to view real-time data
             </div>
-          ) : null}
+          )}
         </Card>
       </div>
     </div>

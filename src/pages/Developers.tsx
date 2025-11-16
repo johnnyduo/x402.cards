@@ -212,22 +212,31 @@ function LiveAgentData() {
   );
   const { agents, isLoading: isLoadingAgents } = useAllAgents();
 
-  // Map agent IDs to their on-chain data
+  // Map agent IDs to their on-chain data and real-time stream status
   const getAgentStatus = (agentId: number) => {
     const agent = agents.find(a => a.id === agentId);
     if (!agent || agent.wallet === '0x0') return { registered: false, streaming: false, awaitingStream: false };
     
+    // Get real-time streaming status based on agent ID
+    let isCurrentlyStreaming = false;
+    switch(agentId) {
+      case 1: isCurrentlyStreaming = signalForgeStreamActive; break;
+      case 2: isCurrentlyStreaming = volatilityPulseStreamActive; break;
+      case 3: isCurrentlyStreaming = arbNavigatorStreamActive; break;
+      case 4: isCurrentlyStreaming = sentimentRadarStreamActive; break;
+      case 5: isCurrentlyStreaming = riskSentinelStreamActive; break;
+      case 6: isCurrentlyStreaming = aiCrawlerStreamActive; break;
+    }
+    
     // Registered = agent exists on-chain
-    // Awaiting Stream = registered but no active streams yet
-    // Streaming = has active streams
+    // Awaiting Stream = registered but no active stream currently
+    // Streaming = has active stream right now
     const registered = true;
-    const hasStreams = agent.totalStreams > 0n;
-    const isActive = agent.isActive;
     
     return {
       registered,
-      awaitingStream: registered && !hasStreams && isActive,
-      streaming: hasStreams && isActive,
+      awaitingStream: registered && !isCurrentlyStreaming,
+      streaming: isCurrentlyStreaming,
       totalStreams: Number(agent.totalStreams),
     };
   };

@@ -2,7 +2,8 @@
 
 <div align="center">
 
-<img src="public/Robot%20TFU.gif" alt="x402.Cards Robot Mascot" width="200"/>
+![Robot_TFU_20251116123922](https://github.com/user-attachments/assets/956594c9-46a7-4d78-9292-f79b98e59885)
+
 
 [![IOTA EVM](https://img.shields.io/badge/IOTA-EVM-00E5FF?style=for-the-badge&logo=iota)](https://evm.iota.org/)
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.28-363636?style=for-the-badge&logo=solidity)](https://soliditylang.org/)
@@ -20,7 +21,9 @@
 
 ## 🎯 Overview
 
-x402.Cards is a next-generation DeFi intelligence platform that revolutionizes how users access on-chain data. Instead of traditional subscriptions, users activate AI-powered agents that stream real-time market intelligence while automatically paying per second via smart contracts on IOTA EVM.
+<img width="1439" height="822" alt="Screenshot 2568-11-16 at 19 57 46" src="https://github.com/user-attachments/assets/4e85d426-3123-44e9-8df1-f6309b199ddf" />
+
+x402.Cards is a next-generation DeFi intelligence platform that revolutionizes how users access on-chain data. Instead of traditional subscriptions, users activate AI-powered tokenized agents that stream real-time market intelligence while automatically paying per second via smart contracts on IOTA EVM.
 
 ### Key Innovations
 
@@ -35,6 +38,8 @@ x402.Cards is a next-generation DeFi intelligence platform that revolutionizes h
 
 ## 🚀 Features
 
+<img width="1309" height="818" alt="Screenshot 2568-11-16 at 19 58 26" src="https://github.com/user-attachments/assets/90cf3030-0554-48b1-b389-8ae02dc46bc3" />
+
 ### Intelligent Agents
 
 | Agent | Category | Cost/Sec | Description |
@@ -46,6 +51,8 @@ x402.Cards is a next-generation DeFi intelligence platform that revolutionizes h
 | **Risk Sentinel** | Risk | 0.0010 USDC | Liquidation risk scoring and collateral exposure monitoring |
 | **AI Crawler Service** | Data | 0.0030 USDC | Distributed web crawler for blockchain data indexing |
 
+<img width="1432" height="916" alt="Screenshot 2568-11-16 at 19 59 10" src="https://github.com/user-attachments/assets/0a0690bb-b51e-4b87-a1a1-a484bc0a9d6e" />
+
 ### Core Functionality
 
 - **Stream Management**: Create, pause, resume, and cancel payment streams on-chain
@@ -56,6 +63,8 @@ x402.Cards is a next-generation DeFi intelligence platform that revolutionizes h
 - **Responsive Design**: Mobile-first UI with glassmorphic design system
 
 ---
+
+<img width="1444" height="872" alt="Screenshot 2568-11-16 at 19 59 42" src="https://github.com/user-attachments/assets/a920d4c6-dc61-464b-bbe4-1a4157b87edb" />
 
 ## 🏗️ Architecture
 

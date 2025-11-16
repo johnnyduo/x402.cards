@@ -1,103 +1,198 @@
-import { useWriteContract, useWaitForTransactionReceipt, useReadContract } from 'wagmi';
+import { useWriteContract, useWaitForTransactionReceipt, useReadContract, usePublicClient } from 'wagmi';
 import { STREAMING_PAYMENTS_ADDRESS, STREAMING_PAYMENTS_ABI } from '@/config/streamingContracts';
 import { toast } from 'sonner';
 
 export function useRegisterAgent() {
-  const { writeContract, data: hash, isPending } = useWriteContract();
+  const { writeContractAsync, data: hash, isPending } = useWriteContract();
+  const publicClient = usePublicClient();
   
-  const { isLoading: isConfirming } = useWaitForTransactionReceipt({
-    hash,
-  });
-
   const registerAgent = async (
     agentId: bigint,
     wallet: `0x${string}`,
     pricePerSecond: bigint
   ) => {
+    let txHash: `0x${string}` | undefined;
+    
     try {
-      await writeContract({
+      // Submit transaction
+      txHash = await writeContractAsync({
         address: STREAMING_PAYMENTS_ADDRESS,
         abi: STREAMING_PAYMENTS_ABI,
         functionName: 'registerAgent',
         args: [agentId, wallet, pricePerSecond],
-        gas: 500000n, // Set explicit gas limit
+        gas: 500000n,
       });
+
+      // Wait for transaction receipt
+      if (publicClient) {
+        const receipt = await publicClient.waitForTransactionReceipt({ 
+          hash: txHash,
+          confirmations: 1
+        });
+
+        // Check if transaction was successful
+        if (receipt.status === 'reverted') {
+          throw new Error('Transaction reverted on-chain');
+        }
+      }
+
+      return { success: true, txHash };
+      
     } catch (error: any) {
-      console.error('Register agent error:', error);
+      console.error('❌ Register agent error:', error);
+      console.error('❌ Error details:', {
+        message: error?.message,
+        shortMessage: error?.shortMessage,
+        cause: error?.cause,
+        data: error?.data,
+        details: error?.details,
+      });
       
       // Parse specific error messages
-      let errorMessage = 'Failed to register agent';
+      let errorMessage = 'Transaction failed';
+      let errorDetails = '';
       
-      if (error?.message?.includes('insufficient funds')) {
-        errorMessage = 'Insufficient funds for gas fees. Please add more IOTA to your wallet.';
-      } else if (error?.message?.includes('user rejected')) {
-        errorMessage = 'Transaction was rejected';
-      } else if (error?.message?.includes('already registered')) {
-        errorMessage = 'This agent ID is already registered';
-      } else if (error?.message?.includes('Price too low')) {
-        errorMessage = 'Price too low. Contract requires minimum 0.001 USDC per second (1000 in 6 decimals).';
-      } else if (error?.message?.includes('execution reverted')) {
-        errorMessage = 'Transaction reverted. Check price requirements (min 0.001 USDC/sec).';
-      } else if (error?.shortMessage) {
-        errorMessage = error.shortMessage;
+      // Extract error information from multiple sources
+      const errorStr = JSON.stringify(error).toLowerCase();
+      const errorMsg = (error?.message || '').toLowerCase();
+      const shortMsg = error?.shortMessage || '';
+      const causeReason = error?.cause?.reason || '';
+      const metaMessages = error?.metaMessages || [];
+      const details = error?.details || '';
+      
+      // Check all possible error sources
+      const allErrorText = [errorMsg, errorStr, causeReason, shortMsg, details, ...metaMessages]
+        .join(' ')
+        .toLowerCase();
+      
+      if (allErrorText.includes('agent already registered')) {
+        errorMessage = 'Agent Already Registered';
+        errorDetails = 'This agent ID is already registered on-chain. Use the Manage Agents tab to update it, or choose a different agent.';
+      } else if (allErrorText.includes('price too low')) {
+        errorMessage = 'Price Too Low';
+        errorDetails = 'Minimum price is 0.001 USDC per second (1000 wei). Please increase the price.';
+      } else if (allErrorText.includes('invalid wallet')) {
+        errorMessage = 'Invalid Wallet Address';
+        errorDetails = 'The wallet address cannot be 0x0. Please provide a valid address.';
+      } else if (allErrorText.includes('insufficient funds') || allErrorText.includes('insufficient balance')) {
+        errorMessage = 'Insufficient Funds';
+        errorDetails = 'Not enough IOTA for gas fees. Please add funds to your wallet.';
+      } else if (allErrorText.includes('user rejected') || allErrorText.includes('user denied')) {
+        errorMessage = 'Transaction Rejected';
+        errorDetails = 'You cancelled the transaction in your wallet.';
+      } else if (allErrorText.includes('execution reverted') || allErrorText.includes('reverted')) {
+        // Try to extract the specific revert reason
+        const revertMatch = error?.message?.match(/reverted with reason string '([^']+)'/) ||
+                           error?.message?.match(/reverted: ([^\n]+)/);
+        if (revertMatch) {
+          errorMessage = 'Contract Rejected Transaction';
+          errorDetails = revertMatch[1];
+        } else {
+          errorMessage = 'Transaction Reverted';
+          errorDetails = shortMsg || causeReason || details || 'The contract rejected this transaction. This usually means the agent is already registered or requirements are not met.';
+        }
+      } else if (shortMsg) {
+        errorMessage = 'Transaction Failed';
+        errorDetails = shortMsg;
+      } else if (error?.message) {
+        errorMessage = 'Transaction Failed';
+        errorDetails = error.message.slice(0, 200);
       }
       
-      toast.error(errorMessage);
-      throw new Error(errorMessage);
+      return { 
+        success: false, 
+        txHash, 
+        error: errorMessage,
+        errorDetails 
+      };
     }
   };
 
   return {
     registerAgent,
-    isLoading: isPending || isConfirming,
+    isLoading: isPending,
     hash,
   };
 }
 
 export function useUpdateAgent() {
-  const { writeContract, data: hash, isPending } = useWriteContract();
-  
-  const { isLoading: isConfirming } = useWaitForTransactionReceipt({
-    hash,
-  });
+  const { writeContractAsync, data: hash, isPending } = useWriteContract();
+  const publicClient = usePublicClient();
 
   const updateAgent = async (
     agentId: bigint,
     wallet: `0x${string}`,
     pricePerSecond: bigint
   ) => {
+    let txHash: `0x${string}` | undefined;
+    
     try {
-      await writeContract({
+      txHash = await writeContractAsync({
         address: STREAMING_PAYMENTS_ADDRESS,
         abi: STREAMING_PAYMENTS_ABI,
         functionName: 'updateAgent',
         args: [agentId, wallet, pricePerSecond],
+        gas: 500000n,
       });
-      toast.success('Agent updated successfully');
-    } catch (error) {
-      console.error('Update agent error:', error);
-      toast.error('Failed to update agent');
-      throw error;
+
+      // Wait for confirmation
+      if (publicClient) {
+        const receipt = await publicClient.waitForTransactionReceipt({ 
+          hash: txHash,
+          confirmations: 1
+        });
+
+        if (receipt.status === 'reverted') {
+          throw new Error('Transaction reverted on-chain');
+        }
+      }
+
+      return { success: true, txHash };
+      
+    } catch (error: any) {
+      console.error('❌ Update agent error:', error);
+      
+      let errorMessage = 'Update failed';
+      let errorDetails = error?.shortMessage || error?.message?.slice(0, 100) || 'Unknown error';
+      
+      return { 
+        success: false, 
+        txHash, 
+        error: errorMessage,
+        errorDetails 
+      };
     }
   };
 
   return {
     updateAgent,
-    isLoading: isPending || isConfirming,
+    isLoading: isPending,
     hash,
   };
 }
 
 export function useAgentStats(agentId: bigint) {
-  const { data, isLoading, refetch } = useReadContract({
+  const { data, isLoading, refetch, error } = useReadContract({
     address: STREAMING_PAYMENTS_ADDRESS,
     abi: STREAMING_PAYMENTS_ABI,
     functionName: 'getAgentStats',
     args: [agentId],
+    blockTag: 'latest', // Explicitly query latest block
     query: {
-      refetchInterval: 5000, // Refetch every 5 seconds
+      gcTime: 0, // Don't cache
+      staleTime: 0, // Always refetch
     },
   });
+
+  // Debug logging
+  if (agentId === 1n) {
+    console.log(`🔍 Agent #${agentId} read result:`, { 
+      data, 
+      isLoading, 
+      error: error?.message,
+      hasError: !!error 
+    });
+  }
 
   if (!data) {
     return {
@@ -131,15 +226,8 @@ export function useAgentStats(agentId: bigint) {
 }
 
 export function useAllAgents() {
-  // Get total agents registered
-  const { data: totalAgentsData } = useReadContract({
-    address: STREAMING_PAYMENTS_ADDRESS,
-    abi: STREAMING_PAYMENTS_ABI,
-    functionName: 'totalStreamsCreated', // Using this as proxy for now
-  });
-
-  // For now, we'll manually query agents 1-6
-  // In production, add a getAllAgents() function to the contract
+  // Query all predefined agent IDs (1-6)
+  // Note: Contract doesn't have a function to get total agent count
   const agentIds = [1n, 2n, 3n, 4n, 5n, 6n];
   
   const agents = agentIds.map((id) => {
@@ -152,10 +240,12 @@ export function useAllAgents() {
 
   const isLoading = agents.some((agent) => agent.isLoading);
 
-  // Filter out agents that don't exist (wallet is 0x0)
-  const validAgents = agents.filter(
-    (agent) => agent.wallet !== '0x0' && agent.wallet !== '0x0000000000000000000000000000000000000000'
-  );
+  // Filter out agents that don't exist (wallet is 0x0 or not active)
+  const validAgents = agents.filter((agent) => {
+    return agent.isActive && 
+           agent.wallet !== '0x0' && 
+           agent.wallet !== '0x0000000000000000000000000000000000000000';
+  });
 
   return {
     agents: validAgents,

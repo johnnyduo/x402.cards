@@ -20,11 +20,51 @@ import {
   Shield,
   Sparkles,
   Zap,
+  Trash2,
+  Edit,
+  RefreshCw,
 } from 'lucide-react';
-import { useRegisterAgent, useAllAgents } from '@/hooks/useAgentRegistry';
+import { useRegisterAgent, useAllAgents, useUpdateAgent } from '@/hooks/useAgentRegistry';
 import { useAPIStatus, useAgentLiveData } from '@/hooks/useAgentAPI';
 import { AGENTS as predefinedAgents } from '@/data/agents';
 import { formatUnits, parseUnits, formatGwei } from 'viem';
+
+// LocalStorage helpers for agent cache
+const AGENTS_CACHE_KEY = 'x402_registered_agents';
+const CACHE_DURATION = 300000; // 5 minutes
+
+interface CachedAgent {
+  id: number;
+  wallet: string;
+  pricePerSecond: string;
+  timestamp: number;
+  txHash?: string;
+}
+
+const saveAgentToCache = (agent: CachedAgent) => {
+  try {
+    const cached = localStorage.getItem(AGENTS_CACHE_KEY);
+    const agents: CachedAgent[] = cached ? JSON.parse(cached) : [];
+    const filtered = agents.filter(a => a.id !== agent.id);
+    filtered.push({ ...agent, timestamp: Date.now() });
+    localStorage.setItem(AGENTS_CACHE_KEY, JSON.stringify(filtered));
+  } catch (e) {
+    console.error('Failed to cache agent:', e);
+  }
+};
+
+const getCachedAgents = (): CachedAgent[] => {
+  try {
+    const cached = localStorage.getItem(AGENTS_CACHE_KEY);
+    if (!cached) return [];
+    const agents: CachedAgent[] = JSON.parse(cached);
+    const now = Date.now();
+    return agents.filter(a => (now - a.timestamp) < CACHE_DURATION);
+  } catch (e) {
+    console.error('Failed to load cached agents:', e);
+    return [];
+  }
+};
 
 export default function Admin() {
   const { isConnected, address } = useAccount();
@@ -35,19 +75,69 @@ export default function Admin() {
   const [pricePerSecond, setPricePerSecond] = useState('');
   const [tokenURI, setTokenURI] = useState('');
   const [isRegisteringAll, setIsRegisteringAll] = useState(false);
+  const [cachedAgents, setCachedAgents] = useState<CachedAgent[]>(getCachedAgents());
   
   // Contract deployer/owner address
   const DEPLOYER_ADDRESS = '0x5ebaddf71482d40044391923be1fc42938129988';
   const isDeployer = address?.toLowerCase() === DEPLOYER_ADDRESS.toLowerCase();
 
   const { registerAgent, isLoading: isRegistering } = useRegisterAgent();
+  const { updateAgent, isLoading: isUpdating } = useUpdateAgent();
   const { agents, isLoading: isLoadingAgents, refetch } = useAllAgents();
   const { status: apiStatus, isChecking: isCheckingAPI, refetch: refetchAPI } = useAPIStatus();
   const agentLiveData = useAgentLiveData(selectedAgent ? parseInt(selectedAgent) : 0);
 
+  // Manual refresh handler
+  const handleRefresh = async () => {
+    toast.loading('Refreshing agent data...', { id: 'refresh' });
+    await refetch();
+    toast.success('Agent data updated', { id: 'refresh' });
+  };
+
+  // Log agents data and network info for debugging
+  useEffect(() => {
+    console.log('🌐 Connected:', isConnected);
+    console.log('📍 Wallet Address:', address);
+    console.log('📊 Agents loaded:', agents.length, 'agents');
+    console.log('🔗 Contract Address:', '0x340DeE0a3EA33304C59d15d37D951A5B72A7b563');
+    
+    // Check if we're on the right network
+    if (window.ethereum) {
+      window.ethereum.request({ method: 'eth_chainId' }).then((chainId: string) => {
+        const chainIdDecimal = parseInt(chainId, 16);
+        console.log('🔢 Current Chain ID:', chainIdDecimal, '(should be 1076 for IOTA EVM Testnet)');
+        if (chainIdDecimal !== 1076) {
+          console.error('❌ WRONG NETWORK! Please switch to IOTA EVM Testnet (Chain ID 1076)');
+        }
+      });
+    }
+  }, [isConnected, address, agents]);
+
   const handleRegister = async () => {
     if (!selectedAgent || !agentName || !walletAddress || !pricePerSecond) {
       toast.error('Please fill in all required fields');
+      return;
+    }
+
+    // Check if agent is already registered (check both on-chain data and cache)
+    const checkAgentId = Number(selectedAgent);
+    const isAlreadyRegistered = agents.some(a => 
+      a.id === checkAgentId && 
+      a.isActive &&
+      a.wallet !== '0x0' &&
+      a.wallet !== '0x0000000000000000000000000000000000000000'
+    );
+    
+    if (isAlreadyRegistered) {
+      toast.error(
+        <div>
+          <div className="font-semibold">Agent Already Registered</div>
+          <div className="text-xs text-white/70 mt-1">
+            Agent #{checkAgentId} is already active on-chain. Use the Manage Agents tab to update it.
+          </div>
+        </div>,
+        { duration: 5000 }
+      );
       return;
     }
 
@@ -71,29 +161,65 @@ export default function Admin() {
       return;
     }
 
-    try {
-      const priceInWei = parseUnits(pricePerSecond, 6);
-      const agentId = BigInt(selectedAgent);
+    const priceInWei = parseUnits(pricePerSecond, 6);
+    const agentId = BigInt(selectedAgent);
 
-      toast.loading('Registering agent... Please confirm the transaction in your wallet');
+    const loadingToast = toast.loading('Submitting transaction...');
 
-      await registerAgent(agentId, walletAddress as `0x${string}`, priceInWei);
+    const result = await registerAgent(agentId, walletAddress as `0x${string}`, priceInWei);
 
-      toast.dismiss();
-      toast.success('Agent registered successfully!');
+    toast.dismiss(loadingToast);
 
-      setSelectedAgent('');
-      setAgentName('');
-      setWalletAddress('0x5ebaddf71482d40044391923be1fc42938129988');
-      setPricePerSecond('');
-      setTokenURI('');
-
-      await refetch();
-    } catch (error: any) {
-      toast.dismiss();
-      console.error('Registration error:', error);
-      // Error message already shown by registerAgent hook
+    if (!result.success) {
+      // Show error with details
+      toast.error(
+        <div>
+          <div className="font-semibold">{result.error}</div>
+          {result.errorDetails && (
+            <div className="text-xs text-white/70 mt-1">{result.errorDetails}</div>
+          )}
+          {result.txHash && (
+            <a 
+              href={`https://explorer.evm.testnet.iota.cafe/tx/${result.txHash}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs text-red-400 hover:underline mt-1 block"
+            >
+              View Failed TX: {result.txHash.slice(0, 10)}...{result.txHash.slice(-8)}
+            </a>
+          )}
+        </div>,
+        { duration: 7000 }
+      );
+      return;
     }
+
+    // Success - show message and refresh
+    toast.success(
+      <div>
+        <div className="font-semibold">✅ Agent Registered Successfully!</div>
+        <div className="text-xs text-white/70 mt-1">Transaction confirmed on-chain</div>
+        <a 
+          href={`https://explorer.evm.testnet.iota.cafe/tx/${result.txHash}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="text-xs text-secondary hover:underline mt-1 block"
+        >
+          View TX: {result.txHash.slice(0, 10)}...{result.txHash.slice(-8)}
+        </a>
+      </div>,
+      { duration: 5000 }
+    );
+
+    // Reset form
+    setSelectedAgent('');
+    setAgentName('');
+    setWalletAddress('0x5ebaddf71482d40044391923be1fc42938129988');
+    setPricePerSecond('');
+    setTokenURI('');
+
+    // Refresh to show new agent immediately
+    await refetch();
   };
 
   const handleRegisterAll = async () => {
@@ -111,39 +237,99 @@ export default function Admin() {
     setIsRegisteringAll(true);
     let successCount = 0;
     let failCount = 0;
+    let skippedCount = 0;
 
-    toast.loading(`Registering ${predefinedAgents.length} agents...`);
+    // Filter out already registered agents
+    const registeredIds = new Set(agents.filter(a => a.wallet !== '0x0000000000000000000000000000000000000000').map(a => a.id));
+    const agentsToRegister = predefinedAgents.filter(a => !registeredIds.has(a.id));
 
-    for (const agent of predefinedAgents) {
-      try {
-        const priceInWei = parseUnits(agent.pricePerSec.toString(), 6);
-        const agentId = BigInt(agent.id);
+    if (agentsToRegister.length === 0) {
+      setIsRegisteringAll(false);
+      toast.info('All agents are already registered!');
+      return;
+    }
 
-        await registerAgent(agentId, walletAddress as `0x${string}`, priceInWei);
+    let currentToast = toast.loading(`Registering ${agentsToRegister.length} agents (${predefinedAgents.length - agentsToRegister.length} already registered)...`);
+
+    for (const agent of agentsToRegister) {
+      const priceInWei = parseUnits(agent.pricePerSec.toString(), 6);
+      const agentId = BigInt(agent.id);
+
+      const result = await registerAgent(agentId, walletAddress as `0x${string}`, priceInWei);
+      
+      if (result.success && result.txHash) {
+        // Cache successful registration
+        saveAgentToCache({
+          id: agent.id,
+          wallet: walletAddress,
+          pricePerSecond: agent.pricePerSec.toString(),
+          timestamp: Date.now(),
+          txHash: result.txHash
+        });
+        
         successCount++;
         
-        toast.dismiss();
-        toast.loading(`Registered ${agent.name} (${successCount}/${predefinedAgents.length})...`);
-        
-        // Small delay between registrations to avoid overwhelming the network
-        await new Promise(resolve => setTimeout(resolve, 2000));
-      } catch (error: any) {
-        console.error(`Failed to register ${agent.name}:`, error);
+        toast.dismiss(currentToast);
+        currentToast = toast.loading(`✅ ${agent.name} registered (${successCount}/${agentsToRegister.length})...`);
+      } else {
+        // Registration failed
         failCount++;
+        console.error(`❌ Failed to register ${agent.name}:`, result.error, result.errorDetails);
+        
+        toast.dismiss(currentToast);
+        currentToast = toast.loading(`❌ ${agent.name} failed: ${result.error} (${successCount + failCount}/${agentsToRegister.length})`);
       }
+      
+      // Small delay between registrations
+      await new Promise(resolve => setTimeout(resolve, 2000));
     }
 
-    toast.dismiss();
+    toast.dismiss(currentToast);
     setIsRegisteringAll(false);
+    setCachedAgents(getCachedAgents());
     
-    if (successCount === predefinedAgents.length) {
+    const skipped = predefinedAgents.length - agentsToRegister.length;
+    if (successCount === agentsToRegister.length && skipped > 0) {
+      toast.success(`Successfully registered ${successCount} new agents! (${skipped} were already registered)`);
+    } else if (successCount === agentsToRegister.length) {
       toast.success(`Successfully registered all ${successCount} agents!`);
     } else if (successCount > 0) {
-      toast.success(`Registered ${successCount} agents (${failCount} failed)`);
+      toast.success(`Registered ${successCount} agents (${failCount} failed, ${skipped} already registered)`);
     } else {
-      toast.error('Failed to register agents');
+      toast.error(`Failed to register agents (${skipped} already registered)`);
     }
 
+    // Refetch in background
+    setTimeout(() => refetch(), 2000);
+  };
+
+  const handleDeactivateAgent = async (agentId: number) => {
+    if (!confirm(`Are you sure you want to deactivate Agent #${agentId}? This will set the wallet to 0x0 address.`)) {
+      return;
+    }
+
+    const loadingToast = toast.loading('Deactivating agent...');
+    
+    const result = await updateAgent(
+      BigInt(agentId),
+      '0x0000000000000000000000000000000000000000' as `0x${string}`,
+      0n
+    );
+
+    toast.dismiss(loadingToast);
+
+    if (!result.success) {
+      toast.error(
+        <div>
+          <div className="font-semibold">{result.error}</div>
+          <div className="text-xs text-white/70 mt-1">{result.errorDetails}</div>
+        </div>,
+        { duration: 5000 }
+      );
+      return;
+    }
+
+    toast.success('Agent deactivated successfully');
     await refetch();
   };
 
@@ -299,12 +485,17 @@ export default function Admin() {
                         position="popper"
                         sideOffset={8}
                       >
-                        {predefinedAgents.map((agent) => (
+                        {predefinedAgents.map((agent) => {
+                          const isRegistered = agents.some(a => a.id === agent.id && a.wallet !== '0x0000000000000000000000000000000000000000');
+                          return (
                           <SelectItem
                             key={agent.id}
                             value={agent.id.toString()}
-                            textValue={agent.name}   // 👈 this fixes the “card in trigger” glitch
-                            className="text-white hover:bg-secondary/10 cursor-pointer focus:bg-secondary/10 py-4 px-4 border-b border-white/5 last:border-0"
+                            textValue={agent.name}   // 👈 this fixes the "card in trigger" glitch
+                            disabled={isRegistered}
+                            className={`text-white hover:bg-secondary/10 cursor-pointer focus:bg-secondary/10 py-4 px-4 border-b border-white/5 last:border-0 ${
+                              isRegistered ? 'opacity-50 cursor-not-allowed' : ''
+                            }`}
                           >
                             <div className="flex items-start gap-3 py-1">
                               <div className="mt-0.5 text-secondary shrink-0">{agent.icon}</div>
@@ -319,6 +510,12 @@ export default function Admin() {
                                   >
                                     {agent.category}
                                   </Badge>
+                                  {isRegistered && (
+                                    <Badge variant="outline" className="text-[10px] border-emerald-500/50 text-emerald-400 px-2 py-0.5">
+                                      <CheckCircle2 className="w-2.5 h-2.5 mr-1" />
+                                      Registered
+                                    </Badge>
+                                  )}
                                 </div>
                                 <p className="text-white/70 text-sm leading-relaxed mb-2">
                                   {agent.description}
@@ -347,7 +544,8 @@ export default function Admin() {
                               </div>
                             </div>
                           </SelectItem>
-                        ))}
+                        );
+                        })}
                       </SelectContent>
                     </Select>
                   </div>
@@ -578,15 +776,13 @@ export default function Admin() {
                         Recipient Wallet Address
                       </Label>
                     </div>
-                    <Input
-                      id="wallet-address"
-                      placeholder="0x..."
-                      value={walletAddress}
-                      onChange={(e) => setWalletAddress(e.target.value)}
-                      className="w-full bg-black/30 border-white/10 text-white font-mono h-14 text-sm hover:bg-black/40 transition-colors"
-                    />
+                    <div className="w-full bg-black/30 border border-white/10 rounded-lg px-4 py-4 h-14 flex items-center">
+                      <span className="text-white/70 font-mono text-sm">
+                        {walletAddress.slice(0, 6)}...{walletAddress.slice(-4)}
+                      </span>
+                    </div>
                     <p className="text-xs text-white/50 mt-3">
-                      This address will receive payments for agent usage
+                      This address will receive payments for agent usage (connected wallet)
                     </p>
                   </div>
 
@@ -660,27 +856,37 @@ export default function Admin() {
                       <h3 className="text-lg font-semibold text-white">Registered Agents</h3>
                       <p className="text-xs text-white/50 mt-1">On-chain agent registry data</p>
                     </div>
-                    <Button
-                      onClick={() => refetch()}
-                      variant="outline"
-                      size="sm"
-                      className="border-white/10 text-white/70 hover:text-white hover:border-secondary/30"
-                    >
-                      <Activity className="w-3 h-3 mr-1" />
-                      Refresh
-                    </Button>
+                    <div className="flex gap-2">
+                      <Button
+                        onClick={handleRefresh}
+                        disabled={isLoadingAgents}
+                        variant="outline"
+                        size="sm"
+                        className="border-white/10 text-white/70 hover:text-white hover:border-secondary/30"
+                      >
+                        <RefreshCw className={`w-3 h-3 mr-1 ${isLoadingAgents ? 'animate-spin' : ''}`} />
+                        Refresh
+                      </Button>
+                      {agents.length === 0 && !isLoadingAgents && (
+                        <Badge variant="outline" className="border-amber-500/50 text-amber-400 text-xs">
+                          No on-chain data found - Check console
+                        </Badge>
+                      )}
+                    </div>
                   </div>
 
-                  {isLoadingAgents ? (
-                    <div className="flex items-center justify-center py-12">
-                      <div className="text-center">
-                        <Loader2 className="w-8 h-8 animate-spin text-secondary mx-auto mb-2" />
-                        <p className="text-xs text-white/50">Loading agents from blockchain...</p>
+                  {(() => {
+                    // Show only confirmed on-chain agents
+                    return isLoadingAgents ? (
+                      <div className="flex items-center justify-center py-12">
+                        <div className="text-center">
+                          <Loader2 className="w-8 h-8 animate-spin text-secondary mx-auto mb-2" />
+                          <p className="text-xs text-white/50">Loading agents from blockchain...</p>
+                        </div>
                       </div>
-                    </div>
-                  ) : agents && agents.length > 0 ? (
-                    <div className="space-y-4">
-                      {agents.map((agent) => {
+                    ) : agents.length > 0 ? (
+                      <div className="space-y-4">
+                        {agents.map((agent) => {
                         const agentInfo = predefinedAgents.find(a => a.id === agent.id);
                         return (
                           <div
@@ -768,11 +974,25 @@ export default function Admin() {
                             </div>
 
                             {agentInfo && (
-                              <div className="mt-3 pt-3 border-t border-white/5">
-                                <div className="text-xs text-white/50 mb-2">Category</div>
-                                <Badge variant="outline" className="border-secondary/30 text-secondary">
-                                  {agentInfo.category}
-                                </Badge>
+                              <div className="mt-3 pt-3 border-t border-white/5 flex items-center justify-between">
+                                <div>
+                                  <div className="text-xs text-white/50 mb-2">Category</div>
+                                  <Badge variant="outline" className="border-secondary/30 text-secondary">
+                                    {agentInfo.category}
+                                  </Badge>
+                                </div>
+                                <div className="flex gap-2">
+                                  <Button
+                                    onClick={() => handleDeactivateAgent(agent.id)}
+                                    disabled={isUpdating || agent.totalStreams > 0n}
+                                    variant="outline"
+                                    size="sm"
+                                    className="border-red-500/30 text-red-400 hover:bg-red-500/10 hover:text-red-300 hover:border-red-500/50"
+                                  >
+                                    <Trash2 className="w-3 h-3 mr-1.5" />
+                                    {agent.totalStreams > 0n ? 'Has Active Streams' : 'Deactivate'}
+                                  </Button>
+                                </div>
                               </div>
                             )}
                           </div>
@@ -787,7 +1007,8 @@ export default function Admin() {
                       <p className="text-white/70 font-medium mb-1">No Registered Agents</p>
                       <p className="text-xs text-white/40">Register your first agent to get started</p>
                     </div>
-                  )}
+                  );
+                  })()}
                 </div>
               </TabsContent>
             </Tabs>

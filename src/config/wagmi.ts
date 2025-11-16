@@ -22,10 +22,10 @@ export const iotaEVM = defineChain({
   },
   rpcUrls: {
     default: {
-      http: ['https://json-rpc.evm.testnet.iota.cafe', 'https://rpc.ankr.com/iota_evm_testnet'],
+      http: ['https://json-rpc.evm.testnet.iota.cafe'],
     },
     public: {
-      http: ['https://json-rpc.evm.testnet.iota.cafe', 'https://rpc.ankr.com/iota_evm_testnet'],
+      http: ['https://json-rpc.evm.testnet.iota.cafe'],
     },
   },
   blockExplorers: {
@@ -34,12 +34,8 @@ export const iotaEVM = defineChain({
       url: 'https://explorer.evm.testnet.iota.cafe' 
     },
   },
-  contracts: {
-    multicall3: {
-      address: '0xcA11bde05977b3631167028862bE2a173976CA11',
-      blockCreated: 1,
-    },
-  },
+  // Note: multicall3 not available on IOTA EVM Testnet
+  // Wagmi will use direct calls instead
   testnet: true,
 })
 

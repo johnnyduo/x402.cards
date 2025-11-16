@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test RPC Call</title>
+</head>
+<body>
+    <h1>Direct RPC Test</h1>
+    <button onclick="testCall()">Test getAgentStats(1)</button>
+    <pre id="result"></pre>
+
+    <script src="https://cdn.jsdelivr.net/npm/viem@2.39.0/dist/viem.js"></script>
+    <script>
+        async function testCall() {
+            const result = document.getElementById('result');
+            result.textContent = 'Testing...';
+
+            try {
+                const { createPublicClient, http, encodeFunctionData, decodeFunctionResult } = viem;
+                
+                const client = createPublicClient({
+                    transport: http('https://json-rpc.evm.testnet.iota.cafe')
+                });
+
+                // Encode the call
+                const data = encodeFunctionData({
+                    abi: [{
+                        inputs: [{ name: "agentId", type: "uint256" }],
+                        name: "getAgentStats",
+                        outputs: [
+                            { name: "wallet", type: "address" },
+                            { name: "pricePerSecond", type: "uint256" },
+                            { name: "isActive", type: "bool" },
+                            { name: "totalEarned", type: "uint256" },
+                            { name: "totalStreams", type: "uint256" }
+                        ],
+                        stateMutability: "view",
+                        type: "function"
+                    }],
+                    functionName: 'getAgentStats',
+                    args: [1n]
+                });
+
+                // Make the call
+                const response = await client.call({
+                    to: '0x340DeE0a3EA33304C59d15d37D951A5B72A7b563',
+                    data: data
+                });
+
+                result.textContent = JSON.stringify({
+                    data: response.data,
+                    raw: response
+                }, null, 2);
+
+            } catch (error) {
+                result.textContent = 'ERROR: ' + error.message + '\n\n' + error.stack;
+            }
+        }
+    </script>
+</body>
+</html>

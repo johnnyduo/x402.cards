@@ -145,5 +145,25 @@ export const STREAMING_PAYMENTS_ABI = [
     ],
     name: "StreamCancelled",
     type: "event"
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "agentId", type: "uint256" },
+      { indexed: true, name: "wallet", type: "address" },
+      { indexed: false, name: "pricePerSecond", type: "uint256" }
+    ],
+    name: "AgentRegistered",
+    type: "event"
+  },
+  {
+    anonymous: false,
+    inputs: [
+      { indexed: true, name: "agentId", type: "uint256" },
+      { indexed: true, name: "wallet", type: "address" },
+      { indexed: false, name: "pricePerSecond", type: "uint256" }
+    ],
+    name: "AgentUpdated",
+    type: "event"
   }
 ] as const;

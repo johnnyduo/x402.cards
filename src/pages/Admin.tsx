@@ -77,6 +77,11 @@ export default function Admin() {
   const [isRegisteringAll, setIsRegisteringAll] = useState(false);
   const [cachedAgents, setCachedAgents] = useState<CachedAgent[]>(getCachedAgents());
   
+  // Edit agent state
+  const [editingAgent, setEditingAgent] = useState<{ id: number; wallet: string; price: string } | null>(null);
+  const [editWallet, setEditWallet] = useState('');
+  const [editPrice, setEditPrice] = useState('');
+  
   // Contract deployer/owner address
   const DEPLOYER_ADDRESS = '0x5ebaddf71482d40044391923be1fc42938129988';
   const isDeployer = address?.toLowerCase() === DEPLOYER_ADDRESS.toLowerCase();
@@ -301,6 +306,81 @@ export default function Admin() {
 
     // Refetch in background
     setTimeout(() => refetch(), 2000);
+  };
+
+  const handleEditAgent = (agent: any) => {
+    setEditingAgent({
+      id: agent.id,
+      wallet: agent.wallet,
+      price: formatUnits(agent.pricePerSecond, 6)
+    });
+    setEditWallet(agent.wallet);
+    setEditPrice(formatUnits(agent.pricePerSecond, 6));
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingAgent) return;
+
+    // Validation
+    if (!editWallet || !editWallet.match(/^0x[a-fA-F0-9]{40}$/)) {
+      toast.error('Invalid wallet address');
+      return;
+    }
+
+    if (!editPrice || parseFloat(editPrice) <= 0) {
+      toast.error('Price must be greater than 0');
+      return;
+    }
+
+    const loadingToast = toast.loading('Updating agent...');
+
+    try {
+      const priceWei = parseUnits(editPrice, 6); // USDC has 6 decimals
+      
+      const result = await updateAgent(
+        BigInt(editingAgent.id),
+        editWallet as `0x${string}`,
+        priceWei
+      );
+
+      toast.dismiss(loadingToast);
+
+      if (!result.success) {
+        toast.error(
+          <div>
+            <div className="font-semibold">{result.error}</div>
+            <div className="text-xs text-white/70 mt-1">{result.errorDetails}</div>
+          </div>,
+          { duration: 5000 }
+        );
+        return;
+      }
+
+      toast.success(
+        <div>
+          <div className="font-semibold">Agent updated successfully!</div>
+          <div className="text-xs text-white/70 mt-1">Transaction: {result.txHash?.slice(0, 10)}...{result.txHash?.slice(-8)}</div>
+        </div>,
+        { duration: 5000 }
+      );
+
+      // Reset edit state
+      setEditingAgent(null);
+      setEditWallet('');
+      setEditPrice('');
+
+      // Refetch agents
+      setTimeout(() => refetch(), 2000);
+    } catch (error: any) {
+      toast.dismiss(loadingToast);
+      toast.error(
+        <div>
+          <div className="font-semibold">Update failed</div>
+          <div className="text-xs text-white/70 mt-1">{error?.message || 'Unknown error'}</div>
+        </div>,
+        { duration: 5000 }
+      );
+    }
   };
 
   const handleDeactivateAgent = async (agentId: number) => {
@@ -983,6 +1063,16 @@ export default function Admin() {
                                 </div>
                                 <div className="flex gap-2">
                                   <Button
+                                    onClick={() => handleEditAgent(agent)}
+                                    disabled={isUpdating}
+                                    variant="outline"
+                                    size="sm"
+                                    className="border-secondary/30 text-secondary hover:bg-secondary/10 hover:text-secondary hover:border-secondary/50"
+                                  >
+                                    <Edit className="w-3 h-3 mr-1.5" />
+                                    Edit
+                                  </Button>
+                                  <Button
                                     onClick={() => handleDeactivateAgent(agent.id)}
                                     disabled={isUpdating || agent.totalStreams > 0n}
                                     variant="outline"
@@ -1015,6 +1105,118 @@ export default function Admin() {
           </div>
         )}
       </div>
+
+      {/* Edit Agent Dialog */}
+      {editingAgent && (
+        <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="glass-strong rounded-2xl p-6 max-w-md w-full border border-secondary/20">
+            <div className="flex items-center justify-between mb-6">
+              <div>
+                <h3 className="text-xl font-semibold text-white">Edit Agent #{editingAgent.id}</h3>
+                <p className="text-sm text-white/50 mt-1">
+                  {predefinedAgents.find(a => a.id === editingAgent.id)?.name || 'Unknown Agent'}
+                </p>
+              </div>
+              <Button
+                onClick={() => setEditingAgent(null)}
+                variant="ghost"
+                size="sm"
+                className="text-white/50 hover:text-white"
+              >
+                ✕
+              </Button>
+            </div>
+
+            <div className="space-y-4">
+              {/* Wallet Address */}
+              <div>
+                <Label htmlFor="edit-wallet" className="text-white/70 text-sm mb-2 block">
+                  Wallet Address
+                </Label>
+                <Input
+                  id="edit-wallet"
+                  value={editWallet}
+                  onChange={(e) => setEditWallet(e.target.value)}
+                  placeholder="0x..."
+                  className="bg-black/30 border-white/10 text-white font-mono"
+                />
+                <p className="text-xs text-white/40 mt-1">Agent will receive payments to this address</p>
+              </div>
+
+              {/* Price per Second */}
+              <div>
+                <Label htmlFor="edit-price" className="text-white/70 text-sm mb-2 block">
+                  Price per Second (USDC)
+                </Label>
+                <Input
+                  id="edit-price"
+                  type="number"
+                  step="0.0001"
+                  value={editPrice}
+                  onChange={(e) => setEditPrice(e.target.value)}
+                  placeholder="0.001"
+                  className="bg-black/30 border-white/10 text-white font-mono"
+                />
+                {editPrice && (
+                  <div className="mt-2 p-2 bg-black/30 rounded border border-white/5">
+                    <div className="text-xs text-white/50 mb-1">Pricing Preview:</div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-white/60">Per minute:</span>
+                      <span className="text-secondary font-mono">${(parseFloat(editPrice) * 60).toFixed(4)}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-white/60">Per hour:</span>
+                      <span className="text-secondary font-mono">${(parseFloat(editPrice) * 3600).toFixed(4)}</span>
+                    </div>
+                    <div className="flex justify-between text-xs">
+                      <span className="text-white/60">Per day:</span>
+                      <span className="text-secondary font-mono">${(parseFloat(editPrice) * 86400).toFixed(2)}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+              {/* Warning */}
+              <div className="bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+                <div className="flex gap-2">
+                  <AlertCircle className="w-4 h-4 text-amber-400 flex-shrink-0 mt-0.5" />
+                  <div className="text-xs text-amber-200/90">
+                    <strong>Note:</strong> Updating an agent will change its parameters immediately on-chain. Active streams will continue with the old rate until they expire.
+                  </div>
+                </div>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4">
+                <Button
+                  onClick={() => setEditingAgent(null)}
+                  variant="outline"
+                  className="flex-1 border-white/10 text-white/70 hover:text-white"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleSaveEdit}
+                  disabled={isUpdating}
+                  className="flex-1 bg-secondary hover:bg-secondary/80 text-white"
+                >
+                  {isUpdating ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Updating...
+                    </>
+                  ) : (
+                    <>
+                      <CheckCircle2 className="w-4 h-4 mr-2" />
+                      Save Changes
+                    </>
+                  )}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -256,6 +256,26 @@ export const Navigation = () => {
 
         <div className="flex items-center gap-4">
           {isConnected && address && (
+            <Button
+              variant="outline"
+              onClick={handleClaimUSDC}
+              disabled={isClaiming || isClaimPending || timeUntilNextClaim > 0}
+              className={`font-display tracking-wide transition-all ${
+                timeUntilNextClaim > 0
+                  ? 'border-white/20 text-white/40 cursor-not-allowed'
+                  : 'border-emerald-500/30 text-emerald-400 hover:border-emerald-500 hover:bg-emerald-500/10'
+              }`}
+            >
+              <Droplet className="w-4 h-4 mr-2" />
+              {isClaiming || isClaimPending 
+                ? 'Claiming...' 
+                : timeUntilNextClaim > 0 
+                ? `Wait ${formatTimeRemaining(timeUntilNextClaim)}`
+                : 'Claim 100 USDC'}
+            </Button>
+          )}
+          
+          {isConnected && address && (
             <div className="hidden md:flex items-center gap-3 px-4 py-2 rounded-lg border border-white/10 bg-black/20 backdrop-blur-sm">
               <div className="flex items-center gap-2">
                 <div className="w-2 h-2 rounded-full bg-secondary animate-pulse" />
@@ -277,26 +297,6 @@ export const Navigation = () => {
                 </div>
               </div>
             </div>
-          )}
-          
-          {isConnected && address && (
-            <Button
-              variant="outline"
-              onClick={handleClaimUSDC}
-              disabled={isClaiming || isClaimPending || timeUntilNextClaim > 0}
-              className={`font-display tracking-wide transition-all ${
-                timeUntilNextClaim > 0
-                  ? 'border-white/20 text-white/40 cursor-not-allowed'
-                  : 'border-emerald-500/30 text-emerald-400 hover:border-emerald-500 hover:bg-emerald-500/10'
-              }`}
-            >
-              <Droplet className="w-4 h-4 mr-2" />
-              {isClaiming || isClaimPending 
-                ? 'Claiming...' 
-                : timeUntilNextClaim > 0 
-                ? `Wait ${formatTimeRemaining(timeUntilNextClaim)}`
-                : 'Claim 100 USDC'}
-            </Button>
           )}
           
           <Button

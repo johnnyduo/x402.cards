@@ -868,7 +868,7 @@ const Streams = () => {
           animated: isActive,
           className: isActive ? (isAddon ? 'animated-edge-glow-green' : 'animated-edge-glow') : '',
           style: {
-            ...edge.style,
+            ...(edge.style || {}),
             stroke: isActive 
               ? (isAddon ? 'url(#edge-gradient-6)' : `url(#edge-gradient-${agentId})`)
               : (isAddon ? 'rgba(16, 185, 129, 0.4)' : 'rgba(66, 153, 225, 0.4)'),
@@ -879,7 +879,7 @@ const Streams = () => {
                   : 'drop-shadow(0 0 10px rgba(0, 229, 255, 0.8)) drop-shadow(0 0 20px rgba(0, 229, 255, 0.5))')
               : 'none',
             opacity: isActive ? 1 : 0.6,
-          },
+          } as any,
           markerEnd: {
             ...(edge.markerEnd || {}),
             color: isActive 

@@ -931,7 +931,6 @@ const Streams = () => {
   return (
     <div className="min-h-screen relative overflow-hidden">
       <Navigation />
-      <AppHeader />
 
       {/* Animated background particles */}
       <div className="fixed inset-0 pointer-events-none z-0">
@@ -950,25 +949,33 @@ const Streams = () => {
         ))}
       </div>
 
-      <section className="px-4 md:px-6 pb-20 relative z-10">
+      <section className="px-4 md:px-6 pt-32 pb-20 relative z-10">
         <div className="max-w-[1800px] mx-auto">
           {/* Header Section */}
           <div className="mb-8 text-center">
-            <div className="inline-block mb-4 px-6 py-2 rounded-full bg-primary/10 border border-primary/30 backdrop-blur-sm">
-              <span className="text-xs font-display font-bold text-secondary uppercase tracking-wider">Live Intelligence Dashboard</span>
-            </div>
-            <h1 className="text-5xl font-display font-bold mb-4" style={{
+            <h1 className="text-5xl md:text-6xl font-display font-bold mb-6" style={{
               background: 'linear-gradient(135deg, #00E5FF 0%, #4299E1 50%, #00E5FF 100%)',
               backgroundSize: '200% auto',
               WebkitBackgroundClip: 'text',
               WebkitTextFillColor: 'transparent',
               animation: 'shimmer 3s linear infinite'
             }}>
-              Streaming Agent Matrix
+              Real-Time Streaming Payment Flows
             </h1>
-            <p className="text-white/60 font-display text-lg max-w-2xl mx-auto">
-              Real-time data streams flowing through autonomous intelligence agents
+            <p className="text-white/70 font-display text-base md:text-lg max-w-3xl mx-auto mb-4">
+              Tokenized AI agents processing DeFi intelligence with per-second automated payments
             </p>
+            <div className="inline-flex flex-wrap gap-2 justify-center">
+              <span className="px-3 py-1 text-xs font-display font-bold text-secondary/80 uppercase tracking-wider bg-secondary/10 border border-secondary/30 rounded-full backdrop-blur-sm">
+                X402 Protocol
+              </span>
+              <span className="px-3 py-1 text-xs font-display font-bold text-primary/80 uppercase tracking-wider bg-primary/10 border border-primary/30 rounded-full backdrop-blur-sm">
+                EIP-8004
+              </span>
+              <span className="px-3 py-1 text-xs font-display font-bold text-purple-400/80 uppercase tracking-wider bg-purple-500/10 border border-purple-500/30 rounded-full backdrop-blur-sm">
+                ReactFlow
+              </span>
+            </div>
           </div>
 
           {/* ReactFlow Container */}

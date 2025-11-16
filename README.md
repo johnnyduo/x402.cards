@@ -1,14 +1,16 @@
-# x402.Cards - Streaming Intelligence Dashboard
+# x402.Cards - Tokenized AI Agents with Real-Time Streaming Payments
 
 <div align="center">
 
 [![IOTA EVM](https://img.shields.io/badge/IOTA-EVM-00E5FF?style=for-the-badge&logo=iota)](https://evm.iota.org/)
+[![EIP-8004](https://img.shields.io/badge/EIP--8004-Agent_NFTs-9B59B6?style=for-the-badge)](https://github.com)
+[![X402](https://img.shields.io/badge/X402-Streaming-00E5CC?style=for-the-badge)](https://x402.cards)
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.28-363636?style=for-the-badge&logo=solidity)](https://soliditylang.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
 [![React](https://img.shields.io/badge/React-18.3-61DAFB?style=for-the-badge&logo=react)](https://react.dev/)
-[![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?style=for-the-badge&logo=vite)](https://vitejs.dev/)
+[![ReactFlow](https://img.shields.io/badge/ReactFlow-Visualization-FF5555?style=for-the-badge)](https://reactflow.dev/)
 
-**Autonomous DeFi intelligence agents with per-second streaming payments on IOTA EVM**
+**Autonomous tokenized AI agents with per-second streaming payments for real-time DeFi intelligence and automated web crawling**
 
 [Live Demo](https://x402.cards) | [Documentation](#-features) | [Contracts](#-smart-contracts) | [API](#-api-endpoints)
 
@@ -20,16 +22,17 @@
 
 <img width="1439" height="822" alt="Screenshot 2568-11-16 at 19 57 46" src="https://github.com/user-attachments/assets/4e85d426-3123-44e9-8df1-f6309b199ddf" />
 
-x402.Cards is a next-generation DeFi intelligence platform that revolutionizes how users access on-chain data. Instead of traditional subscriptions, users activate AI-powered tokenized agents that stream real-time market intelligence while automatically paying per second via smart contracts on IOTA EVM.
+x402.Cards is a revolutionary DeFi automation platform powered by **EIP-8004 tokenized agents** with **X402 streaming payment protocol**. Deploy autonomous AI agents as NFTs that provide real-time market intelligence, automated web crawling, and DeFi analytics—paying only per-second for active streams via smart contracts on IOTA EVM.
 
 ### Key Innovations
 
-- **⚡ Streaming Payments**: Pay only for what you use - per-second granularity powered by custom smart contracts
-- **🤖 Autonomous Agents**: Six specialized AI agents providing real-time DeFi intelligence
-- **🔄 ReactFlow Visualization**: Interactive flow-based UI showing active streams and cost metrics
-- **💰 USDC Faucet**: Built-in testnet USDC faucet with 24-hour cooldown
-- **📊 Real-time Analytics**: Live tracking of spending, earnings, and net balance
-- **🔗 IOTA EVM Native**: Leverages IOTA's low fees and high throughput for micro-payments
+- **🎭 EIP-8004 Tokenized Agents**: Each AI agent is an NFT with on-chain identity, tradeable and composable
+- **⚡ X402 Streaming Payments**: Real-time per-second payment streams with automatic USDC settlement
+- **🤖 Autonomous DeFi Automation**: Six specialized AI agents providing continuous market intelligence
+- **🕷️ AI Web Crawler**: Distributed autonomous crawler for blockchain data indexing and analysis
+- **🔄 ReactFlow Visualization**: Interactive automation flow UI showing real-time payment streams
+- **📊 Real-time Analytics**: Live tracking of spending, earnings, and net balance across all agents
+- **🔗 IOTA EVM Native**: Gas-optimized smart contracts leveraging IOTA's micro-payment capabilities
 
 ---
 

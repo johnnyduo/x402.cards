@@ -21,7 +21,7 @@ export function useRegisterAgent() {
         functionName: 'registerAgent',
         args: [agentId, wallet, pricePerSecond],
         gas: 500000n,
-      });
+      } as any);
 
       // Wait for transaction receipt
       if (publicClient) {
@@ -133,7 +133,7 @@ export function useUpdateAgent() {
         functionName: 'updateAgent',
         args: [agentId, wallet, pricePerSecond],
         gas: 500000n,
-      });
+      } as any);
 
       // Wait for confirmation
       if (publicClient) {

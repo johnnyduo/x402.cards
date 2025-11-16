@@ -17,7 +17,7 @@ export function useCreateStream() {
       abi: STREAMING_PAYMENTS_ABI,
       functionName: 'createStream',
       args: [BigInt(agentId), BigInt(durationInSeconds)],
-    });
+    } as any);
   };
 
   return {
@@ -43,7 +43,7 @@ export function useApproveUSDC() {
       abi: USDC_ABI,
       functionName: 'approve',
       args: [STREAMING_PAYMENTS_ADDRESS, amount],
-    });
+    } as any);
   };
 
   return {
@@ -173,7 +173,7 @@ export function useClaimStream() {
       abi: STREAMING_PAYMENTS_ABI,
       functionName: 'claimStream',
       args: [BigInt(streamId)],
-    });
+    } as any);
   };
 
   return {
@@ -199,7 +199,7 @@ export function usePauseStream() {
       abi: STREAMING_PAYMENTS_ABI,
       functionName: 'pauseStream',
       args: [BigInt(streamId)],
-    });
+    } as any);
   };
 
   return {
@@ -225,7 +225,7 @@ export function useCancelStream() {
       abi: STREAMING_PAYMENTS_ABI,
       functionName: 'cancelStream',
       args: [BigInt(streamId)],
-    });
+    } as any);
   };
 
   return {

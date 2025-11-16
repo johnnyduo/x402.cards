@@ -122,7 +122,7 @@ export function AgentStreamToggle({
           abi: STREAMING_PAYMENTS_ABI,
           functionName: 'pauseStream',
           args: [streamId],
-        });
+        } as any);
 
         if (publicClient) {
           await publicClient.waitForTransactionReceipt({ hash, confirmations: 1 });
@@ -163,7 +163,7 @@ export function AgentStreamToggle({
             abi: USDC_ABI,
             functionName: 'approve',
             args: [STREAMING_PAYMENTS_ADDRESS, totalCost],
-          });
+          } as any);
 
           if (publicClient) {
             await publicClient.waitForTransactionReceipt({ 
@@ -186,7 +186,7 @@ export function AgentStreamToggle({
           abi: STREAMING_PAYMENTS_ABI,
           functionName: 'createStream',
           args: [BigInt(agentId), BigInt(defaultDuration)],
-        });
+        } as any);
 
         if (publicClient) {
           await publicClient.waitForTransactionReceipt({ 

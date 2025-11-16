@@ -2,6 +2,8 @@
 
 <div align="center">
 
+<img src="public/Robot%20TFU.gif" alt="x402.Cards Robot Mascot" width="200"/>
+
 [![IOTA EVM](https://img.shields.io/badge/IOTA-EVM-00E5FF?style=for-the-badge&logo=iota)](https://evm.iota.org/)
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.28-363636?style=for-the-badge&logo=solidity)](https://soliditylang.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.5-3178C6?style=for-the-badge&logo=typescript)](https://www.typescriptlang.org/)
@@ -82,13 +84,20 @@ x402.Cards is a next-generation DeFi intelligence platform that revolutionizes h
 ### Contract Architecture
 
 ```
-StreamingPayments.sol (Core payment logic)
-├── Agent Registry (stores agent metadata)
+X402StreamingPayments.sol (Core payment logic)
+├── Agent Registry Integration (EIP-8004)
 ├── Stream Management (create/pause/cancel streams)
 ├── Payment Calculation (per-second accrual)
-└── Claim System (withdraw accumulated funds)
+├── Claim System (withdraw accumulated funds)
+└── Fee System (0.5% platform fee)
 
-MockUSDC.sol (Testnet token)
+EIP8004AgentRegistry.sol (Agent identity NFTs)
+├── ERC721 NFT per agent
+├── Agent metadata storage
+├── URI & JSON metadata support
+└── Ownership verification
+
+USDC.sol (Testnet token)
 ├── ERC20 Standard
 ├── Mint Function (faucet)
 └── 6 decimal precision
@@ -159,21 +168,22 @@ npm run lint
 
 | Contract | Address | Explorer |
 |----------|---------|----------|
-| StreamingPayments | `0x7b7193e9419e35f97fCE8ecA0bd1BFa00a4a9379` | [View](https://explorer.evm.testnet.iotaledger.net/address/0x7b7193e9419e35f97fCE8ecA0bd1BFa00a4a9379) |
-| MockUSDC | `0x3dF99fae76a5dF4c0004a965F59E0a818eAD9fC1` | [View](https://explorer.evm.testnet.iotaledger.net/address/0x3dF99fae76a5dF4c0004a965F59E0a818eAD9fC1) |
+| X402StreamingPayments | `0x340DeE0a3EA33304C59d15d37D951A5B72A7b563` | [View](https://explorer.evm.testnet.iotaledger.net/address/0x340DeE0a3EA33304C59d15d37D951A5B72A7b563) |
+| EIP8004AgentRegistry | `0xcd5709C04D9Ffb775cb5eF492a7512C9B3f15631` | [View](https://explorer.evm.testnet.iotaledger.net/address/0xcd5709C04D9Ffb775cb5eF492a7512C9B3f15631) |
+| USDC (Testnet) | `0x1ce14fD9dd6678fC3d192f02207d6ff999B04037` | [View](https://explorer.evm.testnet.iotaledger.net/address/0x1ce14fD9dd6678fC3d192f02207d6ff999B04037) |
 
 ### Key Functions
 
-**StreamingPayments.sol**
+**X402StreamingPayments.sol**
 
 ```solidity
-// Register new agent
+// Register new agent (requires AgentRegistry NFT ownership)
 function registerAgent(uint256 agentId, address wallet, uint256 pricePerSecond)
 
 // Create streaming payment
 function createStream(uint256 agentId, uint256 durationSeconds) returns (uint256 streamId)
 
-// Claim accumulated payments
+// Claim accumulated payments (with 0.5% platform fee)
 function claimStream(uint256 streamId) returns (uint256 amount)
 
 // Pause/Cancel streams
@@ -183,9 +193,23 @@ function cancelStream(uint256 streamId)
 // View functions
 function getStreamDetails(uint256 streamId) returns (...)
 function getAgentStats(uint256 agentId) returns (...)
+function activeStreams(address user, uint256 agentId) returns (uint256 streamId)
 ```
 
-**MockUSDC.sol**
+**EIP8004AgentRegistry.sol**
+
+```solidity
+// Register new agent (mints NFT)
+function register(string uri, string metadata) returns (uint256 tokenId)
+
+// Update agent metadata
+function updateMetadata(uint256 tokenId, string metadata)
+
+// Get agent info
+function getAgent(uint256 tokenId) returns (uri, metadata, timestamp)
+```
+
+**USDC.sol**
 
 ```solidity
 // Mint testnet USDC (faucet)
@@ -193,6 +217,7 @@ function mint(address to, uint256 amount)
 
 // Check if can claim (24hr cooldown)
 function canClaim(address account) returns (bool)
+function lastClaimTime(address account) returns (uint256)
 ```
 
 ---

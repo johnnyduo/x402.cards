@@ -3,7 +3,7 @@ import { Navigation } from "@/components/Navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, TrendingUp, Activity, GitBranch, AlertCircle, Zap, Shield, Sparkles } from "lucide-react";
+import { Loader2, TrendingUp, Activity, GitBranch, AlertCircle, Zap, Shield, Sparkles, Heart } from "lucide-react";
 import { useAgentData } from "@/hooks/useAgentData";
 import { useAllAgents } from "@/hooks/useAgentRegistry";
 import { AGENTS as predefinedAgents } from "@/data/agents";
@@ -557,6 +557,17 @@ function LiveAgentData() {
             }`} />
           </div>
 
+          {/* Stream Activation Toggle */}
+          {getAgentStatus(3).registered && (
+            <div className="mb-4 pb-4 border-b border-white/10">
+              <AgentStreamToggle
+                agentId={3}
+                agentName="Arb Navigator"
+                pricePerSecond={0.0005}
+              />
+            </div>
+          )}
+
           {!getAgentStatus(3).registered ? (
             <div className="text-center py-6 text-white/40 text-sm italic">
               Register agent in Setting first
@@ -641,10 +652,21 @@ function LiveAgentData() {
                 </Badge>
               )}
             </div>
-            <Activity className={`w-4 h-4 ${
+            <Heart className={`w-4 h-4 ${
               getAgentStatus(4).streaming ? 'text-emerald-400 animate-pulse' : 'text-secondary'
             }`} />
           </div>
+
+          {/* Stream Activation Toggle */}
+          {getAgentStatus(4).registered && (
+            <div className="mb-4 pb-4 border-b border-white/10">
+              <AgentStreamToggle
+                agentId={4}
+                agentName="Sentiment Radar"
+                pricePerSecond={0.0008}
+              />
+            </div>
+          )}
 
           {!getAgentStatus(4).registered ? (
             <div className="text-center py-6 text-white/40 text-sm italic">

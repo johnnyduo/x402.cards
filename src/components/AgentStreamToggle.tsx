@@ -162,19 +162,40 @@ export function AgentStreamToggle({
             address: USDC_CONTRACT_ADDRESS,
             abi: USDC_ABI,
             functionName: 'approve',
-            args: [STREAMING_PAYMENTS_ADDRESS, totalCost],
+            args: [STREAMING_PAYMENTS_ADDRESS, totalCost * 10n], // Approve 10x to avoid future approvals
           } as any);
 
           if (publicClient) {
             await publicClient.waitForTransactionReceipt({ 
               hash: approveHash, 
-              confirmations: 1 
+              confirmations: 2 // Wait for 2 confirmations for safety
             });
           }
 
+          // Wait a bit and refetch allowance multiple times to ensure it's updated
+          await new Promise(resolve => setTimeout(resolve, 2000));
           await refetchAllowance();
-          console.log('✅ USDC approved!');
-          toast.success('USDC approved!');
+          
+          // Verify allowance was updated
+          let attempts = 0;
+          while (attempts < 5) {
+            const result = await refetchAllowance();
+            const updatedAllowance = (result.data as bigint) || 0n;
+            console.log('🔄 Allowance verification attempt', attempts + 1, updatedAllowance.toString());
+            
+            if (updatedAllowance >= totalCost) {
+              console.log('✅ USDC approved and verified!');
+              toast.success('USDC approved!');
+              break;
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            attempts++;
+          }
+          
+          if (attempts >= 5) {
+            throw new Error('Approval transaction confirmed but allowance not updated. Please try again.');
+          }
         }
 
         // Step 2: Create stream
@@ -213,6 +234,8 @@ export function AgentStreamToggle({
         toast.error('Transaction cancelled');
       } else if (error.message?.includes('insufficient')) {
         toast.error('Insufficient USDC balance');
+      } else if (error.message?.includes('allowance') || error.message?.includes('ERC20')) {
+        toast.error('Approval issue detected. Please try again or manually approve USDC in your wallet.');
       } else {
         toast.error(error.message || 'Failed to toggle stream');
       }

@@ -468,21 +468,25 @@ const nodeTypes = {
 const Streams = () => {
   const { address } = useAccount();
   
-  // Check on-chain status for agents 1-2 to sync with Developers page
+  // Check on-chain status for all agents to sync with Developers page
   const { isStreaming: agent1Streaming, isExpired: agent1Expired, claimableAmount: agent1Claimable, totalPaid: agent1TotalPaid } = useAgentStreamStatus(1);
   const { isStreaming: agent2Streaming, isExpired: agent2Expired, claimableAmount: agent2Claimable, totalPaid: agent2TotalPaid } = useAgentStreamStatus(2);
+  const { isStreaming: agent3Streaming, isExpired: agent3Expired, claimableAmount: agent3Claimable, totalPaid: agent3TotalPaid } = useAgentStreamStatus(3);
+  const { isStreaming: agent4Streaming, isExpired: agent4Expired, claimableAmount: agent4Claimable, totalPaid: agent4TotalPaid } = useAgentStreamStatus(4);
+  const { isStreaming: agent5Streaming, isExpired: agent5Expired, claimableAmount: agent5Claimable, totalPaid: agent5TotalPaid } = useAgentStreamStatus(5);
+  const { isStreaming: agent6Streaming, isExpired: agent6Expired, claimableAmount: agent6Claimable, totalPaid: agent6TotalPaid } = useAgentStreamStatus(6);
   
-  // Use local state only for visualization of agents 3-6
+  // Use local state only for visualization fallback
   const [localStreamStates, setLocalStreamStates] = useState<Record<number, boolean>>({});
 
-  // Build streamStates: sync agents 1-2 from on-chain, use local state for 3-6
+  // Build streamStates: sync all agents from on-chain
   const streamStates = {
     1: agent1Streaming || false,
     2: agent2Streaming || false,
-    3: localStreamStates[3] || false,
-    4: localStreamStates[4] || false,
-    5: localStreamStates[5] || false,
-    6: localStreamStates[6] || false,
+    3: agent3Streaming || false,
+    4: agent4Streaming || false,
+    5: agent5Streaming || false,
+    6: agent6Streaming || false,
   };
 
   // Build expired states for agents 1-2 (on-chain only)
@@ -496,33 +500,46 @@ const Streams = () => {
   
   // totalSpent is calculated from sum of all agentAccumulated values
   const [totalSpent, setTotalSpent] = useState(0);
-  const [totalEarned, setTotalEarned] = useState(() => {
-    if (!address) return 0;
-    const stored = localStorage.getItem(`streams_total_earned_${address}`);
-    return stored ? parseFloat(stored) : 0;
+  const [totalEarned, setTotalEarned] = useState(0);
+  const [agentAccumulated, setAgentAccumulated] = useState<Record<number, number>>(() => {
+    if (!address) return {};
+    const stored = localStorage.getItem(`streams_agent_accumulated_${address}`);
+    return stored ? JSON.parse(stored) : {};
   });
-  const [agentAccumulated, setAgentAccumulated] = useState<Record<number, number>>({});
 
   const activeCount = agents.filter(agent => streamStates[agent.id]).length;
-  const totalCostPerSec = agents.filter((agent) => streamStates[agent.id]).reduce((sum, agent) => sum + agent.pricePerSec, 0);
-  const addonRevenue = 0; // No revenue agents currently
-  const netRatePerSec = totalCostPerSec - addonRevenue; // Net rate after revenue
+  
+  // Calculate costs: agents 1-5 are expenses
+  const totalCostPerSec = agents
+    .filter((agent) => agent.id !== 6 && streamStates[agent.id])
+    .reduce((sum, agent) => sum + agent.pricePerSec, 0);
+  
+  // Calculate revenue: agent 6 (AI Crawler) generates revenue
+  const addonRevenue = streamStates[6] ? agents[5].pricePerSec : 0;
+  
+  // Net rate = costs - revenue (negative means profit)
+  const netRatePerSec = totalCostPerSec - addonRevenue;
+  
   const allStreamsActive = agents.every(agent => streamStates[agent.id]);
 
   // Open settings modal to control stream activation (on-chain)
   const handleToggleStream = useCallback((agentId: number) => {
     // Open the settings modal for this agent to control stream
-    setOpenModalId(agentId);
+    if (agentId === 6) {
+      setIsAddonModalOpen(true);
+    } else {
+      setOpenModalId(agentId);
+    }
   }, []);
 
   // Note: handleToggleAll removed - users should activate streams individually via modals
 
-  // Sync on-chain accumulated amounts for agents 1-2 (totalPaid + claimable)
+  // Sync on-chain accumulated amounts for all agents (totalPaid + claimable)
   useEffect(() => {
     setAgentAccumulated(prev => {
       const newAccumulated = { ...prev };
       
-      // For agents 1-2: total spent = totalPaid + claimable
+      // For all agents: total spent = totalPaid + claimable
       if (agent1Streaming || agent1TotalPaid) {
         const paid = agent1TotalPaid ? Number(formatUnits(agent1TotalPaid, 6)) : 0;
         const claimable = agent1Claimable ? Number(formatUnits(agent1Claimable, 6)) : 0;
@@ -539,50 +556,109 @@ const Streams = () => {
           newAccumulated[2] = newValue;
         }
       }
+      if (agent3Streaming || agent3TotalPaid) {
+        const paid = agent3TotalPaid ? Number(formatUnits(agent3TotalPaid, 6)) : 0;
+        const claimable = agent3Claimable ? Number(formatUnits(agent3Claimable, 6)) : 0;
+        const newValue = paid + claimable;
+        if (Math.abs((prev[3] || 0) - newValue) > 0.0001) {
+          newAccumulated[3] = newValue;
+        }
+      }
+      if (agent4Streaming || agent4TotalPaid) {
+        const paid = agent4TotalPaid ? Number(formatUnits(agent4TotalPaid, 6)) : 0;
+        const claimable = agent4Claimable ? Number(formatUnits(agent4Claimable, 6)) : 0;
+        const newValue = paid + claimable;
+        if (Math.abs((prev[4] || 0) - newValue) > 0.0001) {
+          newAccumulated[4] = newValue;
+        }
+      }
+      if (agent5Streaming || agent5TotalPaid) {
+        const paid = agent5TotalPaid ? Number(formatUnits(agent5TotalPaid, 6)) : 0;
+        const claimable = agent5Claimable ? Number(formatUnits(agent5Claimable, 6)) : 0;
+        const newValue = paid + claimable;
+        if (Math.abs((prev[5] || 0) - newValue) > 0.0001) {
+          newAccumulated[5] = newValue;
+        }
+      }
+      if (agent6Streaming || agent6TotalPaid) {
+        const paid = agent6TotalPaid ? Number(formatUnits(agent6TotalPaid, 6)) : 0;
+        const claimable = agent6Claimable ? Number(formatUnits(agent6Claimable, 6)) : 0;
+        const newValue = paid + claimable;
+        if (Math.abs((prev[6] || 0) - newValue) > 0.0001) {
+          newAccumulated[6] = newValue;
+        }
+      }
       
       return JSON.stringify(newAccumulated) !== JSON.stringify(prev) ? newAccumulated : prev;
     });
-  }, [agent1Streaming, agent1Claimable, agent1TotalPaid, agent2Streaming, agent2Claimable, agent2TotalPaid]);
+  }, [
+    agent1Streaming, agent1Claimable, agent1TotalPaid, 
+    agent2Streaming, agent2Claimable, agent2TotalPaid,
+    agent3Streaming, agent3Claimable, agent3TotalPaid,
+    agent4Streaming, agent4Claimable, agent4TotalPaid,
+    agent5Streaming, agent5Claimable, agent5TotalPaid,
+    agent6Streaming, agent6Claimable, agent6TotalPaid
+  ]);
 
-  // Calculate totalSpent from all agent accumulated amounts
+  // Calculate totalSpent and totalEarned from agentAccumulated
   const totalSpentCalculated = useMemo(() => {
-    return Object.values(agentAccumulated).reduce((sum, val) => sum + val, 0);
+    // Sum agents 1-5 (costs)
+    return Object.entries(agentAccumulated)
+      .filter(([id]) => parseInt(id) !== 6)
+      .reduce((sum, [, val]) => sum + val, 0);
   }, [agentAccumulated]);
 
-  // Real-time spending/earning tracker for local agents 3-6 (reduced frequency for performance)
+  const totalEarnedCalculated = useMemo(() => {
+    // Agent 6 earnings
+    return agentAccumulated[6] || 0;
+  }, [agentAccumulated]);
+
+  // Real-time per-second spending tracker for all active agents
   useEffect(() => {
     const interval = setInterval(() => {
-      if (addonRevenue > 0) {
-        setTotalEarned(prev => prev + (addonRevenue * 3));
-      }
+      const currentTime = Date.now();
       
-      // Update individual agent accumulated amounts (local calculation for agents 3-6 only)
+      // Calculate per-second accumulation for all active streams
       setAgentAccumulated(prev => {
         const newAccumulated = { ...prev };
+        let hasChanges = false;
+        
         agents.forEach(agent => {
-          // Skip agents 1-2 (synced from on-chain above)
-          if (agent.id > 2 && streamStates[agent.id]) {
-            const rate = agent.pricePerSec * 3; // Multiply by 3
-            newAccumulated[agent.id] = (newAccumulated[agent.id] || 0) + rate;
+          if (streamStates[agent.id]) {
+            // For agents 1-2: on-chain data takes precedence (already synced above)
+            // For agents 3-6: calculate locally per second
+            if (agent.id > 2) {
+              const rate = agent.pricePerSec; // Per second rate
+              const newValue = (newAccumulated[agent.id] || 0) + rate;
+              if (Math.abs((prev[agent.id] || 0) - newValue) > 0.00001) {
+                newAccumulated[agent.id] = newValue;
+                hasChanges = true;
+              }
+            }
           }
         });
-        return newAccumulated;
+        
+        return hasChanges ? newAccumulated : prev;
       });
-    }, 3000); // Update every 3 seconds instead of 1 (less CPU load)
+    }, 1000); // Update every 1 second for accurate real-time tracking
 
     return () => clearInterval(interval);
-  }, [addonRevenue, streamStates]);
+  }, [streamStates, agents]);
 
-  // Update totalSpent state
+  // Update totalSpent and totalEarned states from calculated values
   useEffect(() => {
     setTotalSpent(totalSpentCalculated);
   }, [totalSpentCalculated]);
 
-  // Save totalEarned to localStorage
+  useEffect(() => {
+    setTotalEarned(totalEarnedCalculated);
+  }, [totalEarnedCalculated]);
+
+  // Save agentAccumulated to localStorage whenever it changes
   useEffect(() => {
     if (!address) return;
-    localStorage.setItem(`streams_total_earned_${address}`, totalEarned.toString());
-  }, [address, totalEarned]);
+    localStorage.setItem(`streams_agent_accumulated_${address}`, JSON.stringify(agentAccumulated));
+  }, [address, agentAccumulated]);
 
   const initialNodes: Node[] = [
     // Top row agents
@@ -691,7 +767,7 @@ const Streams = () => {
         active: streamStates[6] || false,
         expired: false,
         onToggle: () => handleToggleStream(6),
-        onSettings: () => setOpenModalId(6),
+        onSettings: () => setIsAddonModalOpen(true),
         isAddon: true,
         accumulated: 0,
       }
@@ -706,7 +782,7 @@ const Streams = () => {
         activeCount,
         totalCost: totalCostPerSec,
         netRate: netRatePerSec,
-        revenueActive: false, // No revenue agents currently
+        revenueActive: streamStates[6] || false, // Agent 6 (AI Crawler) generates revenue
         active: allStreamsActive,
         onToggle: undefined, // Disabled - activate agents individually via their modals
         totalSpent,
@@ -872,6 +948,11 @@ const Streams = () => {
               ...node.data,
               activeCount: currentActiveCount,
               active: currentAllActive,
+              totalSpent: totalSpent,
+              totalEarned: totalEarned,
+              totalCost: totalCostPerSec,
+              netRate: netRatePerSec,
+              revenueActive: streamStates[6] || false,
             },
           };
         } else if (node.type === 'agent') {
@@ -926,7 +1007,7 @@ const Streams = () => {
         };
       })
     );
-  }, [streamStates[1], streamStates[2], streamStates[3], streamStates[4], streamStates[5], streamStates[6], agentAccumulated]);
+  }, [streamStates[1], streamStates[2], streamStates[3], streamStates[4], streamStates[5], streamStates[6], agentAccumulated, totalSpent, totalEarned, totalCostPerSec, netRatePerSec]);
 
   return (
     <div className="min-h-screen relative overflow-hidden">

@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import { GoogleGenerativeAI } from '@google/generative-ai';
 
 dotenv.config({ path: '../.env.local' });
 
@@ -66,20 +67,17 @@ async function fhGet(endpoint, params = {}) {
 }
 
 // ==================== GEMINI AI CLIENT ====================
-async function geminiAnalyze(prompt) {
-  const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-pro:generateContent?key=${GEMINI_API_KEY}`;
-  
-  const res = await fetch(url, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      contents: [{ parts: [{ text: prompt }] }]
-    })
-  });
+const genAI = new GoogleGenerativeAI(GEMINI_API_KEY);
 
-  if (!res.ok) throw new Error(`Gemini error: ${res.status}`);
-  const json = await res.json();
-  return json.candidates[0]?.content?.parts[0]?.text || '';
+async function geminiAnalyze(prompt) {
+  try {
+    const model = genAI.getGenerativeModel({ model: 'gemini-2.5-flash' });
+    const result = await model.generateContent(prompt);
+    const response = await result.response;
+    return response.text();
+  } catch (error) {
+    throw new Error(`Gemini error: ${error.message}`);
+  }
 }
 
 // ==================== BLOCKBERRY (IOTA EXPLORER) CLIENT ====================
@@ -122,6 +120,7 @@ app.get('/api/health', async (req, res) => {
         '/api/agents/arb-navigator',
         '/api/agents/sentiment-radar',
         '/api/agents/risk-sentinel',
+        '/api/agents/ai-crawler',
       ],
     });
   } catch (error) {
@@ -563,8 +562,60 @@ function naiveSentimentScore(text) {
   return score;
 }
 
+// ==================== AI CRAWLER AGENT ====================
+app.get('/api/agents/ai-crawler', async (req, res) => {
+  try {
+    const targets = req.query.targets?.split(',') || ['twitter', 'reddit', 'discord'];
+    
+    // Simulate AI crawler collecting data from various sources
+    const crawlerStats = {
+      status: 'ACTIVE',
+      targets: targets,
+      pagesIndexed: Math.floor(Math.random() * 1000) + 500,
+      dataCollected: Math.floor(Math.random() * 5000) + 2000,
+      earnings: (Math.random() * 10 + 5).toFixed(4),
+      uptime: (Math.random() * 5 + 95).toFixed(1),
+      crawlRate: (Math.random() * 100 + 50).toFixed(0),
+      sources: targets.map(target => ({
+        name: target,
+        status: 'active',
+        lastCrawl: new Date(Date.now() - Math.random() * 3600000).toISOString(),
+        itemsCollected: Math.floor(Math.random() * 500) + 100,
+        quality: (Math.random() * 30 + 70).toFixed(1)
+      })),
+      recentFindings: [
+        {
+          source: targets[0] || 'twitter',
+          type: 'trending_topic',
+          content: 'AI and blockchain integration trending',
+          relevance: 0.92,
+          timestamp: new Date(Date.now() - Math.random() * 7200000).toISOString()
+        },
+        {
+          source: targets[1] || 'reddit',
+          type: 'community_sentiment',
+          content: 'Positive sentiment on DeFi protocols',
+          relevance: 0.85,
+          timestamp: new Date(Date.now() - Math.random() * 7200000).toISOString()
+        }
+      ],
+      performance: {
+        avgResponseTime: (Math.random() * 500 + 200).toFixed(0) + 'ms',
+        successRate: (Math.random() * 5 + 95).toFixed(1) + '%',
+        bandwidthUsed: (Math.random() * 500 + 100).toFixed(0) + 'MB'
+      }
+    };
+
+    res.json(crawlerStats);
+  } catch (error) {
+    console.error('AI Crawler error:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`✅ x402 API Server running on http://localhost:${PORT}`);
   console.log(`📊 Twelve Data API: ${TWELVEDATA_API_KEY ? 'Connected' : 'Missing'}`);
   console.log(`📰 Finnhub API: ${FINNHUB_API_KEY ? 'Connected' : 'Missing'}`);
+  console.log(`🤖 AI Crawler API: Ready`);
 });

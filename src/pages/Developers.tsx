@@ -3,7 +3,10 @@ import { Navigation } from "@/components/Navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, TrendingUp, Activity, GitBranch, AlertCircle, Zap, Shield, Sparkles, Heart } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Loader2, TrendingUp, Activity, GitBranch, AlertCircle, Zap, Shield, Sparkles, Heart, Check, X } from "lucide-react";
 import { useAgentData } from "@/hooks/useAgentData";
 import { useAllAgents } from "@/hooks/useAgentRegistry";
 import { AGENTS as predefinedAgents } from "@/data/agents";
@@ -171,6 +174,11 @@ function LiveAgentData() {
   // Signal Forge active symbol tab
   const [signalForgeSymbol, setSignalForgeSymbol] = useState<'BTC/USD' | 'ETH/USD' | 'SOL/USD'>('BTC/USD');
   
+  // AI Crawler URL management
+  const [crawlUrl, setCrawlUrl] = useState('');
+  const [allowedUrls, setAllowedUrls] = useState<string[]>([]);
+  const [urlActionLoading, setUrlActionLoading] = useState(false);
+  
   // Get on-chain stream status for each agent (synced across pages)
   const { isStreaming: signalForgeStreamActive } = useAgentStreamStatus(1);
   const { isStreaming: volatilityPulseStreamActive } = useAgentStreamStatus(2);
@@ -211,6 +219,43 @@ function LiveAgentData() {
     aiCrawlerStreamActive
   );
   const { agents, isLoading: isLoadingAgents } = useAllAgents();
+
+  // AI Crawler URL handlers
+  const handleAllowUrl = async () => {
+    if (!crawlUrl || !crawlUrl.startsWith('http')) {
+      alert('Please enter a valid URL starting with http:// or https://');
+      return;
+    }
+    
+    setUrlActionLoading(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    if (!allowedUrls.includes(crawlUrl)) {
+      setAllowedUrls(prev => [...prev, crawlUrl]);
+    }
+    setCrawlUrl('');
+    setUrlActionLoading(false);
+  };
+
+  const handleBlockUrl = async () => {
+    if (!crawlUrl || !crawlUrl.startsWith('http')) {
+      alert('Please enter a valid URL starting with http:// or https://');
+      return;
+    }
+    
+    setUrlActionLoading(true);
+    // Simulate API call
+    await new Promise(resolve => setTimeout(resolve, 800));
+    
+    setAllowedUrls(prev => prev.filter(url => url !== crawlUrl));
+    setCrawlUrl('');
+    setUrlActionLoading(false);
+  };
+
+  const handleRemoveUrl = (urlToRemove: string) => {
+    setAllowedUrls(prev => prev.filter(url => url !== urlToRemove));
+  };
 
   // Map agent IDs to their on-chain data and real-time stream status
   const getAgentStatus = (agentId: number) => {
@@ -859,38 +904,103 @@ function LiveAgentData() {
               Register agent in Setting first
             </div>
           ) : aiCrawlerStreamActive ? (
-            crawlerLoading ? (
-              <div className="flex items-center justify-center py-4">
-                <Loader2 className="w-5 h-5 text-secondary animate-spin" />
+            <div className="space-y-3">
+              <div className="flex justify-between text-sm mb-3">
+                <span className="text-muted-foreground">Status</span>
+                <Badge variant="outline" className="border-emerald-500 text-emerald-500">
+                  ACTIVE - Earning Per Second
+                </Badge>
               </div>
-            ) : crawlerData ? (
+              
               <div className="space-y-2">
-                <div className="flex justify-between text-sm">
-                  <span className="text-muted-foreground">Status</span>
-                  <Badge variant="outline" className="border-emerald-500 text-emerald-500">
-                    {crawlerData.status || 'ACTIVE'}
-                  </Badge>
+                <Label htmlFor="crawl-url" className="text-xs text-white/80">
+                  Manage Crawl URLs
+                </Label>
+                <div className="flex gap-2">
+                  <Input
+                    id="crawl-url"
+                    type="url"
+                    placeholder="https://example.com"
+                    value={crawlUrl}
+                    onChange={(e) => setCrawlUrl(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleAllowUrl()}
+                    disabled={urlActionLoading}
+                    className="flex-1 bg-black/20 border-white/10 focus:border-secondary text-sm"
+                  />
+                  <Button 
+                    size="sm" 
+                    onClick={handleAllowUrl}
+                    disabled={urlActionLoading || !crawlUrl}
+                    className="bg-emerald-500 hover:bg-emerald-600 text-white font-semibold px-3 gap-1.5"
+                  >
+                    {urlActionLoading ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Check className="w-3.5 h-3.5" />
+                    )}
+                    Allow
+                  </Button>
+                  <Button 
+                    size="sm" 
+                    onClick={handleBlockUrl}
+                    disabled={urlActionLoading || !crawlUrl}
+                    variant="outline"
+                    className="border-red-500/50 text-red-400 hover:bg-red-500/10 hover:text-red-300 font-semibold px-3 gap-1.5"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                    Block
+                  </Button>
                 </div>
-                <div className="grid grid-cols-3 gap-2 mt-2">
-                  <div className="text-center">
-                    <div className="font-bold">{crawlerData.pagesIndexed || 0}</div>
-                    <div className="text-xs text-muted-foreground">Pages</div>
+                <p className="text-[10px] text-white/40 italic">
+                  Allow or block URLs from being crawled. Earn 0.003 USDC/sec while streaming
+                </p>
+
+                {/* Allowed URLs List */}
+                {allowedUrls.length > 0 && (
+                  <div className="mt-3 space-y-1.5">
+                    <div className="text-[10px] text-emerald-400/60 uppercase font-semibold">
+                      Allowed URLs ({allowedUrls.length})
+                    </div>
+                    <div className="space-y-1 max-h-32 overflow-y-auto">
+                      {allowedUrls.map((url, idx) => (
+                        <div key={idx} className="flex items-center justify-between bg-emerald-500/10 border border-emerald-500/30 rounded px-2 py-1.5 group">
+                          <span className="text-xs text-emerald-400/80 truncate flex-1 mr-2">{url}</span>
+                          <button
+                            onClick={() => handleRemoveUrl(url)}
+                            className="opacity-0 group-hover:opacity-100 transition-opacity"
+                          >
+                            <X className="w-3 h-3 text-red-400 hover:text-red-300" />
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  <div className="text-center">
-                    <div className="text-emerald-500 font-bold">{crawlerData.earnings || '0.00'}</div>
-                    <div className="text-xs text-muted-foreground">Earned</div>
-                  </div>
-                  <div className="text-center">
-                    <div className="font-bold">{crawlerData.uptime || '100'}%</div>
-                    <div className="text-xs text-muted-foreground">Uptime</div>
+                )}
+              </div>
+
+              {crawlerLoading ? (
+                <div className="flex items-center justify-center py-4">
+                  <Loader2 className="w-5 h-5 text-secondary animate-spin" />
+                </div>
+              ) : crawlerData ? (
+                <div className="bg-black/20 rounded-lg p-3 mt-3">
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="text-center">
+                      <div className="font-bold">{crawlerData.pagesIndexed || 0}</div>
+                      <div className="text-xs text-muted-foreground">Pages</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="text-emerald-500 font-bold">{crawlerData.earnings || '0.00'}</div>
+                      <div className="text-xs text-muted-foreground">Earned</div>
+                    </div>
+                    <div className="text-center">
+                      <div className="font-bold">{crawlerData.uptime || '100'}%</div>
+                      <div className="text-xs text-muted-foreground">Uptime</div>
+                    </div>
                   </div>
                 </div>
-              </div>
-            ) : (
-              <div className="text-center py-6 text-white/40 text-sm">
-                Waiting for data...
-              </div>
-            )
+              ) : null}
+            </div>
           ) : (
             <div className="text-center py-6 text-white/40 text-sm italic">
               Activate stream to view real-time data

@@ -12,7 +12,7 @@
 
 **Autonomous DeFi intelligence agents with per-second streaming payments on IOTA EVM**
 
-[Live Demo](https://your-deployment.vercel.app) | [Documentation](#-features) | [Contracts](#-smart-contracts) | [API](#-api-endpoints)
+[Live Demo](https://x402.cards) | [Documentation](#-features) | [Contracts](#-smart-contracts) | [API](#-api-endpoints)
 
 </div>
 
@@ -133,12 +133,12 @@ cp .env.example .env
 Create `.env` file in project root:
 
 ```env
-# Required
-VITE_REOWN_PROJECT_ID=2aaa6469698af00874e7e688d69eab25
+# Required - Get your own from https://cloud.reown.com
+VITE_REOWN_PROJECT_ID=your_reown_project_id_here
 
 # Optional (for local development)
 VITE_IOTA_RPC_URL=https://json-rpc.evm.testnet.iotaledger.net
-VITE_CHAIN_ID=1075
+VITE_CHAIN_ID=1076
 ```
 
 ### Development

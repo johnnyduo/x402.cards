@@ -421,15 +421,6 @@ This project is licensed under the MIT License. See [LICENSE](LICENSE) file for 
 
 ---
 
-## 📞 Support
-
-- **GitHub Issues**: [Report bugs](https://github.com/johnnyduo/x402-streamflow/issues)
-- **Twitter**: [@x402cards](https://twitter.com/x402cards)
-- **Discord**: [Join community](https://discord.gg/x402)
-- **Email**: support@x402.cards
-
----
-
 ## 🗺️ Roadmap
 
 ### Phase 1: Q4 2025

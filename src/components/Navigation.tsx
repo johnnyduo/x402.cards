@@ -225,13 +225,13 @@ export const Navigation = () => {
     >
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         <div className="flex items-center gap-8">
-          <h1 className="text-xl font-display font-bold gradient-text tracking-wider">
+          <NavLink to="/" className="text-xl font-display font-bold gradient-text tracking-wider hover:opacity-80 transition-opacity cursor-pointer">
             x402.Cards
-          </h1>
+          </NavLink>
           
           <div className="hidden md:flex items-center gap-6">
             <NavLink
-              to="/"
+              to="/streams"
               className="text-sm font-body text-white/50 hover:text-white transition-colors"
               activeClassName="text-white font-semibold"
             >

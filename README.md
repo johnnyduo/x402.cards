@@ -2,7 +2,7 @@
 
 <div align="center">
 
-<img width="500" height="500" alt="ss 2568-11-16 at 19 57 46" src="[https://github.com/user-attachments/assets/4e85d426-3123-44e9-8df1-f6309b199ddf](https://github.com/user-attachments/assets/956594c9-46a7-4d78-9292-f79b98e59885)" />
+<img width="500" height="500" alt="ss 2568-11-16 at 19 57 46" src="(https://github.com/user-attachments/assets/73394c0b-23e6-4a70-ac25-57e91dbf18af)" />
 
 [![IOTA EVM](https://img.shields.io/badge/IOTA-EVM-00E5FF?style=for-the-badge&logo=iota)](https://evm.iota.org/)
 [![Solidity](https://img.shields.io/badge/Solidity-0.8.28-363636?style=for-the-badge&logo=solidity)](https://soliditylang.org/)

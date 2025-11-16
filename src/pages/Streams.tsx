@@ -465,8 +465,8 @@ const nodeTypes = {
 
 const Streams = () => {
   // Check on-chain status for agents 1-2 to sync with Developers page
-  const { isStreaming: agent1Streaming } = useAgentStreamStatus(1);
-  const { isStreaming: agent2Streaming } = useAgentStreamStatus(2);
+  const { isStreaming: agent1Streaming, claimableAmount: agent1Claimable } = useAgentStreamStatus(1);
+  const { isStreaming: agent2Streaming, claimableAmount: agent2Claimable } = useAgentStreamStatus(2);
   
   // Use local state only for visualization of agents 3-6
   const [localStreamStates, setLocalStreamStates] = useState<Record<number, boolean>>({});
@@ -501,6 +501,31 @@ const Streams = () => {
 
   // Note: handleToggleAll removed - users should activate streams individually via modals
 
+  // Sync on-chain accumulated amounts for agents 1-2 (same as Dev page)
+  useEffect(() => {
+    if (!agent1Streaming && !agent2Streaming) return;
+    
+    setAgentAccumulated(prev => {
+      const newAccumulated = { ...prev };
+      
+      // Use real on-chain claimable amount for agents 1-2
+      if (agent1Streaming && agent1Claimable) {
+        const newValue = Number(formatUnits(agent1Claimable, 6));
+        if (Math.abs((prev[1] || 0) - newValue) > 0.0001) {
+          newAccumulated[1] = newValue;
+        }
+      }
+      if (agent2Streaming && agent2Claimable) {
+        const newValue = Number(formatUnits(agent2Claimable, 6));
+        if (Math.abs((prev[2] || 0) - newValue) > 0.0001) {
+          newAccumulated[2] = newValue;
+        }
+      }
+      
+      return JSON.stringify(newAccumulated) !== JSON.stringify(prev) ? newAccumulated : prev;
+    });
+  }, [agent1Streaming, agent1Claimable, agent2Streaming, agent2Claimable]);
+
   // Real-time spending/earning tracker (reduced frequency for performance)
   useEffect(() => {
     const interval = setInterval(() => {
@@ -511,11 +536,12 @@ const Streams = () => {
         setTotalEarned(prev => prev + (addonRevenue * 3));
       }
       
-      // Update individual agent accumulated amounts (local calculation for visualization)
+      // Update individual agent accumulated amounts (local calculation for agents 3-6 only)
       setAgentAccumulated(prev => {
         const newAccumulated = { ...prev };
         agents.forEach(agent => {
-          if (streamStates[agent.id]) {
+          // Skip agents 1-2 (synced from on-chain above)
+          if (agent.id > 2 && streamStates[agent.id]) {
             const rate = agent.pricePerSec * 3; // Multiply by 3
             newAccumulated[agent.id] = (newAccumulated[agent.id] || 0) + rate;
           }

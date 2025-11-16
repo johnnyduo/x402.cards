@@ -82,6 +82,18 @@ export function AgentStreamToggle({
   const now = Math.floor(Date.now() / 1000);
   const timeRemaining = Math.max(0, endTime - now);
 
+  // Check if stream has expired and refetch status
+  useEffect(() => {
+    if (hasActiveStream && isActive && timeRemaining === 0) {
+      // Stream has expired, refetch to update UI
+      console.log('⏱️ Stream expired for agent', agentId);
+      setTimeout(() => {
+        refetchStream();
+        refetchDetails();
+      }, 1000); // Small delay to let contract state update
+    }
+  }, [timeRemaining, hasActiveStream, isActive, agentId, refetchStream, refetchDetails]);
+
   const handleToggle = async () => {
     if (!address) {
       toast.error('Please connect your wallet');
@@ -246,14 +258,26 @@ export function AgentStreamToggle({
 
       {/* Stream Info - Only show when active */}
       {isStreaming && (
-        <div className="bg-black/20 rounded-lg p-3 space-y-2 border border-emerald-500/20">
+        <div className={`bg-black/20 rounded-lg p-3 space-y-2 border ${
+          timeRemaining === 0 
+            ? 'border-red-500/50 bg-red-500/5' 
+            : timeRemaining < 300 
+              ? 'border-yellow-500/50' 
+              : 'border-emerald-500/20'
+        }`}>
           <div className="flex justify-between text-xs">
             <span className="text-white/60 flex items-center gap-1">
               <Clock className="w-3 h-3" />
               Time Left
             </span>
-            <span className="font-mono text-white">
-              {Math.floor(timeRemaining / 60)}m {timeRemaining % 60}s
+            <span className={`font-mono ${
+              timeRemaining === 0 
+                ? 'text-red-400 font-bold' 
+                : timeRemaining < 300 
+                  ? 'text-yellow-400' 
+                  : 'text-white'
+            }`}>
+              {timeRemaining === 0 ? 'EXPIRED' : `${Math.floor(timeRemaining / 60)}m ${timeRemaining % 60}s`}
             </span>
           </div>
           <div className="flex justify-between text-xs">

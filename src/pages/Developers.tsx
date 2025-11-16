@@ -3,7 +3,7 @@ import { Navigation } from "@/components/Navigation";
 import { Badge } from "@/components/ui/badge";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
-import { Loader2, TrendingUp, Activity, GitBranch, AlertCircle, Zap } from "lucide-react";
+import { Loader2, TrendingUp, Activity, GitBranch, AlertCircle, Zap, Shield, Sparkles } from "lucide-react";
 import { useAgentData } from "@/hooks/useAgentData";
 import { useAllAgents } from "@/hooks/useAgentRegistry";
 import { AGENTS as predefinedAgents } from "@/data/agents";
@@ -17,74 +17,147 @@ const Agents = () => {
       
       <div className="pt-32 px-6 pb-20">
         <div className="max-w-5xl mx-auto">
-          <div className="mb-12">
-            <h1 className="text-4xl font-display font-bold tracking-tight mb-3">
-              Agents
-            </h1>
-            <p className="text-muted-foreground font-body">
-              Real-time AI-powered market analysis and trading intelligence
-            </p>
+          <div className="mb-12 flex items-center justify-between gap-6">
+            <div className="flex-1">
+              <h1 className="text-4xl font-display font-bold tracking-tight mb-3">
+                Agents
+              </h1>
+              <p className="text-muted-foreground font-body">
+                Real-time AI-powered market analysis and trading intelligence
+              </p>
+            </div>
+            <div className="flex-shrink-0 -mr-20 -mt-16 -mb-16 overflow-hidden" style={{ width: '200px', height: '200px' }}>
+              <dotlottie-player
+                src="/Robot TFU.lottie"
+                autoplay
+                loop
+                style={{ 
+                  width: '300px', 
+                  height: '300px',
+                  transform: 'translate(-50px, -50px)'
+                }}
+              />
+            </div>
           </div>
 
           <div className="space-y-6">
-            {/* Status Info Banner */}
-            <div className="glass-strong p-4 rounded-xl border border-secondary/20">
-              <div className="flex items-start gap-3">
-                <AlertCircle className="w-5 h-5 text-secondary mt-0.5 shrink-0" />
-                <div className="flex-1">
-                  <h3 className="text-sm font-semibold text-white mb-2">Agent Status Flow</h3>
-                  <div className="flex flex-wrap gap-3 text-xs text-white/70">
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="border-white/20 text-white/40 text-[10px] px-1.5 py-0">
-                        NOT REGISTERED
-                      </Badge>
-                      <span>→</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="border-blue-500/50 text-blue-400 text-[10px] px-1.5 py-0">
-                        REGISTERED
-                      </Badge>
-                      <span>→</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="border-yellow-500/50 text-yellow-400 text-[10px] px-1.5 py-0">
-                        AWAITING STREAM
-                      </Badge>
-                      <span>→</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-[10px] px-1.5 py-0">
-                        <Zap className="w-2.5 h-2.5 mr-1" />
-                        STREAMING
-                      </Badge>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
             {/* Live Agent Data */}
             <LiveAgentData />
 
-            {/* Coming Soon */}
-            <div className="glass p-6 rounded-2xl border-2 border-secondary/20">
-              <h3 className="text-lg font-display font-semibold mb-2 gradient-text">
-                Coming Soon
-              </h3>
-              <ul className="space-y-2">
-                <li className="text-sm font-body text-muted-foreground flex items-start">
-                  <span className="text-secondary mr-2">→</span>
-                  Advanced analytics modules
-                </li>
-                <li className="text-sm font-body text-muted-foreground flex items-start">
-                  <span className="text-secondary mr-2">→</span>
-                  Partner data card marketplace
-                </li>
-                <li className="text-sm font-body text-muted-foreground flex items-start">
-                  <span className="text-secondary mr-2">→</span>
-                  Custom agent creation tools
-                </li>
-              </ul>
+            {/* x402 + EIP-8004 Advantages */}
+            <div className="glass p-8 rounded-2xl border-2 border-secondary/30 relative overflow-hidden">
+              {/* Background Gradient */}
+              <div className="absolute inset-0 bg-gradient-to-br from-secondary/5 via-transparent to-primary/5 pointer-events-none" />
+              
+              <div className="relative z-10">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-2 rounded-lg bg-secondary/20 backdrop-blur-sm">
+                    <Zap className="w-5 h-5 text-secondary" />
+                  </div>
+                  <h3 className="text-xl font-display font-bold gradient-text">
+                    x402 + EIP-8004 Advantages
+                  </h3>
+                </div>
+
+                <div className="grid md:grid-cols-2 gap-4">
+                  {/* Per-Second Streaming */}
+                  <div className="group p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-secondary/50 transition-all duration-300">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 p-1.5 rounded-md bg-emerald-500/20">
+                        <TrendingUp className="w-4 h-4 text-emerald-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm text-white mb-1">Per-Second Streaming</h4>
+                        <p className="text-xs text-white/60 leading-relaxed">
+                          Pay only for what you use with precise per-second metering, no overpayment
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Gas Efficient */}
+                  <div className="group p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-secondary/50 transition-all duration-300">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 p-1.5 rounded-md bg-blue-500/20">
+                        <Zap className="w-4 h-4 text-blue-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm text-white mb-1">Gas Efficient</h4>
+                        <p className="text-xs text-white/60 leading-relaxed">
+                          Batch settlement model reduces costs - only 2 transactions for entire stream
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Instant Settlement */}
+                  <div className="group p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-secondary/50 transition-all duration-300">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 p-1.5 rounded-md bg-purple-500/20">
+                        <Activity className="w-4 h-4 text-purple-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm text-white mb-1">Instant Settlement</h4>
+                        <p className="text-xs text-white/60 leading-relaxed">
+                          Agents can claim accumulated funds anytime without waiting for stream end
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* No Lock-in */}
+                  <div className="group p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-secondary/50 transition-all duration-300">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 p-1.5 rounded-md bg-amber-500/20">
+                        <AlertCircle className="w-4 h-4 text-amber-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm text-white mb-1">No Lock-in</h4>
+                        <p className="text-xs text-white/60 leading-relaxed">
+                          Stop anytime and unused time is refunded - full flexibility and control
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Transparent Pricing */}
+                  <div className="group p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-secondary/50 transition-all duration-300">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 p-1.5 rounded-md bg-cyan-500/20">
+                        <GitBranch className="w-4 h-4 text-cyan-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm text-white mb-1">Transparent Pricing</h4>
+                        <p className="text-xs text-white/60 leading-relaxed">
+                          Real-time tracking shows exactly what you've paid and what's accumulated
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Composable Protocol */}
+                  <div className="group p-4 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 hover:border-secondary/50 transition-all duration-300">
+                    <div className="flex items-start gap-3">
+                      <div className="mt-1 p-1.5 rounded-md bg-pink-500/20">
+                        <Activity className="w-4 h-4 text-pink-400" />
+                      </div>
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-sm text-white mb-1">Composable Protocol</h4>
+                        <p className="text-xs text-white/60 leading-relaxed">
+                          EIP-8004 standard enables integration with DeFi, DAOs, and other protocols
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Footer Note */}
+                <div className="mt-6 pt-4 border-t border-white/10">
+                  <p className="text-xs text-white/40 text-center font-mono">
+                    Powered by <span className="text-secondary">x402 Streaming Protocol</span> + <span className="text-primary">EIP-8004 Standard</span>
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -103,6 +176,8 @@ function LiveAgentData() {
   const { isStreaming: volatilityPulseStreamActive } = useAgentStreamStatus(2);
   const { isStreaming: arbNavigatorStreamActive } = useAgentStreamStatus(3);
   const { isStreaming: sentimentRadarStreamActive } = useAgentStreamStatus(4);
+  const { isStreaming: riskSentinelStreamActive } = useAgentStreamStatus(5);
+  const { isStreaming: aiCrawlerStreamActive } = useAgentStreamStatus(6);
   
   // Only fetch API data when stream is active for each agent
   const { data: signalData, loading: signalLoading } = useAgentData(
@@ -124,6 +199,16 @@ function LiveAgentData() {
     'sentiment-radar', 
     { symbol: 'BTC' },
     sentimentRadarStreamActive
+  );
+  const { data: riskData, loading: riskLoading } = useAgentData(
+    'risk-sentinel',
+    { protocols: 'aave,compound,makerdao' },
+    riskSentinelStreamActive
+  );
+  const { data: crawlerData, loading: crawlerLoading } = useAgentData(
+    'ai-crawler',
+    { targets: 'twitter,reddit,discord' },
+    aiCrawlerStreamActive
   );
   const { agents, isLoading: isLoadingAgents } = useAllAgents();
 
@@ -150,6 +235,53 @@ function LiveAgentData() {
   return (
     <div className="glass-strong p-6 rounded-2xl">
       <h2 className="text-xl font-display font-semibold mb-6">Live Agent Data</h2>
+      
+      {/* Agent Lifecycle & Stream Activation */}
+      <div className="mb-6 p-4 rounded-xl bg-gradient-to-br from-secondary/5 to-transparent border border-secondary/20">
+        <div className="flex items-center gap-2 mb-4">
+          <AlertCircle className="w-4 h-4 text-secondary" />
+          <h3 className="text-sm font-semibold text-white">Agent Lifecycle & Stream Activation</h3>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-3">
+          {/* Status 1: Not Registered */}
+          <div className="glass p-3 rounded-lg border border-white/10 hover:border-white/20 transition-all">
+            <Badge variant="outline" className="border-white/20 text-white/40 text-[10px] px-1.5 py-0 mb-2">
+              NOT REGISTERED
+            </Badge>
+            <p className="text-xs text-white/70 leading-relaxed">Agent not deployed on-chain</p>
+            <p className="text-[10px] text-white/40 mt-1">→ Register in Setting</p>
+          </div>
+          
+          {/* Status 2: Registered */}
+          <div className="glass p-3 rounded-lg border border-blue-500/30 hover:border-blue-500/50 transition-all">
+            <Badge variant="outline" className="border-blue-500/50 text-blue-400 text-[10px] px-1.5 py-0 mb-2">
+              REGISTERED
+            </Badge>
+            <p className="text-xs text-white/70 leading-relaxed">Contract deployed & ready</p>
+            <p className="text-[10px] text-white/40 mt-1">→ Activate stream</p>
+          </div>
+          
+          {/* Status 3: Awaiting Stream */}
+          <div className="glass p-3 rounded-lg border border-yellow-500/30 hover:border-yellow-500/50 transition-all">
+            <Badge variant="outline" className="border-yellow-500/50 text-yellow-400 text-[10px] px-1.5 py-0 mb-2 animate-pulse">
+              AWAITING STREAM
+            </Badge>
+            <p className="text-xs text-white/70 leading-relaxed">No active payment yet</p>
+            <p className="text-[10px] text-white/40 mt-1">→ Start streaming</p>
+          </div>
+          
+          {/* Status 4: Streaming */}
+          <div className="glass p-3 rounded-lg border border-emerald-500/30 hover:border-emerald-500/50 transition-all bg-emerald-500/5">
+            <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-[10px] px-1.5 py-0 mb-2">
+              <Zap className="w-2.5 h-2.5 mr-1" />
+              STREAMING
+            </Badge>
+            <p className="text-xs text-white/70 leading-relaxed">Live data feed active</p>
+            <p className="text-[10px] text-emerald-400 mt-1">✓ Real-time analytics</p>
+          </div>
+        </div>
+      </div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Signal Forge */}
@@ -375,7 +507,7 @@ function LiveAgentData() {
             <div className="text-center py-6 text-white/40 text-sm italic">
               {getAgentStatus(2).registered 
                 ? 'Activate stream to view real-time data'
-                : 'Register agent in Admin first'}
+                : 'Register agent in Setting first'}
             </div>
           )}
         </Card>
@@ -418,7 +550,7 @@ function LiveAgentData() {
 
           {!getAgentStatus(3).registered ? (
             <div className="text-center py-6 text-white/40 text-sm italic">
-              Register agent in Admin first
+              Register agent in Setting first
             </div>
           ) : arbNavigatorStreamActive ? (
             arbLoading ? (
@@ -507,7 +639,7 @@ function LiveAgentData() {
 
           {!getAgentStatus(4).registered ? (
             <div className="text-center py-6 text-white/40 text-sm italic">
-              Register agent in Admin first
+              Register agent in Setting first
             </div>
           ) : sentimentRadarStreamActive ? (
             sentimentLoading ? (
@@ -538,6 +670,188 @@ function LiveAgentData() {
                   <div className="text-center">
                     <div className="text-red-500 font-bold">{sentimentData.metrics?.bearishPercent?.toFixed(0)}%</div>
                     <div className="text-xs text-muted-foreground">Bear</div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-6 text-white/40 text-sm">
+                Waiting for data...
+              </div>
+            )
+          ) : (
+            <div className="text-center py-6 text-white/40 text-sm italic">
+              Activate stream to view real-time data
+            </div>
+          )}
+        </Card>
+
+        {/* Risk Sentinel */}
+        <Card className={`glass p-4 relative overflow-hidden ${
+          getAgentStatus(5).streaming ? 'ring-2 ring-emerald-500/30' : 
+          getAgentStatus(5).awaitingStream ? 'ring-2 ring-yellow-500/30' :
+          getAgentStatus(5).registered ? 'ring-1 ring-blue-500/30' : 'opacity-60'
+        }`}>
+          {getAgentStatus(5).streaming && (
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-secondary to-emerald-500 animate-pulse" />
+          )}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <h3 className="font-display font-semibold">Risk Sentinel</h3>
+              {getAgentStatus(5).streaming ? (
+                <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-[10px] px-1.5 py-0">
+                  <Zap className="w-2.5 h-2.5 mr-1 animate-pulse" />
+                  STREAMING
+                </Badge>
+              ) : getAgentStatus(5).awaitingStream ? (
+                <Badge variant="outline" className="border-yellow-500/50 text-yellow-400 text-[10px] px-1.5 py-0 animate-pulse">
+                  AWAITING STREAM
+                </Badge>
+              ) : getAgentStatus(5).registered ? (
+                <Badge variant="outline" className="border-blue-500/50 text-blue-400 text-[10px] px-1.5 py-0">
+                  REGISTERED
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="border-white/20 text-white/40 text-[10px] px-1.5 py-0">
+                  NOT REGISTERED
+                </Badge>
+              )}
+            </div>
+            <Shield className={`w-4 h-4 ${
+              getAgentStatus(5).streaming ? 'text-emerald-400 animate-pulse' : 'text-secondary'
+            }`} />
+          </div>
+
+          {/* Stream Activation Toggle */}
+          {getAgentStatus(5).registered && (
+            <div className="mb-4 pb-4 border-b border-white/10">
+              <AgentStreamToggle
+                agentId={5}
+                agentName="Risk Sentinel"
+                pricePerSecond={0.0002}
+              />
+            </div>
+          )}
+
+          {!getAgentStatus(5).registered ? (
+            <div className="text-center py-6 text-white/40 text-sm italic">
+              Register agent in Setting first
+            </div>
+          ) : riskSentinelStreamActive ? (
+            riskLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-5 h-5 text-secondary animate-spin" />
+              </div>
+            ) : riskData ? (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Risk Score</span>
+                  <Badge variant="outline" className={
+                    (riskData.riskScore || 0) > 70 ? 'border-red-500 text-red-500' :
+                    (riskData.riskScore || 0) > 40 ? 'border-yellow-500 text-yellow-500' :
+                    'border-green-500 text-green-500'
+                  }>
+                    {riskData.riskScore || 0}/100
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-2 gap-2 mt-2">
+                  <div className="text-center">
+                    <div className="font-bold">{riskData.liquidationRisk || 'N/A'}</div>
+                    <div className="text-xs text-muted-foreground">Liq Risk</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-bold">{riskData.healthFactor || 'N/A'}</div>
+                    <div className="text-xs text-muted-foreground">Health</div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-6 text-white/40 text-sm">
+                Waiting for data...
+              </div>
+            )
+          ) : (
+            <div className="text-center py-6 text-white/40 text-sm italic">
+              Activate stream to view real-time data
+            </div>
+          )}
+        </Card>
+
+        {/* AI Crawler Service */}
+        <Card className={`glass p-4 relative overflow-hidden ${
+          getAgentStatus(6).streaming ? 'ring-2 ring-emerald-500/30' : 
+          getAgentStatus(6).awaitingStream ? 'ring-2 ring-yellow-500/30' :
+          getAgentStatus(6).registered ? 'ring-1 ring-blue-500/30' : 'opacity-60'
+        }`}>
+          {getAgentStatus(6).streaming && (
+            <div className="absolute top-0 left-0 right-0 h-1 bg-gradient-to-r from-emerald-500 via-secondary to-emerald-500 animate-pulse" />
+          )}
+          <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center gap-2">
+              <h3 className="font-display font-semibold">AI Crawler Service</h3>
+              {getAgentStatus(6).streaming ? (
+                <Badge variant="outline" className="border-emerald-500/50 text-emerald-400 text-[10px] px-1.5 py-0">
+                  <Zap className="w-2.5 h-2.5 mr-1 animate-pulse" />
+                  STREAMING
+                </Badge>
+              ) : getAgentStatus(6).awaitingStream ? (
+                <Badge variant="outline" className="border-yellow-500/50 text-yellow-400 text-[10px] px-1.5 py-0 animate-pulse">
+                  AWAITING STREAM
+                </Badge>
+              ) : getAgentStatus(6).registered ? (
+                <Badge variant="outline" className="border-blue-500/50 text-blue-400 text-[10px] px-1.5 py-0">
+                  REGISTERED
+                </Badge>
+              ) : (
+                <Badge variant="outline" className="border-white/20 text-white/40 text-[10px] px-1.5 py-0">
+                  NOT REGISTERED
+                </Badge>
+              )}
+            </div>
+            <Sparkles className={`w-4 h-4 ${
+              getAgentStatus(6).streaming ? 'text-emerald-400 animate-pulse' : 'text-secondary'
+            }`} />
+          </div>
+
+          {/* Stream Activation Toggle */}
+          {getAgentStatus(6).registered && (
+            <div className="mb-4 pb-4 border-b border-white/10">
+              <AgentStreamToggle
+                agentId={6}
+                agentName="AI Crawler Service"
+                pricePerSecond={0.0003}
+              />
+            </div>
+          )}
+
+          {!getAgentStatus(6).registered ? (
+            <div className="text-center py-6 text-white/40 text-sm italic">
+              Register agent in Setting first
+            </div>
+          ) : aiCrawlerStreamActive ? (
+            crawlerLoading ? (
+              <div className="flex items-center justify-center py-4">
+                <Loader2 className="w-5 h-5 text-secondary animate-spin" />
+              </div>
+            ) : crawlerData ? (
+              <div className="space-y-2">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Status</span>
+                  <Badge variant="outline" className="border-emerald-500 text-emerald-500">
+                    {crawlerData.status || 'ACTIVE'}
+                  </Badge>
+                </div>
+                <div className="grid grid-cols-3 gap-2 mt-2">
+                  <div className="text-center">
+                    <div className="font-bold">{crawlerData.pagesIndexed || 0}</div>
+                    <div className="text-xs text-muted-foreground">Pages</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="text-emerald-500 font-bold">{crawlerData.earnings || '0.00'}</div>
+                    <div className="text-xs text-muted-foreground">Earned</div>
+                  </div>
+                  <div className="text-center">
+                    <div className="font-bold">{crawlerData.uptime || '100'}%</div>
+                    <div className="text-xs text-muted-foreground">Uptime</div>
                   </div>
                 </div>
               </div>
